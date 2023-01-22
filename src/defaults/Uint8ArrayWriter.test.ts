@@ -14,40 +14,45 @@ describe("Uint8ArrayWriter", () => {
   it("has ability to pass buffer and write to it", () => {
     const buf = new Uint8Array();
     const writer = new Uint8ArrayWriter(buf, { growable: true });
-    expect(writer.write(new Uint8Array([1, 2]))).toEqual({
-      ok: true,
-      value: 2,
-    });
+    expect(writer.write(new Uint8Array([1, 2]))).toMatchInlineSnapshot(`
+      OkResult {
+        "value": 2,
+      }
+    `);
     expect([...writer.intoUint8Array()]).toEqual([1, 2]);
   });
   it("can be cleared", () => {
     const buf = new Uint8Array();
     const writer = new Uint8ArrayWriter(buf, { growable: true });
-    expect(writer.write(new Uint8Array([1, 2]))).toEqual({
-      ok: true,
-      value: 2,
-    });
+    expect(writer.write(new Uint8Array([1, 2]))).toMatchInlineSnapshot(`
+      OkResult {
+        "value": 2,
+      }
+    `);
     writer.clear();
-    expect(writer.write(new Uint8Array([2, 3]))).toEqual({
-      ok: true,
-      value: 2,
-    });
+    expect(writer.write(new Uint8Array([2, 3]))).toMatchInlineSnapshot(`
+      OkResult {
+        "value": 2,
+      }
+    `);
     expect(writer.intoUint8Array().length).toBe(2);
   });
   it("throws error when buffer is not growable", () => {
     const buf = new Uint8Array(3);
     const writer = new Uint8ArrayWriter(buf);
-    expect(writer.write(new Uint8Array([1, 2, 3, 4]))).toEqual({
-      ok: false,
-      error: new BufferOverflowError(),
-    });
+    expect(writer.write(new Uint8Array([1, 2, 3, 4]))).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: Buffer overflow],
+      }
+    `);
   });
   it("does nothing when write [] is passed", () => {
     const buf = new Uint8Array(3);
     const writer = new Uint8ArrayWriter(buf);
-    expect(writer.write(new Uint8Array([]))).toEqual({
-      ok: true,
-      value: 0,
-    });
+    expect(writer.write(new Uint8Array([]))).toMatchInlineSnapshot(`
+      OkResult {
+        "value": 0,
+      }
+    `);
   });
 });
