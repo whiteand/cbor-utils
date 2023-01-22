@@ -1,0 +1,32 @@
+{
+  "name": "cbor-utils",
+  "version": "0.0.1",
+  "description": "CBOR encoder and decoder classes. Analogue to minicbor from Rust",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "build": "tsup"
+  },
+  "keywords": [
+    "cbor",
+    "encoder",
+    "decoder",
+    "format"
+  ],
+  "tsup": {
+    "entry": [
+      "src/index.ts"
+    ],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true
+  },
+  "author": "andrewbeletskiy",
+  "license": "ISC",
+  "devDependencies": {
+    "@vitest/coverage-c8": "^0.27.3",
+    "tsup": "^6.5.0",
+    "vitest": "^0.27.3"
+  }
+}
