@@ -63,7 +63,7 @@ export class Encoder<W extends IWriter> {
   i32(x: number): Result<this> {
     return this.int(x);
   }
-  i64(x: number): Result<this> {
+  i64(x: number | bigint): Result<this> {
     return this.int(x);
   }
   int(x: number | bigint): Result<this> {

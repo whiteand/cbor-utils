@@ -42,24 +42,24 @@ describe("Encoder", () => {
     expect(encode((e) => e.u64(0xffffffffffffffffn))).toEqual(
       new Uint8Array([27, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])
     );
-    expect(encode((e) => e.u8(-0))).toEqual(new Uint8Array([0x00]));
-    expect(encode((e) => e.u8(-0x17))).toEqual(new Uint8Array([54]));
-    expect(encode((e) => e.u8(-0x18))).toEqual(new Uint8Array([55]));
-    expect(encode((e) => e.u8(-0xff))).toEqual(new Uint8Array([56, 254]));
-    expect(encode((e) => e.u16(-0x0100))).toEqual(new Uint8Array([56, 255]));
-    expect(encode((e) => e.u16(-0xffff))).toEqual(
+    expect(encode((e) => e.i8(-0))).toEqual(new Uint8Array([0x00]));
+    expect(encode((e) => e.i8(-0x17))).toEqual(new Uint8Array([54]));
+    expect(encode((e) => e.i8(-0x18))).toEqual(new Uint8Array([55]));
+    expect(encode((e) => e.i8(-128))).toEqual(new Uint8Array([56, 127]));
+    expect(encode((e) => e.i16(-0x0100))).toEqual(new Uint8Array([56, 255]));
+    expect(encode((e) => e.i16(-0xffff))).toEqual(
       new Uint8Array([57, 0xff, 0xfe])
     );
-    expect(encode((e) => e.u32(-0x10000))).toEqual(
+    expect(encode((e) => e.i32(-0x10000))).toEqual(
       new Uint8Array([57, 255, 255])
     );
-    expect(encode((e) => e.u32(-0xffffffff))).toEqual(
+    expect(encode((e) => e.i32(-0xffffffff))).toEqual(
       new Uint8Array([58, 0xff, 0xff, 0xff, 0xfe])
     );
-    expect(encode((e) => e.u64(-0x100000000))).toEqual(
+    expect(encode((e) => e.i64(-0x100000000))).toEqual(
       new Uint8Array([58, 0xff, 0xff, 0xff, 0xff])
     );
-    expect(encode((e) => e.u64(-0xffffffffffffffffn))).toEqual(
+    expect(encode((e) => e.i64(-0xffffffffffffffffn))).toEqual(
       new Uint8Array([59, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe])
     );
   });
