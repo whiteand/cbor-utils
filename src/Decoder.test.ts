@@ -6,8 +6,10 @@ describe("Decoder", () => {
   it("should be a class", () => {
     expect(Decoder).toBeInstanceOf(Function);
   });
-  it("has default writer", () => {
-    const decoder = new Decoder();
+  it("returns reader on getReader", () => {
+    const decoder = new Decoder(
+      new Uint8ArrayReader(new Uint8Array([1, 2, 3]))
+    );
     expect(decoder.getReader()).toBeInstanceOf(Uint8ArrayReader);
   });
 });

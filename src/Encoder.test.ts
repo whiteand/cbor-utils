@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Uint8ArrayWriter } from "./defaults";
+import { Uint8ArrayReader, Uint8ArrayWriter } from "./defaults";
 import { Encoder } from "./Encoder";
 
 describe("Encoder", () => {
@@ -7,7 +7,7 @@ describe("Encoder", () => {
     expect(Encoder).toBeInstanceOf(Function);
   });
   it("has default reader", () => {
-    const encoder = new Encoder();
+    const encoder = new Encoder(new Uint8ArrayWriter());
     expect(encoder.getWriter()).toBeInstanceOf(Uint8ArrayWriter);
   });
 });
