@@ -5,12 +5,12 @@ import { encode } from "./encode";
 import { Encoder } from "./Encoder";
 import { Type } from "./Type";
 import { TypeMismatchError } from "./TypeMismatchError";
-import { Result } from "./types";
+import { TResult } from "./types";
 
 function decode<R>(
   bytes: Uint8Array,
-  cb: (d: Decoder<Uint8ArrayReader>) => Result<R>
-): Result<R> {
+  cb: (d: Decoder<Uint8ArrayReader>) => TResult<R>
+): TResult<R> {
   const decoder = new Decoder(new Uint8ArrayReader(bytes));
   const result = cb(decoder);
   return result;
@@ -77,9 +77,8 @@ describe("Decoder", () => {
       ok: true,
       value: 0x18,
     });
-    expect(
-      decode(new Uint8Array([0x19, 1, 0x18]), (d) => d.u8())
-    ).toMatchInlineSnapshot(`
+    expect(decode(new Uint8Array([0x19, 1, 0x18]), (d) => d.u8()))
+      .toMatchInlineSnapshot(`
       {
         "error": [Error: expected u8 but 280 is out of range],
         "ok": false,
@@ -95,9 +94,8 @@ describe("Decoder", () => {
       ok: true,
       value: 23,
     });
-    expect(
-      decode(new Uint8Array([0x1a, 0, 0, 1, 0]), (x) => x.u8())
-    ).toMatchInlineSnapshot(`
+    expect(decode(new Uint8Array([0x1a, 0, 0, 1, 0]), (x) => x.u8()))
+      .toMatchInlineSnapshot(`
       {
         "error": [Error: expected u8 but 256 is out of range],
         "ok": false,
@@ -355,5 +353,11 @@ describe("Decoder", () => {
         "ok": false,
       }
     `);
+  });
+  it("correctly loads several chunks", () => {
+    const input = new Uint8Array([0x1a, 0x01, 0x02, 0x03, 0x04]);
+    const inputReader = new Uint8ArrayReader(input);
+    const decoder = new Decoder(inputReader, { bufferSize: 1 });
+    expect(decoder.u32()).toMatchInlineSnapshot('undefined');
   });
 });

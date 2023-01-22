@@ -1,36 +1,14 @@
 import { SIGNED, SIMPLE } from "./constants";
 import { ok } from "./result";
-import { IWriter, Result, u8 } from "./types";
-
-function u16ToBeBytes(x: number): Uint8Array {
-  const res = new Uint8Array(2);
-  res[0] = (x >> 8) & 0xff;
-  res[1] = x & 0xff;
-  return res;
-}
-function u32ToBeBytes(x: number): Uint8Array {
-  const res = new Uint8Array(4);
-  for (let i = 0, p = 3; i < 4; i++, p--) {
-    res[p] = x & 0xff;
-    x = x >> 8;
-  }
-  return res;
-}
-function u64ToBytes(x: bigint) {
-  const res = new Uint8Array(8);
-  for (let i = 0, p = 7; i < 8; i++, p--) {
-    res[p] = Number(x & 0xffn);
-    x = x >> 8n;
-  }
-  return res;
-}
+import { IWriter, TResult, u8 } from "./types";
+import { u16ToBeBytes, u32ToBeBytes, u64ToBytes } from "./utils";
 
 export class Encoder<W extends IWriter> {
   constructor(private readonly writer: W) {}
   getWriter(): W {
     return this.writer;
   }
-  private put(bytes: Uint8Array): Result<this> {
+  private put(bytes: Uint8Array): TResult<this> {
     let written = 0;
     while (written < bytes.length) {
       const writeResult = this.writer.write(bytes.subarray(written));
@@ -39,34 +17,34 @@ export class Encoder<W extends IWriter> {
     }
     return ok(this);
   }
-  bool(bool: boolean): Result<this> {
+  bool(bool: boolean): TResult<this> {
     return this.put(new Uint8Array([SIMPLE | (bool ? 0x15 : 0x14)]));
   }
-  u8(x: u8): Result<this> {
+  u8(x: u8): TResult<this> {
     return this.int(x);
   }
-  u16(x: number): Result<this> {
+  u16(x: number): TResult<this> {
     return this.int(x);
   }
-  u32(x: number): Result<this> {
+  u32(x: number): TResult<this> {
     return this.int(x);
   }
-  u64(x: number | bigint): Result<this> {
+  u64(x: number | bigint): TResult<this> {
     return this.int(x);
   }
-  i8(x: u8): Result<this> {
+  i8(x: u8): TResult<this> {
     return this.int(x);
   }
-  i16(x: number): Result<this> {
+  i16(x: number): TResult<this> {
     return this.int(x);
   }
-  i32(x: number): Result<this> {
+  i32(x: number): TResult<this> {
     return this.int(x);
   }
-  i64(x: number | bigint): Result<this> {
+  i64(x: number | bigint): TResult<this> {
     return this.int(x);
   }
-  int(x: number | bigint): Result<this> {
+  int(x: number | bigint): TResult<this> {
     if (x >= 0) {
       if (x <= 0x17) {
         return this.put(new Uint8Array([Number(x)]));

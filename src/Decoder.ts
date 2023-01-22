@@ -1,44 +1,11 @@
+import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
 import { EndOfInputError } from "./EndOfInputError";
 import { err, ok } from "./result";
 import { Type } from "./Type";
 import { TypeMismatchError } from "./TypeMismatchError";
-import { IReader, Result } from "./types";
+import { IReader, TResult } from "./types";
 import { typeToStr } from "./typeToStr";
-
-function beBytesToU16(slice: Uint8Array) {
-  return (slice[0] << 8) | slice[1];
-}
-function beBytesToU32(s: Uint8Array) {
-  return (s[0] << 24) | (s[1] << 16) | (s[2] << 8) | s[3];
-}
-function beBytesToU64(s: Uint8Array) {
-  let res = 0n;
-  for (let i = 0; i < 8; i++) {
-    res = (res << 8n) | BigInt(s[i]);
-  }
-  return res;
-}
-
-function try_as<T extends number | bigint>(
-  value: T,
-  size: 8 | 16 | 32 | 64
-): Result<T> {
-  if (size === 8)
-    return value <= 0xff
-      ? ok(value)
-      : err(new Error("expected u8 but " + value + " is out of range"));
-  if (size === 16)
-    return value <= 0xffff
-      ? ok(value)
-      : err(new Error("expected u16, but " + value + " is out of range"));
-
-  if (size === 32)
-    return value <= 0xffffffff
-      ? ok(value)
-      : err(new Error("expected u32, but " + value + " is out of range"));
-
-  return ok(value);
-}
+import { try_as } from "./try_as";
 
 type u8 = number;
 
@@ -64,7 +31,7 @@ export class Decoder<R extends IReader> {
     this.globalPos = 0;
   }
 
-  private loadNextChunk(): Result<number> {
+  private loadNextChunk(): TResult<number> {
     const result = this.reader.read(this.buffer);
     if (!result.ok) return result;
     if (result.value <= 0) {
@@ -75,7 +42,7 @@ export class Decoder<R extends IReader> {
     return ok(result.value);
   }
 
-  private read(): Result<u8> {
+  private read(): TResult<u8> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
       if (!res.ok) return res;
@@ -106,7 +73,7 @@ export class Decoder<R extends IReader> {
     }
     return ok(res);
   }
-  private peek(): Result<u8> {
+  private peek(): TResult<u8> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
       if (!res.ok) return res;
@@ -114,7 +81,7 @@ export class Decoder<R extends IReader> {
     return ok(this.buffer[this.pos]);
   }
 
-  bool(): Result<boolean> {
+  bool(): TResult<boolean> {
     const p = this.globalPos;
     const result = this.read();
     if (!result.ok) return result;
@@ -139,7 +106,7 @@ export class Decoder<R extends IReader> {
     return this.reader;
   }
 
-  u8(): Result<u8> {
+  u8(): TResult<u8> {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok) return marker;
@@ -177,7 +144,29 @@ export class Decoder<R extends IReader> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u8")
     );
   }
-  private typeOf(b: number): Result<Type | null> {
+  u32(): TResult<number> {
+    let p = this.globalPos;
+    const marker = this.read();
+    if (!marker.ok) return marker;
+    const n = marker.value;
+    if (n <= 0x17) {
+      return ok(n);
+    }
+    if (n === 0x18) {
+      return this.read();
+    }
+    return err(new Error("not implemented yet"));
+    // let p = self.pos;
+    //     match self.read()? {
+    //         n @ 0 ..= 0x17 => Ok(u32::from(n)),
+    //         0x18           => self.read().map(u32::from),
+    //         0x19           => self.read_slice(2).map(read_u16).map(u32::from),
+    //         0x1a           => self.read_slice(4).map(read_u32),
+    //         0x1b           => self.read_slice(8).map(read_u64).and_then(|n| try_as(n, "when converting u64 to u32", p)),
+    //         b              => Err(Error::type_mismatch(self.type_of(b)?).at(p).with_message("expected u32"))
+    //     }
+  }
+  private typeOf(b: number): TResult<Type | null> {
     if (b >= 0 && b <= 0x18) return ok(Type.U8);
     if (b === 0x19) return ok(Type.U16);
     if (b === 0x1a) return ok(Type.U32);
