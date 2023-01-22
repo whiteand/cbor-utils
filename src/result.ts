@@ -1,9 +1,34 @@
-import { TResult } from "./types";
-
-export function ok<T>(value: T): TResult<T> {
-  return { ok: true, value };
+export class OkResult<T> {
+  constructor(public readonly value: T) {}
+  ok(): this is OkResult<T> {
+    return true;
+  }
+  map<U>(fn: (value: T) => U): Result<U> {
+    return ok(fn(this.value));
+  }
+  andThen<U>(fn: (value: T) => Result<U>): Result<U> {
+    return fn(this.value);
+  }
+}
+export class ErrResult {
+  constructor(public readonly error: Error) {}
+  ok(): this is OkResult<never> {
+    return false;
+  }
+  map<U>(_fn: (value: never) => U): Result<U> {
+    return this as any;
+  }
+  andThen<U>(_fn: (value: never) => Result<U>): Result<U> {
+    return this as any;
+  }
 }
 
-export function err(value: Error): TResult<never> {
-  return { ok: false, error: value };
+export type Result<T> = OkResult<T> | ErrResult;
+
+export function ok<T>(value: T): OkResult<T> {
+  return new OkResult(value);
+}
+
+export function err(error: Error): ErrResult {
+  return new ErrResult(error);
 }

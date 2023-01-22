@@ -1,11 +1,11 @@
 import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
 import { EndOfInputError } from "./EndOfInputError";
-import { err, ok } from "./result";
+import { err, ok, Result } from "./result";
 import { Type } from "./Type";
 import { TypeMismatchError } from "./TypeMismatchError";
-import { IReader, TResult } from "./types";
+import { IReader } from "./types";
 import { typeToStr } from "./typeToStr";
-import { try_as } from "./try_as";
+import { tryAs } from "./try_as";
 
 type u8 = number;
 
@@ -31,21 +31,21 @@ export class Decoder<R extends IReader> {
     this.globalPos = 0;
   }
 
-  private loadNextChunk(): TResult<number> {
+  private loadNextChunk(): Result<number> {
     const result = this.reader.read(this.buffer);
-    if (!result.ok) return result;
+    if (!result.ok()) return result;
     if (result.value <= 0) {
-      return { ok: false, error: new EndOfInputError() };
+      return err(new EndOfInputError());
     }
     this.bufSize = result.value;
     this.pos = 0;
     return ok(result.value);
   }
 
-  private read(): TResult<u8> {
+  private read(): Result<u8> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
-      if (!res.ok) return res;
+      if (!res.ok()) return res;
     }
     const p = this.pos;
     const b = this.buffer[p];
@@ -67,24 +67,24 @@ export class Decoder<R extends IReader> {
     let i = 0;
     while (i < size) {
       const r = this.read();
-      if (!r.ok) return r;
+      if (!r.ok()) return r;
       res[i] = r.value;
       i++;
     }
     return ok(res);
   }
-  private peek(): TResult<u8> {
+  private peek(): Result<u8> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
-      if (!res.ok) return res;
+      if (!res.ok()) return res;
     }
     return ok(this.buffer[this.pos]);
   }
 
-  bool(): TResult<boolean> {
+  bool(): Result<boolean> {
     const p = this.globalPos;
     const result = this.read();
-    if (!result.ok) return result;
+    if (!result.ok()) return result;
     const b = result.value;
     switch (b) {
       case 0xf4:
@@ -98,7 +98,7 @@ export class Decoder<R extends IReader> {
 
   private typeOfOrUnknown(b: u8): TypeResult {
     const r = this.typeOf(b);
-    if (!r.ok || r.value == null) return { known: false, type: b };
+    if (!r.ok() || r.value == null) return { known: false, type: b };
     return { known: true, type: r.value };
   }
 
@@ -106,10 +106,10 @@ export class Decoder<R extends IReader> {
     return this.reader;
   }
 
-  u8(): TResult<u8> {
+  u8(): Result<u8> {
     const p = this.globalPos;
     const marker = this.read();
-    if (!marker.ok) return marker;
+    if (!marker.ok()) return marker;
     const n = marker.value;
     if (n <= 0x17) {
       return ok(n);
@@ -119,24 +119,24 @@ export class Decoder<R extends IReader> {
     }
     if (n === 0x19) {
       const slice = this.readSlice(2);
-      if (!slice.ok) return slice;
+      if (!slice.ok()) return slice;
       const value = beBytesToU16(slice.value);
-      return try_as(value, 8);
+      return tryAs(value, 8, p);
     }
     if (n === 0x1a) {
       const slice = this.readSlice(4);
-      if (!slice.ok) return slice;
+      if (!slice.ok()) return slice;
       const s = slice.value;
       const value = beBytesToU32(s);
-      return try_as(value, 8);
+      return tryAs(value, 8, p);
     }
     if (n === 0x1b) {
       const slice = this.readSlice(8);
-      if (!slice.ok) return slice;
+      if (!slice.ok()) return slice;
       const s = slice.value;
       let res = beBytesToU64(s);
-      const r = try_as(res, 8);
-      if (!r.ok) return r;
+      const r = tryAs(res, 8, p);
+      if (!r.ok()) return r;
       return ok(Number(r.value));
     }
 
@@ -144,10 +144,10 @@ export class Decoder<R extends IReader> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u8")
     );
   }
-  u32(): TResult<number> {
+  u32(): Result<number> {
     let p = this.globalPos;
     const marker = this.read();
-    if (!marker.ok) return marker;
+    if (!marker.ok()) return marker;
     const n = marker.value;
     if (n <= 0x17) {
       return ok(n);
@@ -155,18 +155,22 @@ export class Decoder<R extends IReader> {
     if (n === 0x18) {
       return this.read();
     }
-    return err(new Error("not implemented yet"));
-    // let p = self.pos;
-    //     match self.read()? {
-    //         n @ 0 ..= 0x17 => Ok(u32::from(n)),
-    //         0x18           => self.read().map(u32::from),
-    //         0x19           => self.read_slice(2).map(read_u16).map(u32::from),
-    //         0x1a           => self.read_slice(4).map(read_u32),
-    //         0x1b           => self.read_slice(8).map(read_u64).and_then(|n| try_as(n, "when converting u64 to u32", p)),
-    //         b              => Err(Error::type_mismatch(self.type_of(b)?).at(p).with_message("expected u32"))
-    //     }
+    if (n === 0x19) {
+      return this.readSlice(2).map(beBytesToU16);
+    }
+    if (n === 0x1a) {
+      return this.readSlice(4).map(beBytesToU32);
+    }
+    if (n === 0x1b) {
+      return this.readSlice(8)
+        .map(beBytesToU64)
+        .andThen((n) => tryAs(n, 8, p));
+    }
+    return err(
+      new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u32")
+    );
   }
-  private typeOf(b: number): TResult<Type | null> {
+  private typeOf(b: number): Result<Type | null> {
     if (b >= 0 && b <= 0x18) return ok(Type.U8);
     if (b === 0x19) return ok(Type.U16);
     if (b === 0x1a) return ok(Type.U32);
@@ -174,28 +178,28 @@ export class Decoder<R extends IReader> {
     if (b >= 0x20 && b <= 0x37) return ok(Type.I8);
     if (b === 0x38) {
       const peekResult = this.peek();
-      if (!peekResult.ok) return peekResult;
+      if (!peekResult.ok()) return peekResult;
       const peek = peekResult.value;
       if (peek < 0x80) return ok(Type.I8);
       return ok(Type.I16);
     }
     if (b === 0x39) {
       const peekResult = this.peek();
-      if (!peekResult.ok) return peekResult;
+      if (!peekResult.ok()) return peekResult;
       const peek = peekResult.value;
       if (peek < 0x80) return ok(Type.I16);
       return ok(Type.I32);
     }
     if (b === 0x3a) {
       const peekResult = this.peek();
-      if (!peekResult.ok) return peekResult;
+      if (!peekResult.ok()) return peekResult;
       const peek = peekResult.value;
       if (peek < 0x80) return ok(Type.I32);
       return ok(Type.I64);
     }
     if (b === 0x3b) {
       const peekResult = this.peek();
-      if (!peekResult.ok) return peekResult;
+      if (!peekResult.ok()) return peekResult;
       const peek = peekResult.value;
       if (peek < 0x80) return ok(Type.I64);
       return ok(Type.Int);

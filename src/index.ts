@@ -5,3 +5,5 @@ export * from "./defaults";
 export * from "./EndOfInputError";
 export * from "./TypeMismatchError";
 export * from "./encode";
+export * from "./result";
+export * from "./decode";

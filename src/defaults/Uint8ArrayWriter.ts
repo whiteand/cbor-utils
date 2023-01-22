@@ -1,4 +1,5 @@
-import { IWriter, TResult } from "../types";
+import { err, ok, Result } from "../result";
+import { IWriter } from "../types";
 
 function getNewCapacity(oldCapacity: number): number {
   return Math.max(1, Math.ceil((oldCapacity * 3) / 2));
@@ -23,19 +24,19 @@ export class Uint8ArrayWriter implements IWriter {
     this.size = 0;
     this.growable = options.growable === true;
   }
-  write = (data: Uint8Array): TResult<number> => {
-    if (data.length <= 0) return { ok: true, value: 0 };
+  write = (data: Uint8Array): Result<number> => {
+    if (data.length <= 0) return ok(0);
 
     if (this.buffer.length >= this.size + data.length) {
       this.buffer.set(data, this.size);
       this.size += data.length;
-      return { ok: true, value: data.length };
+      return ok(data.length);
     }
     if (this.growable) {
       this.growBy(data.length);
       return this.write(data);
     }
-    return { ok: false, error: new BufferOverflowError() };
+    return err(new BufferOverflowError());
   };
   private growBy(addition: number) {
     const newCapacity = Math.max(

@@ -1,5 +1,5 @@
-import { ok } from "../result";
-import { IReader, IWriter, TResult } from "../types";
+import { ok, Result } from "../result";
+import { IReader, IWriter } from "../types";
 
 export class Uint8ArrayReader implements IReader, IWriter {
   private chunks: Uint8Array[];
@@ -10,12 +10,9 @@ export class Uint8ArrayReader implements IReader, IWriter {
     this.chunkIndex = 0;
     this.chunkOffset = 0;
   }
-  write(data: Uint8Array): TResult<number> {
+  write(data: Uint8Array): Result<number> {
     this.chunks.push(data);
-    return {
-      ok: true,
-      value: data.length,
-    };
+    return ok(data.length);
   }
   private next = (): number | null => {
     if (this.chunkIndex >= this.chunks.length) {
@@ -31,7 +28,7 @@ export class Uint8ArrayReader implements IReader, IWriter {
     this.chunkOffset++;
     return result;
   };
-  read(data: Uint8Array): TResult<number> {
+  read(data: Uint8Array): Result<number> {
     let i = 0;
     while (i < data.length) {
       const next = this.next();

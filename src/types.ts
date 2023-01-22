@@ -1,11 +1,11 @@
-export type TResult<T> = { ok: true; value: T } | { ok: false; error: Error };
+import { Result } from "./result";
 
 export interface IWriter {
-  write(data: Uint8Array): TResult<number>;
+  write(data: Uint8Array): Result<number>;
 }
 
 export interface IReader {
-  read(data: Uint8Array): TResult<number>;
+  read(data: Uint8Array): Result<number>;
 }
 
 export type u8 = number;

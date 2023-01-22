@@ -1,20 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { decode } from "./decode";
 import { Decoder } from "./Decoder";
 import { Uint8ArrayReader } from "./defaults";
 import { encode } from "./encode";
 import { Encoder } from "./Encoder";
 import { Type } from "./Type";
 import { TypeMismatchError } from "./TypeMismatchError";
-import { TResult } from "./types";
-
-function decode<R>(
-  bytes: Uint8Array,
-  cb: (d: Decoder<Uint8ArrayReader>) => TResult<R>
-): TResult<R> {
-  const decoder = new Decoder(new Uint8ArrayReader(bytes));
-  const result = cb(decoder);
-  return result;
-}
 
 describe("Decoder", () => {
   it("should be a class", () => {
@@ -358,6 +349,6 @@ describe("Decoder", () => {
     const input = new Uint8Array([0x1a, 0x01, 0x02, 0x03, 0x04]);
     const inputReader = new Uint8ArrayReader(input);
     const decoder = new Decoder(inputReader, { bufferSize: 1 });
-    expect(decoder.u32()).toMatchInlineSnapshot('undefined');
+    expect(decoder.u32()).toMatchInlineSnapshot("undefined");
   });
 });
