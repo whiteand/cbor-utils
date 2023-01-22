@@ -1,3 +1,4 @@
+import { ok } from "../result";
 import { IReader, IWriter, Result } from "../types";
 
 export class Uint8ArrayReader implements IReader, IWriter {
@@ -35,18 +36,12 @@ export class Uint8ArrayReader implements IReader, IWriter {
     while (i < data.length) {
       const next = this.next();
       if (next === null) {
-        return {
-          ok: true,
-          value: i,
-        };
+        return ok(i);
       }
       data[i] = next;
       i++;
     }
-    return {
-      ok: true,
-      value: i,
-    };
+    return ok(i);
   }
   clear() {
     this.chunks = [];
