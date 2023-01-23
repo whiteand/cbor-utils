@@ -463,4 +463,207 @@ describe("Decoder", () => {
       }
     `);
   });
+  it("correctly parses u64 from small u8", () => {
+    expect(decode(new Uint8Array([0x05]), (d) => d.u64())).toEqual({
+      value: 5,
+    });
+  });
+  it("correctly parses u64 from u8", () => {
+    expect(decode(new Uint8Array([0x18, 0x20]), (d) => d.u64())).toEqual({
+      value: 0x20,
+    });
+  });
+  it("correctly parses u64 from u16", () => {
+    expect(decode(new Uint8Array([0x19, 0x1, 0x2]), (d) => d.u64())).toEqual({
+      value: 0x0102,
+    });
+  });
+  it("correctly parses u64 from u32", () => {
+    expect(
+      decode(new Uint8Array([0x1a, 0x1, 0x2, 0x3, 0x4]), (d) => d.u64())
+    ).toEqual({
+      value: 0x01020304,
+    });
+  });
+  it("correctly parses u64 from u64", () => {
+    expect(
+      decode(
+        new Uint8Array([0x1b, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8]),
+        (d) => d.u64()
+      )
+    ).toEqual({
+      value: 0x0102030405060708n,
+    });
+    expect(
+      decode(
+        new Uint8Array([0x1b, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+        (d) => d.u64()
+      )
+    ).toEqual({
+      value: 0xffffffffffffffffn,
+    });
+  });
+  it("correctly throws type mismatch when parsing u64", () => {
+    expect(
+      decode(
+        new Uint8Array([0x1c, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8]),
+        (d) => d.u64()
+      )
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: unexpected type unknown type 28 at position 0: expected expected unsigned],
+      }
+    `);
+  });
+  it("correctly parses small u8 as i8", () => {
+    expect(decode(new Uint8Array([0x05]), (d) => d.i8())).toEqual({
+      value: 5,
+    });
+  });
+  it("corrctly parses u8 as i8", () => {
+    expect(decode(new Uint8Array([0x18, 0x20]), (d) => d.i8())).toEqual({
+      value: 0x20,
+    });
+    expect(decode(new Uint8Array([0x18, 127]), (d) => d.i8())).toEqual({
+      value: 127,
+    });
+    expect(decode(new Uint8Array([0x18, 128]), (d) => d.i8()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u8 but 128 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses u16 as i8", () => {
+    expect(decode(new Uint8Array([0x19, 0, 0x20]), (d) => d.i8())).toEqual({
+      value: 0x20,
+    });
+    expect(decode(new Uint8Array([0x19, 0, 127]), (d) => d.i8())).toEqual({
+      value: 127,
+    });
+    expect(decode(new Uint8Array([0x19, 0, 128]), (d) => d.i8()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u8 but 128 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses u32 as i8", () => {
+    expect(
+      decode(new Uint8Array([0x1a, 0, 0, 0, 0x20]), (d) => d.i8())
+    ).toEqual({
+      value: 0x20,
+    });
+    expect(decode(new Uint8Array([0x1a, 0, 0, 0, 127]), (d) => d.i8())).toEqual(
+      {
+        value: 127,
+      }
+    );
+    expect(decode(new Uint8Array([0x1a, 0, 0, 0, 128]), (d) => d.i8()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u8 but 128 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses u64 as i8", () => {
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 0, 0, 0x20]), (d) => d.i8())
+    ).toEqual({
+      value: 0x20,
+    });
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 0, 0, 127]), (d) => d.i8())
+    ).toEqual({
+      value: 127,
+    });
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 0, 0, 128]), (d) => d.i8())
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u8 but 128 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses small i8 as i8", () => {
+    const bytes = encode((e) => e.i8(-1));
+    expect(decode(bytes, (d) => d.i8())).toEqual({
+      value: -1,
+    });
+
+    expect(decode(new Uint8Array([0x37]), (d) => d.i8())).toEqual({
+      value: -24,
+    });
+  });
+  it("correctly parses small i8 as i8", () => {
+    expect(decode(new Uint8Array([56, 24]), (d) => d.i8())).toEqual({
+      value: -25,
+    });
+    expect(decode(new Uint8Array([56, 127]), (d) => d.i8())).toEqual({
+      value: -128,
+    });
+    expect(decode(new Uint8Array([56, 128]), (d) => d.i8()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u8 but -129 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses small i16 as i8", () => {
+    expect(decode(new Uint8Array([0x39, 0, 24]), (d) => d.i8())).toEqual({
+      value: -25,
+    });
+    expect(decode(new Uint8Array([0x39, 0, 127]), (d) => d.i8())).toEqual({
+      value: -128,
+    });
+    expect(decode(new Uint8Array([0x39, 0, 128]), (d) => d.i8()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u8 but -129 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses small i32 as i8", () => {
+    expect(decode(new Uint8Array([0x3a, 0, 0, 0, 24]), (d) => d.i8())).toEqual({
+      value: -25,
+    });
+    expect(decode(new Uint8Array([0x3a, 0, 0, 0, 127]), (d) => d.i8())).toEqual(
+      {
+        value: -128,
+      }
+    );
+    expect(decode(new Uint8Array([0x3a, 0, 0, 0, 128]), (d) => d.i8()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u8 but -129 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses small i64 as i8", () => {
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0, 24]), (d) => d.i8())
+    ).toEqual({
+      value: -25,
+    });
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0, 127]), (d) => d.i8())
+    ).toEqual({
+      value: -128,
+    });
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0, 128]), (d) => d.i8())
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u8 but -129 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly throws type mismatch when parsing i8", () => {
+    expect(decode(new Uint8Array([0x60]), (d) => d.i8()))
+      .toMatchInlineSnapshot(`
+        ErrResult {
+          "error": [Error: unexpected type String at position 0: expected i8],
+        }
+      `);
+  });
 });
