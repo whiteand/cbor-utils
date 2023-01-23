@@ -1,4 +1,4 @@
-import { Uint8ArrayWriter } from "./defaults";
+import { Uint8ArrayWriter } from "./defaults/Uint8ArrayWriter";
 import { Encoder } from "./Encoder";
 
 export function encode(
