@@ -53,7 +53,7 @@ export function tryAsSigned<T extends number | bigint>(
       ? ok(value)
       : err(
           new Error(
-            "expected u8 but " +
+            "expected i8 but " +
               value +
               " is out of range. At position " +
               postition
@@ -64,7 +64,7 @@ export function tryAsSigned<T extends number | bigint>(
       ? ok(value)
       : err(
           new Error(
-            "expected u16, but " +
+            "expected i16, but " +
               value +
               " is out of range. At position " +
               postition
@@ -76,12 +76,20 @@ export function tryAsSigned<T extends number | bigint>(
       ? ok(value)
       : err(
           new Error(
-            "expected u32, but " +
+            "expected i32, but " +
               value +
               " is out of range. At position " +
               postition
           )
         );
-
-  return ok(value);
+  return value <= 0x7fffffffffffffffn && value >= -0x8000000000000000n
+    ? ok(value)
+    : err(
+        new Error(
+          "expected i64, but " +
+            value +
+            " is out of range. At position " +
+            postition
+        )
+      );
 }
