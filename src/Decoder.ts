@@ -52,6 +52,9 @@ export class Decoder<R extends IReader> {
     this.pos = 0;
     return ok(result.value);
   }
+  position(): number {
+    return this.globalPos;
+  }
 
   read(): Result<u8> {
     if (this.pos >= this.bufSize) {
