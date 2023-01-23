@@ -813,4 +813,161 @@ describe("Decoder", () => {
         }
       `);
   });
+  it("correctly parses small i8 to i32", () => {
+    expect(decode(new Uint8Array([0x20]), (d) => d.i32())).toEqual({
+      value: -1,
+    });
+    expect(decode(new Uint8Array([0x37]), (d) => d.i32())).toEqual({
+      value: -24,
+    });
+  });
+  it("correctly parses i8 to i32", () => {
+    expect(decode(new Uint8Array([0x38, 127]), (d) => d.i32())).toEqual({
+      value: -128,
+    });
+    expect(decode(new Uint8Array([0x38, 128]), (d) => d.i32())).toEqual({
+      value: -129,
+    });
+  });
+  it("correctly parses i16 to i32", () => {
+    expect(decode(new Uint8Array([0x39, 0, 127]), (d) => d.i32())).toEqual({
+      value: -128,
+    });
+    expect(decode(new Uint8Array([0x39, 0, 128]), (d) => d.i32())).toEqual({
+      value: -129,
+    });
+    expect(decode(new Uint8Array([0x39, 0x7f, 0xff]), (d) => d.i32())).toEqual({
+      value: -32768,
+    });
+    expect(decode(new Uint8Array([0x39, 0x80, 0x00]), (d) => d.i32()))
+      .toMatchInlineSnapshot(`
+        OkResult {
+          "value": -32769,
+        }
+      `);
+  });
+  it("correctly parses i32 to i32", () => {
+    expect(
+      decode(new Uint8Array([0x3a, 0, 0, 0, 127]), (d) => d.i32())
+    ).toEqual({
+      value: -128,
+    });
+    expect(
+      decode(new Uint8Array([0x3a, 0, 0, 0, 128]), (d) => d.i32())
+    ).toEqual({
+      value: -129,
+    });
+    expect(
+      decode(new Uint8Array([0x3a, 0, 0, 0x7f, 0xff]), (d) => d.i32())
+    ).toEqual({
+      value: -32768,
+    });
+    expect(
+      decode(new Uint8Array([0x3a, 0, 0, 0x80, 0x00]), (d) => d.i32())
+    ).toEqual({
+      value: -32769,
+    });
+    expect(
+      decode(new Uint8Array([0x3a, 127, 255, 255, 255]), (d) => d.i32())
+    ).toEqual({
+      value: -2147483648,
+    });
+    expect(decode(new Uint8Array([0x3a, 128, 0, 0, 0]), (d) => d.i32()))
+      .toMatchInlineSnapshot(`
+        ErrResult {
+          "error": [Error: expected u32, but -2147483649 is out of range. At position 0],
+        }
+      `);
+  });
+  it("correctly parses i64 to i32", () => {
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0, 127]), (d) => d.i32())
+    ).toEqual({
+      value: -128,
+    });
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0, 128]), (d) => d.i32())
+    ).toEqual({
+      value: -129,
+    });
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0x7f, 0xff]), (d) =>
+        d.i32()
+      )
+    ).toEqual({
+      value: -32768,
+    });
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0x80, 0x00, 0, 0]), (d) =>
+        d.i32()
+      )
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u32, but -2147483649 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly throws type mismatch error when parsing i32", () => {
+    expect(decode(new Uint8Array([0x7f, 0]), (d) => d.i32()))
+      .toMatchInlineSnapshot(`
+        ErrResult {
+          "error": [Error: unexpected type StringIndef at position 0: expected i32],
+        }
+      `);
+  });
+  it("correctly parses small u8 to i32", () => {
+    expect(decode(new Uint8Array([0x0]), (d) => d.i32())).toEqual({
+      value: 0,
+    });
+    expect(decode(new Uint8Array([0x17]), (d) => d.i32())).toEqual({
+      value: 0x17,
+    });
+  });
+  it("correctly parses u8 to i32", () => {
+    expect(decode(new Uint8Array([0x18, 127]), (d) => d.i32())).toEqual({
+      value: 127,
+    });
+    expect(decode(new Uint8Array([0x18, 0xff]), (d) => d.i32())).toEqual({
+      value: 0xff,
+    });
+  });
+  it("correctly parses u16 to i32", () => {
+    expect(decode(new Uint8Array([0x19, 0, 1]), (d) => d.i32())).toEqual({
+      value: 1,
+    });
+    expect(decode(new Uint8Array([0x19, 0x7f, 0xff]), (d) => d.i32())).toEqual({
+      value: 0x7fff,
+    });
+    expect(decode(new Uint8Array([0x19, 0x80, 0]), (d) => d.i32()))
+      .toMatchInlineSnapshot(`
+        OkResult {
+          "value": 32768,
+        }
+      `);
+  });
+  it("correctly parses u32 to i32", () => {
+    expect(decode(new Uint8Array([0x1a, 0, 0, 0, 1]), (d) => d.i32())).toEqual({
+      value: 1,
+    });
+    expect(decode(new Uint8Array([0x1a, 0, 0, 0x80, 0]), (d) => d.i32()))
+      .toMatchInlineSnapshot(`
+        OkResult {
+          "value": 32768,
+        }
+      `);
+  });
+  it("correctly parses u64 to i32", () => {
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 0, 0, 1]), (d) => d.i32())
+    ).toEqual({
+      value: 1,
+    });
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0x80, 0, 0, 0]), (d) => d.i32())
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u32, but 2147483648 is out of range. At position 0],
+      }
+    `);
+  });
 });

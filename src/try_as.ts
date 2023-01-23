@@ -72,7 +72,7 @@ export function tryAsSigned<T extends number | bigint>(
         );
 
   if (size === 32)
-    return value <= 0x7fffffff && value >= -0x80000000
+    return value <= 2147483647 && value >= -2147483648
       ? ok(value)
       : err(
           new Error(

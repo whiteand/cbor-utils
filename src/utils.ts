@@ -2,7 +2,11 @@ export function beBytesToU16(slice: Uint8Array) {
   return (slice[0] << 8) | slice[1];
 }
 export function beBytesToU32(s: Uint8Array) {
-  return (s[0] << 24) | (s[1] << 16) | (s[2] << 8) | s[3];
+  let res = 0n;
+  for (let i = 0; i < 4; i++) {
+    res = (res << 8n) | BigInt(s[i]);
+  }
+  return Number(res);
 }
 export function beBytesToU64(s: Uint8Array) {
   let res = 0n;
