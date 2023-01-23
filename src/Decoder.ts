@@ -1,11 +1,15 @@
-import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
 import { EndOfInputError } from "./EndOfInputError";
 import { err, ok, Result } from "./result";
+import { tryAs, tryAsSigned } from "./try_as";
 import { Type } from "./Type";
 import { TypeMismatchError } from "./TypeMismatchError";
 import { IReader } from "./types";
 import { typeToStr } from "./typeToStr";
-import { tryAs, tryAsSigned } from "./try_as";
+import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
+
+function infoOf(b: u8): u8 {
+  return b & 0b000_11111;
+}
 
 type u8 = number;
 
@@ -56,7 +60,14 @@ export class Decoder<R extends IReader> {
     return ok(b);
   }
 
-  private readSlice(size: number) {
+  private readSlice(sizeParam: number | bigint) {
+    if (sizeParam < 0) {
+      return err(new Error("negative size"));
+    }
+    const size = Number(sizeParam);
+    if (!Number.isSafeInteger(size)) {
+      return err(new Error("size is too big"));
+    }
     const res = new Uint8Array(size);
     if (this.pos + size <= this.bufSize) {
       res.set(this.buffer.subarray(this.pos, this.pos + size));
@@ -483,6 +494,25 @@ export class Decoder<R extends IReader> {
     return err(
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i64")
     );
+  }
+  bytes(): Result<Uint8Array> {
+    const p = this.globalPos;
+    const marker = this.read();
+    if (!marker.ok()) return marker;
+    const b = marker.value;
+    if (Type.Bytes !== this.typeOf(b).unwrap() || infoOf(b) === 31) {
+      return err(
+        new TypeMismatchError(
+          this.typeOfOrUnknown(b),
+          p,
+          "expected bytes (definite length)"
+        )
+      );
+    }
+    let nRes = this.unsigned(infoOf(b), p);
+    if (!nRes.ok()) return nRes;
+    const n = nRes.value;
+    return this.readSlice(n);
   }
 
   private typeOf(b: number): Result<Type | null> {

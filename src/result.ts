@@ -9,6 +9,9 @@ export class OkResult<T> {
   andThen<U>(fn: (value: T) => Result<U>): Result<U> {
     return fn(this.value);
   }
+  unwrap(): T {
+    return this.value;
+  }
 }
 export class ErrResult {
   constructor(public readonly error: Error) {}
@@ -21,6 +24,9 @@ export class ErrResult {
   andThen<U>(_fn: (value: never) => Result<U>): Result<U> {
     return this as any;
   }
+  unwrap(): never {
+    throw this.error;
+  }
 }
 
 export type Result<T> = OkResult<T> | ErrResult;
@@ -31,4 +37,7 @@ export function ok<T>(value: T): OkResult<T> {
 
 export function err(error: Error): ErrResult {
   return new ErrResult(error);
+}
+export function unwrapOr<T>(result: Result<T>, defaultValue: T): T {
+  return result.ok() ? result.value : defaultValue;
 }

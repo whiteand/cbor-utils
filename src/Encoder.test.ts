@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { decode } from "./decode";
 import { Uint8ArrayWriter } from "./defaults";
 import { encode } from "./encode";
 import { Encoder } from "./Encoder";
@@ -62,5 +63,16 @@ describe("Encoder", () => {
     expect(encode((e) => e.i64(-0xffffffffffffffffn))).toEqual(
       new Uint8Array([59, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe])
     );
+  });
+  it("properly encodes bytes", () => {
+    const lens = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 23, 24, 25, 255, 256, 257];
+    for (const l of lens) {
+      const input = new Uint8Array(l);
+      for (let i = 0; i < l; i++) {
+        input[i] = i;
+      }
+      const bs = encode((e) => e.bytes(input));
+      expect(decode(bs, (d) => d.bytes()).unwrap()).toEqual(input);
+    }
   });
 });

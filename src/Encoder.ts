@@ -1,4 +1,4 @@
-import { SIGNED, SIMPLE } from "./constants";
+import { BYTES, SIGNED, SIMPLE } from "./constants";
 import { ok, Result } from "./result";
 import { IWriter, u8 } from "./types";
 import { u16ToBeBytes, u32ToBeBytes, u64ToBytes } from "./utils";
@@ -86,5 +86,31 @@ export class Encoder<W extends IWriter> {
     const r = this.put(new Uint8Array([SIGNED | 27]));
     if (!r.ok()) return r;
     return this.put(u64ToBytes(BigInt(value)));
+  }
+  bytes(slice: Uint8Array): Result<this> {
+    let result = this.typeLen(BYTES, BigInt(slice.length));
+    if (!result.ok()) return result;
+    return this.put(slice);
+  }
+  private typeLen(type: u8, len: bigint): Result<this> {
+    if (len <= 0x17) {
+      return this.put(new Uint8Array([type | Number(len)]));
+    }
+    if (len <= 0xff) {
+      return this.put(new Uint8Array([type | 24, Number(len)]));
+    }
+    if (len <= 0xffff) {
+      let r = this.put(new Uint8Array([type | 25]));
+      if (!r.ok()) return r;
+      return this.put(u16ToBeBytes(Number(len)));
+    }
+    if (len <= 0xffffffffn) {
+      const r = this.put(new Uint8Array([type | 26]));
+      if (!r.ok()) return r;
+      return this.put(u32ToBeBytes(Number(len)));
+    }
+    const r = this.put(new Uint8Array([type | 27]));
+    if (!r.ok()) return r;
+    return this.put(u64ToBytes(len));
   }
 }
