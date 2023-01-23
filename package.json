@@ -7,6 +7,7 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "build": "tsup && tsc",
+    "prepublish": "npm run build",
     "prepare": "npm run build"
   },
   "repository": {
