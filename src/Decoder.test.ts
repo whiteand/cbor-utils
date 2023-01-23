@@ -1069,6 +1069,14 @@ describe("Decoder", () => {
         }
       `);
   });
+  it("correctly throws type mismatch error when parsing int", () => {
+    expect(decode(new Uint8Array([0x7f, 0]), (d) => d.int()))
+      .toMatchInlineSnapshot(`
+        ErrResult {
+          "error": [Error: unexpected type StringIndef at position 0: expected i64],
+        }
+      `);
+  });
   it("correctly parses small u8 to i64", () => {
     expect(decode(new Uint8Array([0x0]), (d) => d.i64())).toEqual({
       value: 0,
@@ -1123,5 +1131,56 @@ describe("Decoder", () => {
         "error": [Error: expected i64, but 9223372036854775808 is out of range. At position 0],
       }
     `);
+  });
+  it("correctly parses u64 to i64", () => {
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 0, 0, 1]), (d) => d.int())
+    ).toEqual({
+      value: 1n,
+    });
+    expect(
+      decode(new Uint8Array([0x1b, 0x80, 0, 0, 0, 0, 0, 0, 0]), (d) => d.int())
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected i64, but 9223372036854775808 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses all integers", () => {
+    const limits: (number | bigint)[] = [];
+    limits.push(0);
+    limits.push(1);
+    limits.push(0x17);
+    limits.push(0x18);
+    limits.push(0x7f);
+    limits.push(0x80);
+    limits.push(0xff);
+    limits.push(0x100);
+    limits.push(0x7fff);
+    limits.push(0x8000);
+    limits.push(0xffff);
+    limits.push(0x10000);
+    limits.push(0x7fffffffn);
+    limits.push(0x80000000n);
+    limits.push(0xffffffffn);
+    limits.push(0x100000000n);
+    limits.push(0x7fffffffffffn);
+    limits.push(0x800000000000n);
+    limits.push(0xffffffffffffn);
+    limits.push(0x1000000000000n);
+    limits.push(0x7fffffffffffffn);
+    limits.push(0x80000000000000n);
+    limits.push(0xffffffffffffffn);
+    limits.push(...limits.map((x) => -BigInt(x) - 1n));
+
+    for (let i = 0; i < limits.length; i++) {
+      const value = limits[i];
+      const encoded = encode((e) => e.int(value));
+      const decoded = decode(encoded, (d) => d.int());
+      expect(decoded.ok()).toBe(true);
+      if (decoded.ok()) {
+        expect(BigInt(decoded.value)).toBe(BigInt(value));
+      }
+    }
   });
 });
