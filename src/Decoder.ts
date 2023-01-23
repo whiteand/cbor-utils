@@ -164,7 +164,8 @@ export class Decoder<R extends IReader> {
     if (n === 0x1b) {
       return this.readSlice(8)
         .map(beBytesToU64)
-        .andThen((n) => tryAs(n, 8, p));
+        .andThen((n) => tryAs(n, 32, p))
+        .map((d) => Number(d));
     }
     return err(
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u32")

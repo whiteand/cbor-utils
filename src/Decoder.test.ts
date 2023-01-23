@@ -71,9 +71,8 @@ describe("Decoder", () => {
         "value": 18,
       }
     `);
-    expect(
-      decode(new Uint8Array([0x19, 0, 0x18]), (d) => d.u8())
-    ).toMatchInlineSnapshot(`
+    expect(decode(new Uint8Array([0x19, 0, 0x18]), (d) => d.u8()))
+      .toMatchInlineSnapshot(`
       OkResult {
         "value": 24,
       }
@@ -94,9 +93,8 @@ describe("Decoder", () => {
         "value": 255,
       }
     `);
-    expect(
-      decode(new Uint8Array([0x1a, 0, 0, 0, 23]), (x) => x.u8())
-    ).toMatchInlineSnapshot(`
+    expect(decode(new Uint8Array([0x1a, 0, 0, 0, 23]), (x) => x.u8()))
+      .toMatchInlineSnapshot(`
       OkResult {
         "value": 23,
       }
@@ -333,6 +331,69 @@ describe("Decoder", () => {
     expect(decoder.u32()).toMatchInlineSnapshot(`
       OkResult {
         "value": 16909060,
+      }
+    `);
+  });
+  it("correctly loads small u32", () => {
+    expect(decode(new Uint8Array([0x05]), (d) => d.u32()))
+      .toMatchInlineSnapshot(`
+      OkResult {
+        "value": 5,
+      }
+    `);
+    expect(decode(new Uint8Array([0x18, 0x20]), (d) => d.u32()))
+      .toMatchInlineSnapshot(`
+      OkResult {
+        "value": 32,
+      }
+    `);
+    expect(decode(new Uint8Array([0x19, 0, 0x20]), (d) => d.u32()))
+      .toMatchInlineSnapshot(`
+      OkResult {
+        "value": 32,
+      }
+    `);
+    expect(decode(new Uint8Array([0x19, 1, 0x20]), (d) => d.u32()))
+      .toMatchInlineSnapshot(`
+      OkResult {
+        "value": 288,
+      }
+    `);
+    expect(
+      decode(new Uint8Array([0x1a, 0x1, 0x2, 0x3, 0x4]), (d) => d.u32())
+    ).toEqual({
+      value: 0x01020304,
+    });
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0x1, 0x2, 0x3, 0x4]), (d) =>
+        d.u32()
+      )
+    ).toEqual({
+      value: 0x01020304,
+    });
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0xff, 0xff, 0xff, 0xff]), (d) =>
+        d.u32()
+      )
+    ).toEqual({
+      value: 0xffffffff,
+    });
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 1, 0x1, 0x2, 0x3, 0x4]), (d) =>
+        d.u32()
+      )
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u32, but 4311876356 is out of range. At position 0],
+      }
+    `);
+    expect(
+      decode(new Uint8Array([0x1e, 0, 0, 0, 1, 0x1, 0x2, 0x3, 0x4]), (d) =>
+        d.u32()
+      )
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: unexpected type unknown type 30 at position 0: expected u32],
       }
     `);
   });
