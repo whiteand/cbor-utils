@@ -285,6 +285,59 @@ export class Decoder<R extends IReader> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i8")
     );
   }
+  i16(): Result<number> {
+    const p = this.globalPos;
+    const marker = this.read();
+    if (!marker.ok()) return marker;
+    const n = marker.value;
+    if (n <= 0x17) {
+      return ok(n);
+    }
+    if (n === 0x18) {
+      return this.read();
+    }
+    if (n === 0x19) {
+      return this.readSlice(2)
+        .map(beBytesToU16)
+        .andThen((n) => tryAsSigned(n, 16, p));
+    }
+    if (n === 0x1a) {
+      return this.readSlice(4)
+        .map(beBytesToU32)
+        .andThen((n) => tryAsSigned(n, 16, p));
+    }
+    if (n === 0x1b) {
+      return this.readSlice(8)
+        .map(beBytesToU64)
+        .andThen((n) => tryAsSigned(n, 16, p))
+        .map(Number);
+    }
+    if (n >= 0x20 && n <= 0x37) {
+      return ok(-1 - n + 0x20);
+    }
+    if (n === 0x38) {
+      return this.read().map((n) => -1 - n);
+    }
+    if (n === 0x39) {
+      return this.readSlice(2)
+        .map(beBytesToU16)
+        .andThen((n) => tryAsSigned(-1 - n, 16, p));
+    }
+    if (n === 0x3a) {
+      return this.readSlice(4)
+        .map(beBytesToU32)
+        .andThen((n) => tryAsSigned(-1 - n, 16, p));
+    }
+    if (n === 0x3b) {
+      return this.readSlice(8)
+        .map(beBytesToU64)
+        .andThen((n) => tryAsSigned(-1n - n, 16, p))
+        .map(Number);
+    }
+    return err(
+      new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i16")
+    );
+  }
   private typeOf(b: number): Result<Type | null> {
     if (b >= 0 && b <= 0x18) return ok(Type.U8);
     if (b === 0x19) return ok(Type.U16);

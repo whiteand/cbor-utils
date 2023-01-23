@@ -666,4 +666,151 @@ describe("Decoder", () => {
         }
       `);
   });
+  it("correctly parses small u8 to i16", () => {
+    expect(decode(new Uint8Array([0x0]), (d) => d.i16())).toEqual({
+      value: 0,
+    });
+    expect(decode(new Uint8Array([0x17]), (d) => d.i16())).toEqual({
+      value: 0x17,
+    });
+  });
+  it("correctly parses u8 to i16", () => {
+    expect(decode(new Uint8Array([0x18, 127]), (d) => d.i16())).toEqual({
+      value: 127,
+    });
+    expect(decode(new Uint8Array([0x18, 0xff]), (d) => d.i16())).toEqual({
+      value: 0xff,
+    });
+  });
+  it("correctly parses u16 to i16", () => {
+    expect(decode(new Uint8Array([0x19, 0, 1]), (d) => d.i16())).toEqual({
+      value: 1,
+    });
+    expect(decode(new Uint8Array([0x19, 0x7f, 0xff]), (d) => d.i16())).toEqual({
+      value: 0x7fff,
+    });
+    expect(decode(new Uint8Array([0x19, 0x80, 0]), (d) => d.i16()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u16, but 32768 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses u32 to i16", () => {
+    expect(decode(new Uint8Array([0x1a, 0, 0, 0, 1]), (d) => d.i16())).toEqual({
+      value: 1,
+    });
+    expect(decode(new Uint8Array([0x1a, 0, 0, 0x80, 0]), (d) => d.i16()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u16, but 32768 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses u64 to i16", () => {
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 0, 0, 1]), (d) => d.i16())
+    ).toEqual({
+      value: 1,
+    });
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 0, 0x80, 0]), (d) => d.i16())
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u16, but 32768 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses small i8 to i16", () => {
+    expect(decode(new Uint8Array([0x20]), (d) => d.i16())).toEqual({
+      value: -1,
+    });
+    expect(decode(new Uint8Array([0x37]), (d) => d.i16())).toEqual({
+      value: -24,
+    });
+  });
+  it("correctly parses i8 to i16", () => {
+    expect(decode(new Uint8Array([0x38, 127]), (d) => d.i16())).toEqual({
+      value: -128,
+    });
+    expect(decode(new Uint8Array([0x38, 128]), (d) => d.i16())).toEqual({
+      value: -129,
+    });
+  });
+  it("correctly parses i16 to i16", () => {
+    expect(decode(new Uint8Array([0x39, 0, 127]), (d) => d.i16())).toEqual({
+      value: -128,
+    });
+    expect(decode(new Uint8Array([0x39, 0, 128]), (d) => d.i16())).toEqual({
+      value: -129,
+    });
+    expect(decode(new Uint8Array([0x39, 0x7f, 0xff]), (d) => d.i16())).toEqual({
+      value: -32768,
+    });
+    expect(decode(new Uint8Array([0x39, 0x80, 0x00]), (d) => d.i16()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u16, but -32769 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses i32 to i16", () => {
+    expect(
+      decode(new Uint8Array([0x3a, 0, 0, 0, 127]), (d) => d.i16())
+    ).toEqual({
+      value: -128,
+    });
+    expect(
+      decode(new Uint8Array([0x3a, 0, 0, 0, 128]), (d) => d.i16())
+    ).toEqual({
+      value: -129,
+    });
+    expect(
+      decode(new Uint8Array([0x3a, 0, 0, 0x7f, 0xff]), (d) => d.i16())
+    ).toEqual({
+      value: -32768,
+    });
+    expect(decode(new Uint8Array([0x3a, 0, 0, 0x80, 0x00]), (d) => d.i16()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u16, but -32769 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly parses i64 to i16", () => {
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0, 127]), (d) => d.i16())
+    ).toEqual({
+      value: -128,
+    });
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0, 128]), (d) => d.i16())
+    ).toEqual({
+      value: -129,
+    });
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0x7f, 0xff]), (d) =>
+        d.i16()
+      )
+    ).toEqual({
+      value: -32768,
+    });
+    expect(
+      decode(new Uint8Array([0x3b, 0, 0, 0, 0, 0, 0, 0x80, 0x00]), (d) =>
+        d.i16()
+      )
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u16, but -32769 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly throws type mismatch error when parsing i16", () => {
+    expect(decode(new Uint8Array([0x7f, 0]), (d) => d.i16()))
+      .toMatchInlineSnapshot(`
+        ErrResult {
+          "error": [Error: unexpected type StringIndef at position 0: expected i16],
+        }
+      `);
+  });
 });
