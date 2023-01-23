@@ -1183,4 +1183,65 @@ describe("Decoder", () => {
       }
     }
   });
+  it("correctly parses indefinite array", () => {
+    const bytes = encode((e) => {
+      e.beginArray();
+      e.u8(10);
+      e.u8(20);
+      e.u8(30);
+      e.end();
+    });
+    const iter = decode(bytes, (d) => d.arrayIter((d) => d.u8()));
+    expect(iter.ok()).toBe(true);
+    if (iter.ok()) {
+      expect([...iter.value].map((r) => r.unwrap())).toEqual([10, 20, 30]);
+    }
+  });
+  it("correctly parses definite array", () => {
+    const bytes = encode((e) => {
+      e.array(3);
+      e.u8(15);
+      e.u8(25);
+      e.u8(35);
+    });
+    const iter = decode(bytes, (d) => d.arrayIter((d) => d.u8()));
+    expect(iter.ok()).toBe(true);
+    if (iter.ok()) {
+      expect([...iter.value].map((r) => r.unwrap())).toEqual([15, 25, 35]);
+    }
+  });
+  it("correctly parses empty definite array", () => {
+    const bytes = encode((e) => {
+      e.array(0);
+    });
+    const iter = decode(bytes, (d) => d.arrayIter((d) => d.u8()));
+    expect(iter.ok()).toBe(true);
+    if (iter.ok()) {
+      expect([...iter.value].map((r) => r.unwrap())).toEqual([]);
+    }
+  });
+  it("correctly parses empty indefinite array", () => {
+    const bytes = encode((e) => {
+      e.beginArray();
+      e.end();
+    });
+    const iter = decode(bytes, (d) => d.arrayIter((d) => d.u8()));
+    expect(iter.ok()).toBe(true);
+    if (iter.ok()) {
+      expect([...iter.value].map((r) => r.unwrap())).toEqual([]);
+    }
+  });
+  it("correctly throws typemismatch for arrayIter", () => {
+    const bytes = encode((e) => {
+      e.beginBytes();
+      e.end();
+    });
+    const iter = decode(bytes, (d) => d.arrayIter((d) => d.u8()));
+    expect(iter.ok()).toBe(false);
+    if (!iter.ok()) {
+      expect(iter.error).toMatchInlineSnapshot(
+        "[Error: unexpected type BytesIndef at position 0: expected array]"
+      );
+    }
+  });
 });

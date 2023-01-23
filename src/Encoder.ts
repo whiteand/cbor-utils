@@ -1,4 +1,4 @@
-import { BYTES, SIGNED, SIMPLE } from "./constants";
+import { ARRAY, BYTES, SIGNED, SIMPLE } from "./constants";
 import { ok, Result } from "./result";
 import { IWriter, u8 } from "./types";
 import { u16ToBeBytes, u32ToBeBytes, u64ToBytes } from "./utils";
@@ -91,6 +91,21 @@ export class Encoder<W extends IWriter> {
     let result = this.typeLen(BYTES, BigInt(slice.length));
     if (!result.ok()) return result;
     return this.put(slice);
+  }
+  array(len: number | bigint) {
+    return this.typeLen(ARRAY, BigInt(len));
+  }
+  beginArray(): Result<this> {
+    return this.put(new Uint8Array([0x9f]));
+  }
+  beginBytes(): Result<this> {
+    return this.put(new Uint8Array([0x5f]));
+  }
+  beginMap(): Result<this> {
+    return this.put(new Uint8Array([0xbf]));
+  }
+  end(): Result<this> {
+    return this.put(new Uint8Array([0xff]));
   }
   private typeLen(type: u8, len: bigint): Result<this> {
     if (len <= 0x17) {

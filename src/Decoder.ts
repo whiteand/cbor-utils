@@ -1,3 +1,5 @@
+import { ArrayIter } from "./ArrayIter";
+import { ARRAY, BYTES } from "./constants";
 import { EndOfInputError } from "./EndOfInputError";
 import { err, ok, Result } from "./result";
 import { tryAs, tryAsSigned } from "./try_as";
@@ -7,6 +9,9 @@ import { IReader } from "./types";
 import { typeToStr } from "./typeToStr";
 import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
 
+function typeOf(b: u8) {
+  return b & 0b111_00000;
+}
 function infoOf(b: u8): u8 {
   return b & 0b000_11111;
 }
@@ -27,12 +32,14 @@ export class Decoder<R extends IReader> {
   private bufSize: number;
   private pos: number;
   private globalPos: number;
+  private currentByte: number | null;
   constructor(reader: R, { bufferSize }: { bufferSize?: number } = {}) {
     this.reader = reader;
     this.buffer = new Uint8Array(bufferSize || 1024);
     this.pos = 0;
     this.bufSize = 0;
     this.globalPos = 0;
+    this.currentByte = null;
   }
 
   private loadNextChunk(): Result<number> {
@@ -46,13 +53,14 @@ export class Decoder<R extends IReader> {
     return ok(result.value);
   }
 
-  private read(): Result<u8> {
+  read(): Result<u8> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
       if (!res.ok()) return res;
     }
     const p = this.pos;
     const b = this.buffer[p];
+    this.currentByte = b;
 
     this.globalPos += 1;
     this.pos += 1;
@@ -84,12 +92,19 @@ export class Decoder<R extends IReader> {
     }
     return ok(res);
   }
-  private peek(): Result<u8> {
+  peek(): Result<u8> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
       if (!res.ok()) return res;
     }
     return ok(this.buffer[this.pos]);
+  }
+
+  /**
+   * @returns Returns last read byte or null if no bytes were read yet
+   */
+  current(): number | null {
+    return this.currentByte;
   }
 
   bool(): Result<boolean> {
@@ -500,7 +515,7 @@ export class Decoder<R extends IReader> {
     const marker = this.read();
     if (!marker.ok()) return marker;
     const b = marker.value;
-    if (Type.Bytes !== this.typeOf(b).unwrap() || infoOf(b) === 31) {
+    if (BYTES !== typeOf(b) || infoOf(b) === 31) {
       return err(
         new TypeMismatchError(
           this.typeOfOrUnknown(b),
@@ -513,6 +528,36 @@ export class Decoder<R extends IReader> {
     if (!nRes.ok()) return nRes;
     const n = nRes.value;
     return this.readSlice(n);
+  }
+
+  /** Begin decoding an array.
+   *
+   * CBOR arrays are heterogenous collections and may be of indefinite
+   * length. If the length is known it is returned as a `number` or `bigint`, for
+   * indefinite arrays `null` is returned.
+   */
+  array(): Result<bigint | number | null> {
+    const p = this.globalPos;
+    const marker = this.read();
+    if (!marker.ok()) return marker;
+    const b = marker.value;
+    if (ARRAY !== typeOf(b)) {
+      return err(
+        new TypeMismatchError(this.typeOfOrUnknown(b), p, "expected array")
+      );
+    }
+    switch (infoOf(b)) {
+      case 31:
+        return ok(null);
+      default:
+        return this.unsigned(infoOf(b), p);
+    }
+  }
+
+  arrayIter<T>(item: (d: Decoder<R>) => Result<T>): Result<ArrayIter<T>> {
+    const len = this.array();
+    if (!len.ok()) return len;
+    return ok(new ArrayIter(this, len.value, item));
   }
 
   private typeOf(b: number): Result<Type | null> {
