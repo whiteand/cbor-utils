@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "build": "tsup && tsc"
+    "build": "tsup && tsc",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
