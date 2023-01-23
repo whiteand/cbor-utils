@@ -397,4 +397,70 @@ describe("Decoder", () => {
       }
     `);
   });
+  it("decodes u16 < 0x17", () => {
+    expect(decode(new Uint8Array([0x05]), (d) => d.u16())).toEqual({
+      value: 5,
+    });
+  });
+  it("decodes u16 < 0xff", () => {
+    expect(decode(new Uint8Array([0x18, 0x20]), (d) => d.u16())).toEqual({
+      value: 0x20,
+    });
+  });
+  it("decodes u16 < 0xffff", () => {
+    expect(decode(new Uint8Array([0x19, 0, 0x20]), (d) => d.u16())).toEqual({
+      value: 0x20,
+    });
+    expect(decode(new Uint8Array([0x19, 1, 0x20]), (d) => d.u16())).toEqual({
+      value: 0x0120,
+    });
+  });
+  it("decodes u16 < 0xffffffff", () => {
+    expect(
+      decode(new Uint8Array([0x1a, 0, 0, 0, 0x20]), (d) => d.u16())
+    ).toEqual({
+      value: 0x20,
+    });
+    expect(
+      decode(new Uint8Array([0x1a, 0, 0, 1, 0x20]), (d) => d.u16())
+    ).toEqual({
+      value: 0x0120,
+    });
+    expect(decode(new Uint8Array([0x1a, 0, 1, 1, 0x20]), (d) => d.u16()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u16, but 65824 is out of range. At position 0],
+      }
+    `);
+    expect(decode(new Uint8Array([0x1a, 0, 1, 1]), (d) => d.u16()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: End of input],
+      }
+    `);
+  });
+  it("correctly decodes u16 from u64", () => {
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 0, 1, 0x20]), (d) => d.u16())
+    ).toMatchInlineSnapshot(`
+      OkResult {
+        "value": 288,
+      }
+    `);
+    expect(
+      decode(new Uint8Array([0x1b, 0, 0, 0, 0, 0, 1, 1, 0x20]), (d) => d.u16())
+    ).toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: expected u16, but 65824 is out of range. At position 0],
+      }
+    `);
+  });
+  it("correctly throws type mismatch", () => {
+    expect(decode(new Uint8Array([0x1c]), (d) => d.u16()))
+      .toMatchInlineSnapshot(`
+      ErrResult {
+        "error": [Error: unexpected type unknown type 28 at position 0: expected u16],
+      }
+    `);
+  });
 });

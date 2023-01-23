@@ -144,6 +144,44 @@ export class Decoder<R extends IReader> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u8")
     );
   }
+  u16(): Result<number> {
+    const p = this.globalPos;
+    const marker = this.read();
+    if (!marker.ok()) return marker;
+    const n = marker.value;
+    if (n <= 0x17) {
+      return ok(n);
+    }
+    if (n === 0x18) {
+      return this.read();
+    }
+    if (n === 0x19) {
+      return this.readSlice(2).map(beBytesToU16);
+    }
+    if (n === 0x1a) {
+      return this.readSlice(4)
+        .map(beBytesToU32)
+        .andThen((n) => tryAs(n, 16, p));
+    }
+    if (n === 0x1b) {
+      return this.readSlice(8)
+        .map(beBytesToU64)
+        .andThen((n) => tryAs(n, 16, p))
+        .map(Number);
+    }
+    return err(
+      new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u16")
+    );
+    // let p = self.pos;
+    //       match self.read()? {
+    //           n @ 0 ..= 0x17 => Ok(u16::from(n)),
+    //           0x18           => self.read().map(u16::from),
+    //           0x19           => self.read_slice(2).map(read_u16),
+    //           0x1a           => self.read_slice(4).map(read_u32).and_then(|n| try_as(n, "when converting u32 to u16", p)),
+    //           0x1b           => self.read_slice(8).map(read_u64).and_then(|n| try_as(n, "when converting u64 to u16", p)),
+    //           b              => Err(Error::type_mismatch(self.type_of(b)?).at(p).with_message("expected u16"))
+    //       }
+  }
   u32(): Result<number> {
     let p = this.globalPos;
     const marker = this.read();
