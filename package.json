@@ -8,6 +8,13 @@
     "coverage": "vitest run --coverage",
     "build": "tsup"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/whiteand/cbor-utils.git"
+  },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "cbor",
     "encoder",
