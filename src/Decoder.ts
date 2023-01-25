@@ -2,6 +2,7 @@ import { err, ok, Result } from "resultra";
 import { ArrayIter } from "./ArrayIter";
 import { ARRAY, BYTES } from "./constants";
 import { EndOfInputError } from "./EndOfInputError";
+import { IDecoder } from "./IDecoder";
 import { tryAs, tryAsSigned } from "./try_as";
 import { Type } from "./Type";
 import { TypeMismatchError } from "./TypeMismatchError";
@@ -26,7 +27,7 @@ export function typeResultToStr(result: TypeResult): string {
   return result.known ? typeToStr(result.type) : `unknown type ${result.type}`;
 }
 
-export class Decoder<R extends IReader> {
+export class Decoder<R extends IReader> implements IDecoder {
   private reader: R;
   private buffer: Uint8Array;
   private bufSize: number;
@@ -237,7 +238,7 @@ export class Decoder<R extends IReader> {
     const n = marker.value;
     return this.unsigned(n, p);
   }
-  unsigned(n: number, p: number): Result<number | bigint> {
+  private unsigned(n: number, p: number): Result<number | bigint> {
     if (n <= 0x17) {
       return ok(n);
     }

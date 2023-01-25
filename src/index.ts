@@ -8,3 +8,5 @@ export * from "./Encoder";
 export * from "./EndOfInputError";
 export * from "./TypeMismatchError";
 export * from "./types";
+export * from "./IEncoder";
+export * from "./IDecoder";
