@@ -1,4 +1,5 @@
 import { Result } from "resultra";
+import { ArrayIter } from "./ArrayIter";
 import { IReader } from "./types";
 
 export interface IDecoder {
@@ -19,4 +20,5 @@ export interface IDecoder {
   i64(): Result<number | bigint>;
   bytes(): Result<Uint8Array>;
   array(): Result<bigint | number | null>;
+  arrayIter<T>(item: (d: IDecoder) => Result<T>): Result<ArrayIter<T>>;
 }

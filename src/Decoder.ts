@@ -558,7 +558,7 @@ export class Decoder<R extends IReader> implements IDecoder {
     }
   }
 
-  arrayIter<T>(item: (d: Decoder<R>) => Result<T>): Result<ArrayIter<T>> {
+  arrayIter<T>(item: (d: IDecoder) => Result<T>): Result<ArrayIter<T>> {
     const len = this.array();
     if (!len.ok()) return len;
     return ok(new ArrayIter(this, len.value, item));
