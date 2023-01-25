@@ -1,4 +1,4 @@
-import { ok, Result } from "../result";
+import { ok, Result } from "resultra";
 import { IReader, IWriter } from "../types";
 
 export class Uint8ArrayReader implements IReader, IWriter {

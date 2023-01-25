@@ -1,4 +1,4 @@
-import { Result } from "./result";
+import { Result } from "resultra";
 
 export interface IWriter {
   write(data: Uint8Array): Result<number>;

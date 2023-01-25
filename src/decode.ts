@@ -1,6 +1,6 @@
+import { Result } from "resultra";
 import { Decoder } from "./Decoder";
 import { Uint8ArrayReader } from "./defaults/Uint8ArrayReader";
-import { Result } from "./result";
 
 export function decode<R>(
   bytes: Uint8Array,

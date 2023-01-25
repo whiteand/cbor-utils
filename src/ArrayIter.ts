@@ -1,6 +1,6 @@
+import { Result } from "resultra";
 import { BREAK } from "./constants";
 import { Decoder } from "./Decoder";
-import { Result } from "./result";
 
 export class ArrayIter<Item>
   implements Iterator<Result<Item>>, Iterable<Result<Item>>

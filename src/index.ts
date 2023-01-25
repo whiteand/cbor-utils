@@ -1,3 +1,4 @@
+export { ok, err, Result } from "resultra";
 export * from "./Encoder";
 export * from "./Decoder";
 export * from "./defaults/Uint8ArrayReader";
@@ -6,5 +7,4 @@ export * from "./types";
 export * from "./EndOfInputError";
 export * from "./TypeMismatchError";
 export * from "./encode";
-export * from "./result";
 export * from "./decode";

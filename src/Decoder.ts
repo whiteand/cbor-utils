@@ -1,7 +1,7 @@
 import { ArrayIter } from "./ArrayIter";
 import { ARRAY, BYTES } from "./constants";
 import { EndOfInputError } from "./EndOfInputError";
-import { err, ok, Result } from "./result";
+import { err, ok, Result } from "resultra";
 import { tryAs, tryAsSigned } from "./try_as";
 import { Type } from "./Type";
 import { TypeMismatchError } from "./TypeMismatchError";

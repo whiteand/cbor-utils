@@ -3,7 +3,8 @@
         "target": "ES2020",
         "declaration": true,
         "declarationDir": "dist",
-        "emitDeclarationOnly": true
+        "emitDeclarationOnly": true,
+        "moduleResolution": "node"
     },
     "include": [
         "src/index.ts"

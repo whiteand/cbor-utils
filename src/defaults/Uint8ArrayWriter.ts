@@ -1,4 +1,4 @@
-import { err, ok, Result } from "../result";
+import { err, ok, Result } from "resultra";
 import { IWriter } from "../types";
 
 function getNewCapacity(oldCapacity: number): number {
