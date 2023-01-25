@@ -20,5 +20,7 @@ export interface IDecoder {
   i64(): Result<number | bigint>;
   bytes(): Result<Uint8Array>;
   array(): Result<bigint | number | null>;
-  arrayIter<T>(item: (d: IDecoder) => Result<T>): Result<ArrayIter<T>>;
+  arrayIter<T>(
+    item: (d: IDecoder) => Result<T>
+  ): Result<Iterator<Result<T>> & Iterable<Result<T>>>;
 }
