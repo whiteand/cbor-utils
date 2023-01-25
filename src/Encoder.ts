@@ -1,5 +1,5 @@
-import { ARRAY, BYTES, SIGNED, SIMPLE } from "./constants";
 import { ok, Result } from "resultra";
+import { ARRAY, BYTES, SIGNED, SIMPLE } from "./constants";
 import { IWriter, u8 } from "./types";
 import { u16ToBeBytes, u32ToBeBytes, u64ToBytes } from "./utils";
 
