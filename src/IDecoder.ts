@@ -29,4 +29,5 @@ export interface IDecoder {
   ): Result<Iterator<Result<Uint8Array>> & Iterable<Result<Uint8Array>>>;
   peekType(): Result<Type | null>;
   skip(): Result<this>;
+  nullable<T>(item: (d: IDecoder) => Result<T>): Result<T | null>;
 }

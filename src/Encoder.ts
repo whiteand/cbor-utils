@@ -6,6 +6,7 @@ import { u16ToBeBytes, u32ToBeBytes, u64ToBytes } from "./utils";
 
 export class Encoder<W extends IWriter> implements IEncoder {
   constructor(private readonly writer: W) {}
+
   getWriter(): W {
     return this.writer;
   }
@@ -133,5 +134,13 @@ export class Encoder<W extends IWriter> implements IEncoder {
     const r = this.put(new Uint8Array([type | 27]));
     if (!r.ok()) return r;
     return this.put(u64ToBytes(len));
+  }
+  nullable<T>(
+    encodeNotNull: (e: IEncoder, value: T) => Result<unknown>,
+    value: T | null
+  ): Result<this> {
+    return value == null
+      ? this.null()
+      : encodeNotNull(this, value).map(() => this);
   }
 }

@@ -1,5 +1,6 @@
 import { ok } from "resultra";
 import { describe, expect, it } from "vitest";
+import { SIMPLE } from "./constants";
 import { decode } from "./decode";
 import { Decoder } from "./Decoder";
 import { Uint8ArrayReader } from "./defaults";
@@ -1274,6 +1275,20 @@ describe("Decoder", () => {
       d.skip().unwrap(); // array
       d.skip().unwrap(); // undefined array
     }).not.toThrow();
-    expect(() => d.skip().unwrap()).toThrowErrorMatchingInlineSnapshot('"End of input"');
+    expect(() => d.skip().unwrap()).toThrowErrorMatchingInlineSnapshot(
+      '"End of input"'
+    );
+  });
+  it("correctly decodes nullable null", () => {
+    const bs = new Uint8Array([22 | SIMPLE]);
+    const numberOrNull = decode(bs, (d) => d.nullable((d) => d.u8()));
+    expect(numberOrNull.ok()).toBe(true);
+    expect(numberOrNull.unwrap()).toBe(null);
+  });
+  it("correctly decodes nullable number", () => {
+    const bs = new Uint8Array([15]);
+    const numberOrNull = decode(bs, (d) => d.nullable((d) => d.u8()));
+    expect(numberOrNull.ok()).toBe(true);
+    expect(numberOrNull.unwrap()).toBe(15);
   });
 });

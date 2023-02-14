@@ -20,4 +20,8 @@ export interface IEncoder {
   beginMap(): Result<this>;
   end(): Result<this>;
   null(): Result<this>;
+  nullable<T>(
+    item: (e: IEncoder, value: T) => Result<unknown>,
+    value: T | null
+  ): Result<this>;
 }

@@ -878,4 +878,14 @@ export class Decoder<R extends IReader> implements IDecoder {
     }
     return ok(null);
   }
+  nullable<T>(item: (d: IDecoder) => Result<T>): Result<T | null> {
+    const type = this.peekType();
+    if (!type.ok()) return type;
+    if (type.value === Type.Null) {
+      const res = this.skip();
+      if (!res.ok()) return res;
+      return ok(null);
+    }
+    return item(this);
+  }
 }

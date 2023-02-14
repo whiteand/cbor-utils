@@ -79,4 +79,12 @@ describe("Encoder", () => {
     const bs = encode((e) => e.null());
     expect(bs).toEqual(new Uint8Array([246]));
   });
+  it("properly encodes nullable", () => {
+    const bs = encode((e) => e.nullable((e, value) => e.u8(value), 10));
+    expect(bs).toEqual(new Uint8Array([10]));
+    const bs2 = encode((e) =>
+      e.nullable<number>((e, value) => e.u8(value), null)
+    );
+    expect(bs2).toEqual(new Uint8Array([246]));
+  });
 });
