@@ -1,3 +1,4 @@
+import { ok } from "resultra";
 import { describe, expect, it } from "vitest";
 import { decode } from "./decode";
 import { Decoder } from "./Decoder";
@@ -1243,5 +1244,36 @@ describe("Decoder", () => {
         "[Error: unexpected type BytesIndef at position 0: expected array]"
       );
     }
+  });
+  it("correctly returns type", () => {
+    const bytes = new Uint8Array([246]);
+    const result = decode(bytes, (d) => d.peekType());
+    expect(result.ok()).toBe(true);
+    expect(result.unwrap()).toBe(Type.Null);
+  });
+  it("correctly skips values", () => {
+    const bytes = encode((e) => {
+      e.null();
+      e.u32(0x11223344);
+      e.u64(0x1122334455667788n);
+      e.u16(0x1122);
+      e.array(1);
+      e.u32(10);
+      e.beginArray();
+      e.u32(1);
+      e.u32(2);
+      e.u32(3);
+      e.end();
+    });
+    const d = new Decoder(new Uint8ArrayReader(bytes));
+    expect(() => {
+      d.skip().unwrap(); // null
+      d.skip().unwrap(); // u32
+      d.skip().unwrap(); // u64
+      d.skip().unwrap(); // u16
+      d.skip().unwrap(); // array
+      d.skip().unwrap(); // undefined array
+    }).not.toThrow();
+    expect(() => d.skip().unwrap()).toThrowErrorMatchingInlineSnapshot('"End of input"');
   });
 });

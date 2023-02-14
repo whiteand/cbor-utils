@@ -35,3 +35,9 @@ const result = decode(bytes, d => {
         submitted: submitted.value
     })
 })
+
+## Will be in next versions
+
+- [ ] Decoder.map()
+- [ ] Decoder.strIter()
+- [ ] Decoder.bytesIter()

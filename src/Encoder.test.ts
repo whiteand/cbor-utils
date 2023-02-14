@@ -75,4 +75,8 @@ describe("Encoder", () => {
       expect(decode(bs, (d) => d.bytes()).unwrap()).toEqual(input);
     }
   });
+  it("properly encodes null", () => {
+    const bs = encode((e) => e.null());
+    expect(bs).toEqual(new Uint8Array([246]));
+  });
 });

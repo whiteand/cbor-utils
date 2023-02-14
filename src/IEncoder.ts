@@ -19,4 +19,5 @@ export interface IEncoder {
   beginBytes(): Result<this>;
   beginMap(): Result<this>;
   end(): Result<this>;
+  null(): Result<this>;
 }

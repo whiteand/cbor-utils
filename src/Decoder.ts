@@ -1,6 +1,18 @@
 import { err, ok, Result } from "resultra";
 import { ArrayIter } from "./ArrayIter";
-import { ARRAY, BYTES } from "./constants";
+import { BytesIter } from "./BytesIter";
+import { StrIter } from "./StrIter";
+import {
+  ARRAY,
+  BREAK,
+  BYTES,
+  MAP,
+  SIGNED,
+  SIMPLE,
+  TAGGED,
+  TEXT,
+  UNSIGNED,
+} from "./constants";
 import { EndOfInputError } from "./EndOfInputError";
 import { IDecoder } from "./IDecoder";
 import { tryAs, tryAsSigned } from "./try_as";
@@ -9,6 +21,26 @@ import { TypeMismatchError } from "./TypeMismatchError";
 import { IReader } from "./types";
 import { typeToStr } from "./typeToStr";
 import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
+
+function sink(x: Iterator<Result<unknown>>): Result<null> {
+  while (true) {
+    const { done, value } = x.next();
+    if (done) break;
+    if (!value.ok()) return value;
+  }
+  return ok(null);
+}
+
+function add(a: number | bigint, b: number | bigint): number | bigint {
+  if (typeof a === "bigint") return a + BigInt(b);
+  if (typeof b === "bigint") return BigInt(a) + b;
+  return a + b;
+}
+function sub(a: number | bigint, b: number | bigint): number | bigint {
+  if (typeof a === "bigint") return a - BigInt(b);
+  if (typeof b === "bigint") return BigInt(a) - b;
+  return a - b;
+}
 
 function typeOf(b: u8) {
   return b & 0b111_00000;
@@ -533,6 +565,164 @@ export class Decoder<R extends IReader> implements IDecoder {
     const n = nRes.value;
     return this.readSlice(n);
   }
+  peekType(): Result<Type | null> {
+    const nextValue = this.peek();
+    if (!nextValue.ok()) return nextValue;
+    return this.typeOf(nextValue.value);
+  }
+  /**
+   * Skip current value
+   */
+  skip(): Result<this> {
+    // Unless we encounter indefinite-length arrays or maps inside of regular
+    // maps or arrays we only need to count how many more CBOR items we need
+    // to skip (initially starting with 1) or how many more break bytes we
+    // need to expect (initially starting with 0).
+    //
+    // If we do need to handle indefinite items (other than bytes or strings),
+    // inside of regular maps or arrays, we switch to using a stack of length
+    // information, starting with the remaining number of potential breaks we
+    // are still expecting and the number of items we still need to skip over
+    // at that point.
+
+    let nrounds: number | bigint = 1; // number of iterations over array and map elements
+    let irounds: number | bigint = 0; // number of indefinite iterations
+
+    let stack: (number | bigint | null)[] = [];
+
+    while (nrounds > 0 || irounds > 0 || stack.length > 0) {
+      let currentRes = this.peek();
+      if (!currentRes.ok()) {
+        return currentRes;
+      }
+      const current = currentRes.value;
+      if (current >= UNSIGNED && current <= 0x1b) {
+        const res = this.u64();
+        if (!res.ok()) return res;
+      } else if (current >= SIGNED && current <= 0x3b) {
+        const res = this.int();
+        if (!res.ok()) return res;
+      } else if (current >= BYTES && current <= 0x5f) {
+        const res = this.bytesIter();
+        if (!res.ok()) return res;
+        const res2 = sink(res.value);
+        if (!res2.ok()) return res2;
+      } else if (current >= TEXT && current <= 0x7f) {
+        const res = this.strIter();
+        if (!res.ok()) return res;
+        const res2 = sink(res.value);
+        if (!res2.ok()) return res2;
+      } else if (current >= ARRAY && current <= 0x9f) {
+        const len = this.array();
+        if (!len.ok()) return len;
+        const n = len.value;
+        if (n == null) {
+          if (nrounds == 0 && irounds == 0) {
+            stack.push(null);
+          } else if (nrounds < 2) {
+            irounds = add(irounds, 1);
+          } else {
+            for (let i = 0; i < irounds; i++) {
+              stack.push(null);
+            }
+            stack.push(sub(nrounds, 1));
+            stack.push(null);
+            nrounds = 0;
+            irounds = 0;
+          }
+        } else if (n == 0) {
+          // do nothing
+        } else {
+          if (nrounds == 0 && irounds == 0) {
+            stack.push(n);
+          } else {
+            nrounds = add(nrounds, n);
+          }
+        }
+      } else if (current >= MAP && current <= 0xbf) {
+        return err(new Error("self.map() is not implemented yet"));
+        // match self.map()? {
+        //                 Some(0) => {}
+        //                 Some(n) =>
+        //                     if nrounds == 0 && irounds == 0 {
+        //                         stack.push(Some(n.saturating_mul(2)))
+        //                     } else {
+        //                         nrounds = nrounds.saturating_add(n.saturating_mul(2))
+        //                     }
+        //                 None =>
+        //                     if nrounds == 0 && irounds == 0 {
+        //                         stack.push(None)
+        //                     } else if nrounds < 2 {
+        //                         irounds = irounds.saturating_add(1)
+        //                     } else {
+        //                         for _ in 0 .. irounds {
+        //                             stack.push(None)
+        //                         }
+        //                         stack.push(Some(nrounds - 1));
+        //                         stack.push(None);
+        //                         nrounds = 0;
+        //                         irounds = 0
+        //                     }
+        //             }
+      } else if (current >= TAGGED && current <= 0xdb) {
+        let p = this.globalPos;
+        let nr = this.read();
+        if (!nr.ok()) return nr;
+        const n = nr.value;
+        const r = this.unsigned(infoOf(n), p);
+        if (!r.ok()) return r;
+        continue;
+      } else if (current >= SIMPLE && current <= 0xfb) {
+        let p = this.globalPos;
+        let nr = this.read();
+        if (!nr.ok()) return nr;
+        const n = nr.value;
+        const r = this.unsigned(infoOf(n), p);
+        if (!r.ok()) return r;
+      } else if (current === BREAK) {
+        let r = this.read();
+        if (!r.ok()) return r;
+        if (nrounds == 0 && irounds == 0) {
+          if (stack[stack.length - 1] == null) {
+            stack.pop();
+          }
+        } else {
+          irounds = sub(irounds, 1);
+        }
+      } else {
+        return err(
+          new TypeMismatchError(
+            this.typeOfOrUnknown(current),
+            this.globalPos,
+            "unknow type"
+          )
+        );
+      }
+
+      if (nrounds == 0 && irounds == 0) {
+        while (
+          stack.length > 0 &&
+          (stack[stack.length - 1] === 0 || stack[stack.length - 1] === 0n)
+        ) {
+          stack.pop();
+        }
+        if (stack.length <= 0) {
+          break;
+        }
+        const last = stack[stack.length - 1];
+        if (last == null) {
+          // do nothing
+        } else {
+          stack[stack.length - 1] = sub(last, 1);
+        }
+      } else {
+        nrounds = sub(nrounds, 1);
+      }
+    }
+
+    return ok(this);
+    // Ok(())
+  }
 
   /** Begin decoding an array.
    *
@@ -562,6 +752,40 @@ export class Decoder<R extends IReader> implements IDecoder {
     const len = this.array();
     if (!len.ok()) return len;
     return ok(new ArrayIter(this, len.value, item));
+  }
+  strIter(): Result<StrIter> {
+    return err(new Error("decoder.strIter() not implemented yet"));
+    // let p = self.pos;
+    //     let b = self.read()?;
+    //     if BYTES != type_of(b) {
+    //         return Err(Error::type_mismatch(self.type_of(b)?)
+    //             .with_message("expected bytes")
+    //             .at(p))
+    //     }
+    //     match info_of(b) {
+    //         31 => Ok(BytesIter { decoder: self, len: None }),
+    //         n  => {
+    //             let len = u64_to_usize(self.unsigned(n, p)?, p)?;
+    //             Ok(BytesIter { decoder: self, len: Some(len) })
+    //         }
+    //     }
+  }
+  bytesIter(): Result<BytesIter> {
+    return err(new Error("decoder.bytesIter() not implemented yet"));
+    // let p = self.pos;
+    //     let b = self.read()?;
+    //     if BYTES != type_of(b) {
+    //         return Err(Error::type_mismatch(self.type_of(b)?)
+    //             .with_message("expected bytes")
+    //             .at(p))
+    //     }
+    //     match info_of(b) {
+    //         31 => Ok(BytesIter { decoder: self, len: None }),
+    //         n  => {
+    //             let len = u64_to_usize(self.unsigned(n, p)?, p)?;
+    //             Ok(BytesIter { decoder: self, len: Some(len) })
+    //         }
+    //     }
   }
 
   private typeOf(b: number): Result<Type | null> {

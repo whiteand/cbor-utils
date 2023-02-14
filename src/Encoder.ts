@@ -105,6 +105,11 @@ export class Encoder<W extends IWriter> implements IEncoder {
   beginMap(): Result<this> {
     return this.put(new Uint8Array([0xbf]));
   }
+  null(): Result<this> {
+    // self.put(&[SIMPLE | 22])
+    return this.put(new Uint8Array([22 | SIMPLE]));
+  }
+
   end(): Result<this> {
     return this.put(new Uint8Array([0xff]));
   }
