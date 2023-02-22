@@ -42,6 +42,13 @@ export function fromUtf8(utf8: Numbers): Result<string> {
     const res = decoder.decode(bytes);
     return ok(res);
   } catch (error) {
-    return err(error);
+    if (error instanceof Error) {
+      return err(error);
+    }
+    return err(
+      Object.assign(new Error("Unknown error during utf8 decoding"), {
+        cause: error,
+      })
+    );
   }
 }
