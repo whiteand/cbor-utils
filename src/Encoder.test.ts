@@ -87,4 +87,13 @@ describe("Encoder", () => {
     );
     expect(bs2).toEqual(new Uint8Array([246]));
   });
+  it("properly encodes strings", () => {
+    const bs = encode((e) => e.str("hello world"));
+    expect(bs).toEqual(
+      new Uint8Array([
+        107, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100,
+      ])
+    );
+    expect(decode(bs, (d) => d.str()).unwrap()).toEqual("hello world");
+  });
 });

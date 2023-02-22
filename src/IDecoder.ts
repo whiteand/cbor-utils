@@ -24,6 +24,7 @@ export interface IDecoder {
     item: (d: IDecoder) => Result<T>
   ): Result<Iterator<Result<T>> & Iterable<Result<T>>>;
   strIter(): Result<Iterator<Result<string>> & Iterable<Result<string>>>;
+  str(): Result<string>;
   bytesIter(
     item: (d: IDecoder) => Result<Uint8Array>
   ): Result<Iterator<Result<Uint8Array>> & Iterable<Result<Uint8Array>>>;

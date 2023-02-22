@@ -13,6 +13,7 @@ export interface IEncoder {
   i32(n: number): Result<this>;
   i64(n: number | bigint): Result<this>;
   int(n: number | bigint): Result<this>;
+  str(x: string): Result<this>;
   bytes(bytes: Uint8Array): Result<this>;
   array(len: number | bigint): Result<this>;
   beginArray(): Result<this>;

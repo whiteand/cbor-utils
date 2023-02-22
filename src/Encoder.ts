@@ -1,8 +1,9 @@
 import { ok, Result } from "resultra";
-import { ARRAY, BYTES, SIGNED, SIMPLE } from "./constants";
+import { ARRAY, BYTES, SIGNED, SIMPLE, TEXT } from "./constants";
 import { IEncoder } from "./IEncoder";
 import { IWriter, u8 } from "./types";
 import { u16ToBeBytes, u32ToBeBytes, u64ToBytes } from "./utils";
+import { utf8 } from "./utils/utf8";
 
 export class Encoder<W extends IWriter> implements IEncoder {
   constructor(private readonly writer: W) {}
@@ -142,5 +143,13 @@ export class Encoder<W extends IWriter> implements IEncoder {
     return value == null
       ? this.null()
       : encodeNotNull(this, value).map(() => this);
+  }
+  str(text: string): Result<this> {
+    const bytes = new Uint8Array(utf8(text));
+    let result = this.typeLen(TEXT, BigInt(bytes.length));
+    if (!result.ok()) {
+      return result;
+    }
+    return this.put(bytes);
   }
 }

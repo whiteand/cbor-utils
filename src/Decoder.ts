@@ -21,6 +21,7 @@ import { TypeMismatchError } from "./TypeMismatchError";
 import { IReader } from "./types";
 import { typeToStr } from "./typeToStr";
 import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
+import { fromUtf8 } from "./utils/utf8";
 
 function sink(x: Iterator<Result<unknown>>): Result<null> {
   while (true) {
@@ -753,6 +754,34 @@ export class Decoder<R extends IReader> implements IDecoder {
     if (!len.ok()) return len;
     return ok(new ArrayIter(this, len.value, item));
   }
+  str(): Result<string> {
+    let p = this.globalPos;
+    let marker = this.read();
+    if (!marker.ok()) return marker;
+    const b = marker.value;
+    if (TEXT !== typeOf(b) || infoOf(b) === 31) {
+      return err(
+        new TypeMismatchError(
+          this.typeOfOrUnknown(b),
+          p,
+          "expected text (definite length)"
+        )
+      );
+    }
+    const nRes = this.unsigned(infoOf(b), p);
+    if (!nRes.ok()) return nRes;
+    const n = nRes.value;
+    const d = this.readSlice(n);
+    if (!d.ok()) return d;
+
+    const strResult = fromUtf8(d.value);
+    if (strResult.ok()) return strResult;
+
+    return err(
+      new TypeMismatchError(this.typeOfOrUnknown(b), p, "Invalid utf8 string")
+    );
+  }
+
   strIter(): Result<StrIter> {
     return err(new Error("decoder.strIter() not implemented yet"));
     // let p = self.pos;
