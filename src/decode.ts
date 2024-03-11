@@ -6,7 +6,7 @@ import { toString } from "./toString";
 
 export function decode<R>(
   bytes: Uint8Array,
-  cb: (d: IDecoder) => Result<R>
+  cb: (d: IDecoder<Uint8ArrayReader>) => Result<R>
 ): Result<R> {
   const decoder = new Decoder(new Uint8ArrayReader(bytes));
   try {

@@ -2,13 +2,13 @@ import { Result } from "resultra";
 import { Type } from "./Type";
 import { IReader } from "./types";
 
-export interface IDecoder {
+export interface IDecoder<R extends IReader = IReader> {
   position(): number;
   read(): Result<number>;
   peek(): Result<number>;
   current(): number | null;
   bool(): Result<boolean>;
-  getReader(): IReader;
+  getReader(): R;
   u8(): Result<number>;
   u16(): Result<number>;
   u32(): Result<number>;
