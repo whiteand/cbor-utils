@@ -125,35 +125,6 @@ export class Decoder<R extends IReader> implements IDecoder {
     return ok(result.value);
   }
 
-  peekSlice(sizeParam: number | bigint): Result<Uint8Array> {
-    if (sizeParam < 0) {
-      return err(new Error("negative size"));
-    }
-    const size = Number(sizeParam);
-    if (!Number.isSafeInteger(size)) {
-      return err(new Error("size is too big"));
-    }
-    this.loadMore(this.pos + size - this.bufSize);
-
-    if (this.pos + size <= this.bufSize) {
-      return ok(this.buffer.subarray(this.pos, this.pos + size));
-    }
-
-    return err(new EndOfInputError());
-  }
-  skipSlice(sizeParam: number | bigint): Result<number> {
-    if (sizeParam < 0) {
-      return err(new Error("negative size"));
-    }
-    const size = Number(sizeParam);
-    if (!Number.isSafeInteger(size)) {
-      return err(new Error("size is too big"));
-    }
-
-    const r = this.readSlice(sizeParam);
-
-    return r.map((r) => r.length);
-  }
   readSlice(sizeParam: number | bigint): Result<Uint8Array> {
     if (sizeParam < 0) {
       return err(new Error("negative size"));
