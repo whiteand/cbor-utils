@@ -11,7 +11,7 @@ export class Encoder<W extends IWriter> implements IEncoder {
   getWriter(): W {
     return this.writer;
   }
-  private put(bytes: Uint8Array): Result<this> {
+  put(bytes: Uint8Array): Result<this> {
     let written = 0;
     while (written < bytes.length) {
       const writeResult = this.writer.write(bytes.subarray(written));

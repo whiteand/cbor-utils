@@ -105,7 +105,7 @@ export class Decoder<R extends IReader> implements IDecoder {
     return ok(b);
   }
 
-  private readSlice(sizeParam: number | bigint) {
+  readSlice(sizeParam: number | bigint) {
     if (sizeParam < 0) {
       return err(new Error("negative size"));
     }
