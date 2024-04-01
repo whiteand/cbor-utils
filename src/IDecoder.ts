@@ -18,6 +18,8 @@ export interface IDecoder<R extends IReader = IReader> {
   i32(): Result<number>;
   int(): Result<number | bigint>;
   i64(): Result<number | bigint>;
+  peekSlice(size: number | bigint): Result<Uint8Array>;
+  skipSlice(size: number | bigint): Result<number>;
   bytes(): Result<Uint8Array>;
   array(): Result<bigint | number | null>;
   arrayIter<T>(

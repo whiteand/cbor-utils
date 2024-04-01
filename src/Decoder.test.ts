@@ -1291,4 +1291,52 @@ describe("Decoder", () => {
     expect(numberOrNull.ok()).toBe(true);
     expect(numberOrNull.unwrap()).toBe(15);
   });
+  it("peekSlice works", () => {
+    const bs = new Uint8Array([1, 2, 3, 4, 5]);
+    const decoder = new Decoder(new Uint8ArrayReader(bs), { bufferSize: 2 });
+    const a = decoder.read();
+    expect(a.ok() && a.value).toBe(1);
+    const b = decoder.peekSlice(3);
+    expect(b.ok() && b.value).toEqual(new Uint8Array([2, 3, 4]));
+    const c = decoder.read();
+    expect(c.ok() && c.value).toBe(2);
+  });
+  it("peekSlice works without additional allocations when it can", () => {
+    const bs = new Uint8Array([1, 2, 3, 4, 5]);
+    const decoder = new Decoder(new Uint8ArrayReader(bs), { bufferSize: 3 });
+    const a = decoder.read();
+    expect(a.ok() && a.value).toBe(1);
+    const b = decoder.peekSlice(2);
+    expect(b.ok() && b.value).toEqual(new Uint8Array([2, 3]));
+    const c = decoder.read();
+    expect(c.ok() && c.value).toBe(2);
+  });
+  it("peekSlice fails when not enough bytes", () => {
+    const bs = new Uint8Array([1, 2, 3]);
+    const decoder = new Decoder(new Uint8ArrayReader(bs), { bufferSize: 2 });
+    const a = decoder.read();
+    expect(a.ok() && a.value).toBe(1);
+    const b = decoder.peekSlice(3);
+    expect(!b.ok()).toBe(true);
+    expect(!b.ok() && b.error).toMatchInlineSnapshot("[Error: End of input]");
+    const c = decoder.read();
+    expect(c.ok() && c.value).toBe(2);
+  });
+  it("skipSlice works", () => {
+    const bs = new Uint8Array([1, 2, 3]);
+    const decoder = new Decoder(new Uint8ArrayReader(bs), { bufferSize: 2 });
+    const a = decoder.read();
+    expect(a.ok() && a.value).toBe(1);
+    decoder.skipSlice(1);
+    const b = decoder.read();
+    expect(b.ok() && b.value).toBe(3);
+  });
+  it("skipBytes fails when not enough bytes to skip", () => {
+    const bs = new Uint8Array([1, 2, 3]);
+    const decoder = new Decoder(new Uint8ArrayReader(bs), { bufferSize: 2 });
+    const a = decoder.read();
+    expect(a.ok() && a.value).toBe(1);
+    const r = decoder.skipSlice(5);
+    expect(!r.ok() && r.error).toMatchInlineSnapshot("[Error: End of input]");
+  });
 });

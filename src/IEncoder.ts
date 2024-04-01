@@ -4,6 +4,7 @@ import { IWriter } from "./types";
 export interface IEncoder {
   getWriter(): IWriter;
   bool(b: boolean): Result<this>;
+  put(bytes: Uint8Array): Result<this>;
   u8(n: number): Result<this>;
   u16(n: number): Result<this>;
   u32(n: number): Result<this>;

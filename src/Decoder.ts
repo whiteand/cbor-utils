@@ -105,7 +105,27 @@ export class Decoder<R extends IReader> implements IDecoder {
     return ok(b);
   }
 
-  readSlice(sizeParam: number | bigint) {
+  private loadMore(toRead: number): Result<number> {
+    if (toRead <= 0) return ok(0);
+    if (this.buffer.length >= this.bufSize + toRead) {
+      const rest = this.buffer.subarray(this.bufSize, this.bufSize + toRead);
+      const result = this.reader.read(rest);
+      if (!result.ok()) return result;
+      this.bufSize += result.value;
+      return ok(result.value);
+    }
+    const newBufferSize = this.bufSize + toRead;
+    const newBuffer = new Uint8Array(newBufferSize);
+    newBuffer.set(this.buffer);
+    const restBuffer = newBuffer.subarray(this.bufSize, this.bufSize + toRead);
+    const result = this.reader.read(restBuffer);
+    if (!result.ok()) return result;
+    this.bufSize += result.value;
+    this.buffer = newBuffer;
+    return ok(result.value);
+  }
+
+  peekSlice(sizeParam: number | bigint): Result<Uint8Array> {
     if (sizeParam < 0) {
       return err(new Error("negative size"));
     }
@@ -113,13 +133,42 @@ export class Decoder<R extends IReader> implements IDecoder {
     if (!Number.isSafeInteger(size)) {
       return err(new Error("size is too big"));
     }
-    const res = new Uint8Array(size);
+    this.loadMore(this.pos + size - this.bufSize);
+
     if (this.pos + size <= this.bufSize) {
-      res.set(this.buffer.subarray(this.pos, this.pos + size));
+      return ok(this.buffer.subarray(this.pos, this.pos + size));
+    }
+
+    return err(new EndOfInputError());
+  }
+  skipSlice(sizeParam: number | bigint): Result<number> {
+    if (sizeParam < 0) {
+      return err(new Error("negative size"));
+    }
+    const size = Number(sizeParam);
+    if (!Number.isSafeInteger(size)) {
+      return err(new Error("size is too big"));
+    }
+
+    const r = this.readSlice(sizeParam);
+
+    return r.map((r) => r.length);
+  }
+  readSlice(sizeParam: number | bigint): Result<Uint8Array> {
+    if (sizeParam < 0) {
+      return err(new Error("negative size"));
+    }
+    const size = Number(sizeParam);
+    if (!Number.isSafeInteger(size)) {
+      return err(new Error("size is too big"));
+    }
+    if (this.pos + size <= this.bufSize) {
+      let subarray = this.buffer.subarray(this.pos, this.pos + size);
       this.pos += size;
       this.globalPos += size;
-      return ok(res);
+      return ok(subarray);
     }
+    const res = new Uint8Array(size);
     let i = 0;
     while (i < size) {
       const r = this.read();
