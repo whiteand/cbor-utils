@@ -8,7 +8,9 @@ export function decode<R>(
   bytes: Uint8Array,
   cb: (d: IDecoder<Uint8ArrayReader>) => Result<R>
 ): Result<R> {
-  const decoder = new Decoder(new Uint8ArrayReader(bytes));
+  const decoder = new Decoder(new Uint8ArrayReader(bytes), {
+    bufferSize: bytes.byteLength,
+  });
   try {
     const result = cb(decoder);
     return result;
