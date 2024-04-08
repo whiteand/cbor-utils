@@ -22,14 +22,14 @@ export interface IDecoder<R extends IReader = IReader> {
   bytes(): Result<Uint8Array>;
   array(): Result<bigint | number | null>;
   arrayIter<T>(
-    item: (d: IDecoder) => Result<T>
+    item: (d: IDecoder<R>) => Result<T>
   ): Result<Iterator<Result<T>> & Iterable<Result<T>>>;
   strIter(): Result<Iterator<Result<string>> & Iterable<Result<string>>>;
   str(): Result<string>;
   bytesIter(
-    item: (d: IDecoder) => Result<Uint8Array>
+    item: (d: IDecoder<R>) => Result<Uint8Array>
   ): Result<Iterator<Result<Uint8Array>> & Iterable<Result<Uint8Array>>>;
   peekType(): Result<Type | null>;
   skip(): Result<this>;
-  nullable<T>(item: (d: IDecoder) => Result<T>): Result<T | null>;
+  nullable<T>(item: (d: IDecoder<R>) => Result<T>): Result<T | null>;
 }

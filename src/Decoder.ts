@@ -60,7 +60,7 @@ export function typeResultToStr(result: TypeResult): string {
   return result.known ? typeToStr(result.type) : `unknown type ${result.type}`;
 }
 
-export class Decoder<R extends IReader> implements IDecoder {
+export class Decoder<R extends IReader> implements IDecoder<R> {
   private reader: R;
   private buffer: Uint8Array;
   private bufSize: number;
@@ -769,7 +769,7 @@ export class Decoder<R extends IReader> implements IDecoder {
     }
   }
 
-  arrayIter<T>(item: (d: IDecoder) => Result<T>): Result<ArrayIter<T>> {
+  arrayIter<T>(item: (d: IDecoder<R>) => Result<T>): Result<ArrayIter<T>> {
     const len = this.array();
     if (!len.ok()) return len;
     return ok(new ArrayIter(this, len.value, item));
@@ -927,7 +927,7 @@ export class Decoder<R extends IReader> implements IDecoder {
     }
     return ok(null);
   }
-  nullable<T>(item: (d: IDecoder) => Result<T>): Result<T | null> {
+  nullable<T>(item: (d: IDecoder<R>) => Result<T>): Result<T | null> {
     const type = this.peekType();
     if (!type.ok()) return type;
     if (type.value === Type.Null) {
