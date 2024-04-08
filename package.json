@@ -1,6 +1,6 @@
 {
   "name": "cbor-utils",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "CBOR encoder and decoder classes. Analogue to minicbor from Rust",
   "main": "dist/index.js",
   "scripts": {
