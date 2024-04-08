@@ -22,6 +22,7 @@ import { IReader } from "./types";
 import { typeToStr } from "./typeToStr";
 import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
 import { fromUtf8 } from "./utils/utf8";
+import { Uint8ArrayReader } from "./defaults/Uint8ArrayReader";
 
 function sink(x: Iterator<Result<unknown>>): Result<null> {
   while (true) {
@@ -60,6 +61,14 @@ export function typeResultToStr(result: TypeResult): string {
   return result.known ? typeToStr(result.type) : `unknown type ${result.type}`;
 }
 
+function getDefaultBufferSize<R extends IReader>(reader: R) {
+  if (reader instanceof Uint8ArrayReader) {
+    return reader.byteLength;
+  }
+
+  return 1024;
+}
+
 export class Decoder<R extends IReader> implements IDecoder<R> {
   private reader: R;
   private buffer: Uint8Array;
@@ -67,9 +76,10 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
   private pos: number;
   private globalPos: number;
   private currentByte: number | null;
-  constructor(reader: R, { bufferSize }: { bufferSize?: number } = {}) {
+  constructor(reader: R, options: { bufferSize?: number } = {}) {
     this.reader = reader;
-    this.buffer = new Uint8Array(bufferSize || 1024);
+    let bufferSize = options.bufferSize ?? getDefaultBufferSize(reader);
+    this.buffer = new Uint8Array(bufferSize);
     this.pos = 0;
     this.bufSize = 0;
     this.globalPos = 0;
@@ -103,26 +113,6 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     this.pos += 1;
 
     return ok(b);
-  }
-
-  private loadMore(toRead: number): Result<number> {
-    if (toRead <= 0) return ok(0);
-    if (this.buffer.length >= this.bufSize + toRead) {
-      const rest = this.buffer.subarray(this.bufSize, this.bufSize + toRead);
-      const result = this.reader.read(rest);
-      if (!result.ok()) return result;
-      this.bufSize += result.value;
-      return ok(result.value);
-    }
-    const newBufferSize = this.bufSize + toRead;
-    const newBuffer = new Uint8Array(newBufferSize);
-    newBuffer.set(this.buffer);
-    const restBuffer = newBuffer.subarray(this.bufSize, this.bufSize + toRead);
-    const result = this.reader.read(restBuffer);
-    if (!result.ok()) return result;
-    this.bufSize += result.value;
-    this.buffer = newBuffer;
-    return ok(result.value);
   }
 
   readSlice(sizeParam: number | bigint): Result<Uint8Array> {

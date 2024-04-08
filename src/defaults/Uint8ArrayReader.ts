@@ -15,6 +15,9 @@ export class Uint8ArrayReader implements IReader, ISliceReader, IWriter {
       this.totalLength += chunks[i].length;
     }
   }
+  get byteLength(): number {
+    return this.totalLength;
+  }
   write(data: Uint8Array): Result<number> {
     this.chunks.push(data);
     this.totalLength += data.length;
