@@ -134,7 +134,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       return err(new Error("size is too big"));
     }
     if (this.pos + size <= this.bufSize) {
-      let subarray = this.buffer.subarray(this.pos, this.pos + size);
+      let subarray = this.buffer.slice(this.pos, this.pos + size);
       this.pos += size;
       this.globalPos += size;
       return ok(subarray);
