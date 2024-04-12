@@ -1,15 +1,19 @@
 import { Result } from "resultra";
 
-export interface IWriter {
-  write(data: Uint8Array): Result<number>;
+export interface IWriter<E = Error> {
+  write(data: Uint8Array): Result<number, E>;
 }
 
-export interface IReader {
-  read(data: Uint8Array): Result<number>;
+export interface IReader<E = Error> {
+  read(data: Uint8Array): Result<number, E>;
 }
 
-export interface ISliceReader {
-  readSlice(from: number, to: number, target?: Uint8Array): Result<Uint8Array>;
+export interface ISliceReader<E = Error> {
+  readSlice(
+    from: number,
+    to: number,
+    target?: Uint8Array
+  ): Result<Uint8Array, E>;
 }
 
 export interface IReadAll {

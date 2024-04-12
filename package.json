@@ -40,6 +40,6 @@
     "vitest": "^0.27.3"
   },
   "dependencies": {
-    "resultra": "^0.0.5"
+    "resultra": "^0.1.2"
   }
 }

@@ -1,7 +1,9 @@
 import { ok, Result } from "resultra";
 import { IReader, ISliceReader, IWriter } from "../types";
 
-export class Uint8ArrayReader implements IReader, ISliceReader, IWriter {
+export class Uint8ArrayReader
+  implements IReader<never>, ISliceReader<never>, IWriter<never>
+{
   private chunks: Uint8Array[];
   private chunkIndex: number;
   private chunkOffset: number;
@@ -18,7 +20,7 @@ export class Uint8ArrayReader implements IReader, ISliceReader, IWriter {
   get byteLength(): number {
     return this.totalLength;
   }
-  write(data: Uint8Array): Result<number> {
+  write(data: Uint8Array): Result<number, never> {
     this.chunks.push(data);
     this.totalLength += data.length;
     return ok(data.length);
@@ -38,7 +40,11 @@ export class Uint8ArrayReader implements IReader, ISliceReader, IWriter {
     return result;
   };
 
-  readSlice(from: number, to: number, target?: Uint8Array): Result<Uint8Array> {
+  readSlice(
+    from: number,
+    to: number,
+    target?: Uint8Array
+  ): Result<Uint8Array, never> {
     if (this.chunks.length <= 0) {
       return ok(target ? target.subarray(0, 0) : new Uint8Array(0));
     }
@@ -81,7 +87,7 @@ export class Uint8ArrayReader implements IReader, ISliceReader, IWriter {
     this.chunkIndex = 0;
     this.chunkOffset = targetOffset;
   }
-  read(data: Uint8Array): Result<number> {
+  read(data: Uint8Array): Result<number, never> {
     let i = 0;
     while (i < data.length) {
       const next = this.next();

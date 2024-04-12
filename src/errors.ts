@@ -1,5 +1,17 @@
 import { TypeResult, typeResultToStr } from "./Decoder";
 
+export class EndOfInputError extends Error {
+  constructor() {
+    super("End of input");
+  }
+}
+
+export class InvalidParams extends TypeError {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 export class TypeMismatchError extends Error {
   constructor(
     typeResult: TypeResult,

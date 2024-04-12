@@ -1,12 +1,11 @@
-export { err, ok, Result } from "resultra";
+export { err, ok, Result, OkResult, ErrResult } from "resultra";
 export * from "./decode";
 export * from "./Decoder";
 export * from "./defaults/Uint8ArrayReader";
 export * from "./defaults/Uint8ArrayWriter";
 export * from "./encode";
 export * from "./Encoder";
-export * from "./EndOfInputError";
-export * from "./TypeMismatchError";
+export * from "./errors";
 export * from "./types";
 export * from "./IEncoder";
 export * from "./IDecoder";

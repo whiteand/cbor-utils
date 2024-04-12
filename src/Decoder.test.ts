@@ -7,7 +7,6 @@ import { Uint8ArrayReader } from "./defaults";
 import { encode } from "./encode";
 import { Encoder } from "./Encoder";
 import { Type } from "./Type";
-import { TypeMismatchError } from "./TypeMismatchError";
 
 describe("Decoder", () => {
   it("should be a class", () => {

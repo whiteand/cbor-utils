@@ -13,11 +13,11 @@ import {
   TEXT,
   UNSIGNED,
 } from "./constants";
-import { EndOfInputError } from "./EndOfInputError";
+import { EndOfInputError, InvalidParams } from "./errors";
 import { IDecoder } from "./IDecoder";
 import { tryAs, tryAsSigned } from "./try_as";
 import { Type } from "./Type";
-import { TypeMismatchError } from "./TypeMismatchError";
+import { TypeMismatchError } from "./errors";
 import { IReader } from "./types";
 import { typeToStr } from "./typeToStr";
 import { beBytesToU16, beBytesToU32, beBytesToU64 } from "./utils";
@@ -61,7 +61,7 @@ export function typeResultToStr(result: TypeResult): string {
   return result.known ? typeToStr(result.type) : `unknown type ${result.type}`;
 }
 
-function getDefaultBufferSize<R extends IReader>(reader: R) {
+function getDefaultBufferSize<R extends IReader<any>>(reader: R) {
   if (reader instanceof Uint8ArrayReader) {
     return reader.byteLength;
   }
@@ -69,7 +69,9 @@ function getDefaultBufferSize<R extends IReader>(reader: R) {
   return 1024;
 }
 
-export class Decoder<R extends IReader> implements IDecoder<R> {
+export class Decoder<ReaderError, R extends IReader<ReaderError>>
+  implements IDecoder<ReaderError, R>
+{
   private reader: R;
   private buffer: Uint8Array;
   private bufSize: number;
@@ -86,7 +88,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     this.currentByte = null;
   }
 
-  private loadNextChunk(): Result<number> {
+  private loadNextChunk(): Result<number, ReaderError | EndOfInputError> {
     const result = this.reader.read(this.buffer);
     if (!result.ok()) return result;
     if (result.value <= 0) {
@@ -100,7 +102,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     return this.globalPos;
   }
 
-  read(): Result<u8> {
+  read(): Result<u8, ReaderError | EndOfInputError> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
       if (!res.ok()) return res;
@@ -115,13 +117,15 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     return ok(b);
   }
 
-  readSlice(sizeParam: number | bigint): Result<Uint8Array> {
+  readSlice(
+    sizeParam: number | bigint
+  ): Result<Uint8Array, InvalidParams | ReaderError | EndOfInputError> {
     if (sizeParam < 0) {
-      return err(new Error("negative size"));
+      return err(new InvalidParams("negative size"));
     }
     const size = Number(sizeParam);
     if (!Number.isSafeInteger(size)) {
-      return err(new Error("size is too big"));
+      return err(new InvalidParams("size is too big"));
     }
     if (this.pos + size <= this.bufSize) {
       let subarray = this.buffer.slice(this.pos, this.pos + size);
@@ -139,7 +143,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     }
     return ok(res);
   }
-  peek(): Result<u8> {
+  peek(): Result<u8, EndOfInputError | ReaderError> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
       if (!res.ok()) return res;
@@ -154,7 +158,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     return this.currentByte;
   }
 
-  bool(): Result<boolean> {
+  bool(): Result<boolean, EndOfInputError | ReaderError> {
     const p = this.globalPos;
     const result = this.read();
     if (!result.ok()) return result;
@@ -179,7 +183,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     return this.reader;
   }
 
-  u8(): Result<u8> {
+  u8(): Result<u8, EndOfInputError | ReaderError | TypeMismatchError> {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -217,7 +221,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u8")
     );
   }
-  u16(): Result<number> {
+  u16(): Result<number, EndOfInputError | ReaderError | TypeMismatchError> {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -246,7 +250,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u16")
     );
   }
-  u32(): Result<number> {
+  u32(): Result<number, EndOfInputError | ReaderError | TypeMismatchError> {
     let p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -273,7 +277,10 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u32")
     );
   }
-  u64(): Result<number | bigint> {
+  u64(): Result<
+    number | bigint,
+    EndOfInputError | ReaderError | TypeMismatchError
+  > {
     let p = this.globalPos;
 
     let marker = this.read();
@@ -281,7 +288,13 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     const n = marker.value;
     return this.unsigned(n, p);
   }
-  private unsigned(n: number, p: number): Result<number | bigint> {
+  private unsigned(
+    n: number,
+    p: number
+  ): Result<
+    number | bigint,
+    EndOfInputError | ReaderError | TypeMismatchError
+  > {
     if (n <= 0x17) {
       return ok(n);
     }
@@ -305,7 +318,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       )
     );
   }
-  i8(): Result<number> {
+  i8(): Result<number, EndOfInputError | ReaderError | TypeMismatchError> {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -358,7 +371,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i8")
     );
   }
-  i16(): Result<number> {
+  i16(): Result<number, EndOfInputError | ReaderError | TypeMismatchError> {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -411,7 +424,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i16")
     );
   }
-  i32(): Result<number> {
+  i32(): Result<number, EndOfInputError | ReaderError | TypeMismatchError> {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -463,7 +476,10 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i32")
     );
   }
-  int(): Result<number | bigint> {
+  int(): Result<
+    number | bigint,
+    EndOfInputError | ReaderError | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -510,7 +526,10 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i64")
     );
   }
-  i64(): Result<number | bigint> {
+  i64(): Result<
+    number | bigint,
+    EndOfInputError | ReaderError | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -557,7 +576,10 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i64")
     );
   }
-  bytes(): Result<Uint8Array> {
+  bytes(): Result<
+    Uint8Array,
+    EndOfInputError | ReaderError | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -576,7 +598,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     const n = nRes.value;
     return this.readSlice(n);
   }
-  peekType(): Result<Type | null> {
+  peekType(): Result<Type | null, ReaderError | EndOfInputError> {
     const nextValue = this.peek();
     if (!nextValue.ok()) return nextValue;
     return this.typeOf(nextValue.value);
@@ -584,7 +606,7 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
   /**
    * Skip current value
    */
-  skip(): Result<this> {
+  skip(): Result<this, EndOfInputError | ReaderError> {
     // Unless we encounter indefinite-length arrays or maps inside of regular
     // maps or arrays we only need to count how many more CBOR items we need
     // to skip (initially starting with 1) or how many more break bytes we
@@ -741,7 +763,10 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
    * length. If the length is known it is returned as a `number` or `bigint`, for
    * indefinite arrays `null` is returned.
    */
-  array(): Result<bigint | number | null> {
+  array(): Result<
+    bigint | number | null,
+    ReaderError | EndOfInputError | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -759,12 +784,17 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     }
   }
 
-  arrayIter<T>(item: (d: IDecoder<R>) => Result<T>): Result<ArrayIter<T>> {
+  arrayIter<T, E>(
+    item: (d: this) => Result<T, E>
+  ): Result<
+    ArrayIter<T, E>,
+    ReaderError | EndOfInputError | TypeMismatchError
+  > {
     const len = this.array();
     if (!len.ok()) return len;
     return ok(new ArrayIter(this, len.value, item));
   }
-  str(): Result<string> {
+  str(): Result<string, EndOfInputError | ReaderError | TypeMismatchError> {
     let p = this.globalPos;
     let marker = this.read();
     if (!marker.ok()) return marker;
@@ -827,7 +857,9 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     //     }
   }
 
-  private typeOf(b: number): Result<Type | null> {
+  private typeOf(
+    b: number
+  ): Result<Type | null, ReaderError | EndOfInputError> {
     if (b >= 0 && b <= 0x18) return ok(Type.U8);
     if (b === 0x19) return ok(Type.U16);
     if (b === 0x1a) return ok(Type.U32);
@@ -917,7 +949,9 @@ export class Decoder<R extends IReader> implements IDecoder<R> {
     }
     return ok(null);
   }
-  nullable<T>(item: (d: IDecoder<R>) => Result<T>): Result<T | null> {
+  nullable<T, E>(
+    item: (d: this) => Result<T, E>
+  ): Result<T | null, E | ReaderError | EndOfInputError> {
     const type = this.peekType();
     if (!type.ok()) return type;
     if (type.value === Type.Null) {

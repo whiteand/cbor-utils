@@ -5,13 +5,15 @@ import { IWriter, u8 } from "./types";
 import { u16ToBeBytes, u32ToBeBytes, u64ToBytes } from "./utils";
 import { utf8 } from "./utils/utf8";
 
-export class Encoder<W extends IWriter> implements IEncoder {
+export class Encoder<WriterError, W extends IWriter<WriterError>>
+  implements IEncoder<WriterError, W>
+{
   constructor(private readonly writer: W) {}
 
   getWriter(): W {
     return this.writer;
   }
-  put(bytes: Uint8Array): Result<this> {
+  put(bytes: Uint8Array): Result<this, WriterError> {
     let written = 0;
     while (written < bytes.length) {
       const writeResult = this.writer.write(bytes.subarray(written));
@@ -20,34 +22,34 @@ export class Encoder<W extends IWriter> implements IEncoder {
     }
     return ok(this);
   }
-  bool(bool: boolean): Result<this> {
+  bool(bool: boolean): Result<this, WriterError> {
     return this.put(new Uint8Array([SIMPLE | (bool ? 0x15 : 0x14)]));
   }
-  u8(x: u8): Result<this> {
+  u8(x: u8): Result<this, WriterError> {
     return this.int(x);
   }
-  u16(x: number): Result<this> {
+  u16(x: number): Result<this, WriterError> {
     return this.int(x);
   }
-  u32(x: number): Result<this> {
+  u32(x: number): Result<this, WriterError> {
     return this.int(x);
   }
-  u64(x: number | bigint): Result<this> {
+  u64(x: number | bigint): Result<this, WriterError> {
     return this.int(x);
   }
-  i8(x: u8): Result<this> {
+  i8(x: u8): Result<this, WriterError> {
     return this.int(x);
   }
-  i16(x: number): Result<this> {
+  i16(x: number): Result<this, WriterError> {
     return this.int(x);
   }
-  i32(x: number): Result<this> {
+  i32(x: number): Result<this, WriterError> {
     return this.int(x);
   }
-  i64(x: number | bigint): Result<this> {
+  i64(x: number | bigint): Result<this, WriterError> {
     return this.int(x);
   }
-  int(x: number | bigint): Result<this> {
+  int(x: number | bigint): Result<this, WriterError> {
     if (x >= 0) {
       if (x <= 0x17) {
         return this.put(new Uint8Array([Number(x)]));
@@ -90,7 +92,7 @@ export class Encoder<W extends IWriter> implements IEncoder {
     if (!r.ok()) return r;
     return this.put(u64ToBytes(BigInt(value)));
   }
-  bytes(slice: Uint8Array): Result<this> {
+  bytes(slice: Uint8Array): Result<this, WriterError> {
     let result = this.typeLen(BYTES, BigInt(slice.length));
     if (!result.ok()) return result;
     return this.put(slice);
@@ -98,24 +100,24 @@ export class Encoder<W extends IWriter> implements IEncoder {
   array(len: number | bigint) {
     return this.typeLen(ARRAY, BigInt(len));
   }
-  beginArray(): Result<this> {
+  beginArray(): Result<this, WriterError> {
     return this.put(new Uint8Array([0x9f]));
   }
-  beginBytes(): Result<this> {
+  beginBytes(): Result<this, WriterError> {
     return this.put(new Uint8Array([0x5f]));
   }
-  beginMap(): Result<this> {
+  beginMap(): Result<this, WriterError> {
     return this.put(new Uint8Array([0xbf]));
   }
-  null(): Result<this> {
+  null(): Result<this, WriterError> {
     // self.put(&[SIMPLE | 22])
     return this.put(new Uint8Array([22 | SIMPLE]));
   }
 
-  end(): Result<this> {
+  end(): Result<this, WriterError> {
     return this.put(new Uint8Array([0xff]));
   }
-  private typeLen(type: u8, len: bigint): Result<this> {
+  private typeLen(type: u8, len: bigint): Result<this, WriterError> {
     if (len <= 0x17) {
       return this.put(new Uint8Array([type | Number(len)]));
     }
@@ -136,15 +138,15 @@ export class Encoder<W extends IWriter> implements IEncoder {
     if (!r.ok()) return r;
     return this.put(u64ToBytes(len));
   }
-  nullable<T>(
-    encodeNotNull: (e: IEncoder, value: T) => Result<unknown>,
+  nullable<T, E>(
+    encodeNotNull: (e: this, value: T) => Result<unknown, E>,
     value: T | null
-  ): Result<this> {
+  ): Result<this, WriterError | E> {
     return value == null
       ? this.null()
       : encodeNotNull(this, value).map(() => this);
   }
-  str(text: string): Result<this> {
+  str(text: string): Result<this, WriterError> {
     const bytes = new Uint8Array(utf8(text));
     let result = this.typeLen(TEXT, BigInt(bytes.length));
     if (!result.ok()) {

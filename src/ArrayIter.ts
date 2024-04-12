@@ -2,25 +2,27 @@ import { Result } from "resultra";
 import { BREAK } from "./constants";
 import { Decoder } from "./Decoder";
 
-export class ArrayIter<Item>
-  implements Iterator<Result<Item>>, Iterable<Result<Item>>
+export class ArrayIter<Item, DecodeError = Error>
+  implements
+    Iterator<Result<Item, DecodeError>>,
+    Iterable<Result<Item, DecodeError>>
 {
   private finished: boolean;
   constructor(
-    private decoder: Decoder<any>,
+    private decoder: Decoder<any, any>,
     private len: number | bigint | null,
-    private parseItem: (item: any) => Result<Item>
+    private parseItem: (item: any) => Result<Item, DecodeError>
   ) {
     this.finished = false;
   }
-  [Symbol.iterator](): Iterator<Result<Item>, any, undefined> {
+  [Symbol.iterator](): Iterator<Result<Item, DecodeError>, any, undefined> {
     return this;
   }
-  private finish(): IteratorResult<Result<Item>, unknown> {
+  private finish(): IteratorResult<Result<Item, never>, unknown> {
     this.finished = true;
     return { done: true, value: undefined };
   }
-  next(): IteratorResult<Result<Item>, any> {
+  next(): IteratorResult<Result<Item, DecodeError>, any> {
     if (this.finished || this.len === 0) {
       return { done: true, value: undefined };
     }
