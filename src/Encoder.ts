@@ -5,15 +5,15 @@ import { IWriter, u8 } from "./types";
 import { u16ToBeBytes, u32ToBeBytes, u64ToBytes } from "./utils";
 import { utf8 } from "./utils/utf8";
 
-export class Encoder<WriterError, W extends IWriter<WriterError>>
-  implements IEncoder<WriterError, W>
-{
+type WE<W> = W extends IWriter<infer E> ? E : never;
+
+export class Encoder<W extends IWriter<any>> implements IEncoder<WE<W>, W> {
   constructor(private readonly writer: W) {}
 
   getWriter(): W {
     return this.writer;
   }
-  put(bytes: Uint8Array): Result<this, WriterError> {
+  put(bytes: Uint8Array): Result<this, WE<W>> {
     let written = 0;
     while (written < bytes.length) {
       const writeResult = this.writer.write(bytes.subarray(written));
@@ -22,34 +22,34 @@ export class Encoder<WriterError, W extends IWriter<WriterError>>
     }
     return ok(this);
   }
-  bool(bool: boolean): Result<this, WriterError> {
+  bool(bool: boolean): Result<this, WE<W>> {
     return this.put(new Uint8Array([SIMPLE | (bool ? 0x15 : 0x14)]));
   }
-  u8(x: u8): Result<this, WriterError> {
+  u8(x: u8): Result<this, WE<W>> {
     return this.int(x);
   }
-  u16(x: number): Result<this, WriterError> {
+  u16(x: number): Result<this, WE<W>> {
     return this.int(x);
   }
-  u32(x: number): Result<this, WriterError> {
+  u32(x: number): Result<this, WE<W>> {
     return this.int(x);
   }
-  u64(x: number | bigint): Result<this, WriterError> {
+  u64(x: number | bigint): Result<this, WE<W>> {
     return this.int(x);
   }
-  i8(x: u8): Result<this, WriterError> {
+  i8(x: u8): Result<this, WE<W>> {
     return this.int(x);
   }
-  i16(x: number): Result<this, WriterError> {
+  i16(x: number): Result<this, WE<W>> {
     return this.int(x);
   }
-  i32(x: number): Result<this, WriterError> {
+  i32(x: number): Result<this, WE<W>> {
     return this.int(x);
   }
-  i64(x: number | bigint): Result<this, WriterError> {
+  i64(x: number | bigint): Result<this, WE<W>> {
     return this.int(x);
   }
-  int(x: number | bigint): Result<this, WriterError> {
+  int(x: number | bigint): Result<this, WE<W>> {
     if (x >= 0) {
       if (x <= 0x17) {
         return this.put(new Uint8Array([Number(x)]));
@@ -92,7 +92,7 @@ export class Encoder<WriterError, W extends IWriter<WriterError>>
     if (!r.ok()) return r;
     return this.put(u64ToBytes(BigInt(value)));
   }
-  bytes(slice: Uint8Array): Result<this, WriterError> {
+  bytes(slice: Uint8Array): Result<this, WE<W>> {
     let result = this.typeLen(BYTES, BigInt(slice.length));
     if (!result.ok()) return result;
     return this.put(slice);
@@ -100,24 +100,24 @@ export class Encoder<WriterError, W extends IWriter<WriterError>>
   array(len: number | bigint) {
     return this.typeLen(ARRAY, BigInt(len));
   }
-  beginArray(): Result<this, WriterError> {
+  beginArray(): Result<this, WE<W>> {
     return this.put(new Uint8Array([0x9f]));
   }
-  beginBytes(): Result<this, WriterError> {
+  beginBytes(): Result<this, WE<W>> {
     return this.put(new Uint8Array([0x5f]));
   }
-  beginMap(): Result<this, WriterError> {
+  beginMap(): Result<this, WE<W>> {
     return this.put(new Uint8Array([0xbf]));
   }
-  null(): Result<this, WriterError> {
+  null(): Result<this, WE<W>> {
     // self.put(&[SIMPLE | 22])
     return this.put(new Uint8Array([22 | SIMPLE]));
   }
 
-  end(): Result<this, WriterError> {
+  end(): Result<this, WE<W>> {
     return this.put(new Uint8Array([0xff]));
   }
-  private typeLen(type: u8, len: bigint): Result<this, WriterError> {
+  private typeLen(type: u8, len: bigint): Result<this, WE<W>> {
     if (len <= 0x17) {
       return this.put(new Uint8Array([type | Number(len)]));
     }
@@ -141,12 +141,12 @@ export class Encoder<WriterError, W extends IWriter<WriterError>>
   nullable<T, E>(
     encodeNotNull: (e: this, value: T) => Result<unknown, E>,
     value: T | null
-  ): Result<this, WriterError | E> {
+  ): Result<this, WE<W> | E> {
     return value == null
       ? this.null()
       : encodeNotNull(this, value).map(() => this);
   }
-  str(text: string): Result<this, WriterError> {
+  str(text: string): Result<this, WE<W>> {
     const bytes = new Uint8Array(utf8(text));
     let result = this.typeLen(TEXT, BigInt(bytes.length));
     if (!result.ok()) {

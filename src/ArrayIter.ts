@@ -1,28 +1,37 @@
 import { Result } from "resultra";
 import { BREAK } from "./constants";
 import { Decoder } from "./Decoder";
+import { IReader } from "./types";
+import { EndOfInputError } from "./errors";
 
-export class ArrayIter<Item, DecodeError = Error>
+export class ArrayIter<Item, ReaderError, DecodeError = Error>
   implements
-    Iterator<Result<Item, DecodeError>>,
-    Iterable<Result<Item, DecodeError>>
+    Iterator<Result<Item, DecodeError | ReaderError | EndOfInputError>>,
+    Iterable<Result<Item, DecodeError | ReaderError | EndOfInputError>>
 {
   private finished: boolean;
   constructor(
-    private decoder: Decoder<any, any>,
+    private decoder: Decoder<IReader<ReaderError>>,
     private len: number | bigint | null,
     private parseItem: (item: any) => Result<Item, DecodeError>
   ) {
     this.finished = false;
   }
-  [Symbol.iterator](): Iterator<Result<Item, DecodeError>, any, undefined> {
+  [Symbol.iterator](): Iterator<
+    Result<Item, DecodeError | ReaderError | EndOfInputError>,
+    any,
+    undefined
+  > {
     return this;
   }
   private finish(): IteratorResult<Result<Item, never>, unknown> {
     this.finished = true;
     return { done: true, value: undefined };
   }
-  next(): IteratorResult<Result<Item, DecodeError>, any> {
+  next(): IteratorResult<
+    Result<Item, DecodeError | ReaderError | EndOfInputError>,
+    any
+  > {
     if (this.finished || this.len === 0) {
       return { done: true, value: undefined };
     }

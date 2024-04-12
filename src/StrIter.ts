@@ -1,26 +1,37 @@
 import { Result } from "resultra";
 import { BREAK } from "./constants";
 import { Decoder } from "./Decoder";
+import { IReader } from "./types";
+import { EndOfInputError } from "./errors";
 
-export class StrIter
-  implements Iterator<Result<string>>, Iterable<Result<string>>
+export class StrIter<Err, ReaderError>
+  implements
+    Iterator<Result<string, Err | ReaderError | EndOfInputError>>,
+    Iterable<Result<string, Err | ReaderError | EndOfInputError>>
 {
   private finished: boolean;
   constructor(
-    private decoder: Decoder<any>,
+    private decoder: Decoder<IReader<ReaderError>>,
     private len: number | bigint | null,
-    private parseItem: (item: any) => Result<string>
+    private parseItem: (item: any) => Result<string, Err>
   ) {
     this.finished = false;
   }
-  [Symbol.iterator](): Iterator<Result<string>, any, undefined> {
+  [Symbol.iterator](): Iterator<
+    Result<string, Err | ReaderError | EndOfInputError>,
+    any,
+    undefined
+  > {
     return this;
   }
-  private finish(): IteratorResult<Result<string>, unknown> {
+  private finish(): IteratorResult<Result<string, never>, unknown> {
     this.finished = true;
     return { done: true, value: undefined };
   }
-  next(): IteratorResult<Result<string>, any> {
+  next(): IteratorResult<
+    Result<string, Err | ReaderError | EndOfInputError | EndOfInputError>,
+    any
+  > {
     if (this.finished || this.len === 0) {
       return { done: true, value: undefined };
     }

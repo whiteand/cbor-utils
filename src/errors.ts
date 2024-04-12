@@ -1,5 +1,25 @@
 import { TypeResult, typeResultToStr } from "./Decoder";
 
+export class DecodeRuntimeError extends Error {
+  constructor(message: string, error: unknown) {
+    super(`error during decode: ${message}`, {
+      cause: error,
+    });
+  }
+}
+
+export class BufferOverflowError extends Error {
+  constructor() {
+    super("Buffer overflow");
+  }
+}
+
+export class NotImplementedError<const M extends string> extends Error {
+  constructor(public readonly methodPath: M) {
+    super(`${methodPath} is not implemented yet`);
+  }
+}
+
 export class EndOfInputError extends Error {
   constructor() {
     super("End of input");

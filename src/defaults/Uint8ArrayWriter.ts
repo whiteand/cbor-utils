@@ -1,4 +1,5 @@
 import { err, ok, Result } from "resultra";
+import { BufferOverflowError } from "../errors";
 import { IWriter } from "../types";
 
 function getNewCapacity(oldCapacity: number): number {
@@ -6,13 +7,8 @@ function getNewCapacity(oldCapacity: number): number {
 }
 
 const DEFAULT_OPTIONS = { growable: false };
-export class BufferOverflowError extends Error {
-  constructor() {
-    super("Buffer overflow");
-  }
-}
 
-export class Uint8ArrayWriter implements IWriter {
+export class Uint8ArrayWriter implements IWriter<BufferOverflowError> {
   private buffer: Uint8Array;
   private size: number;
   private growable: boolean;
@@ -24,7 +20,7 @@ export class Uint8ArrayWriter implements IWriter {
     this.size = 0;
     this.growable = options.growable === true;
   }
-  write = (data: Uint8Array): Result<number> => {
+  write = (data: Uint8Array): Result<number, BufferOverflowError> => {
     if (data.length <= 0) return ok(0);
 
     if (this.buffer.length >= this.size + data.length) {

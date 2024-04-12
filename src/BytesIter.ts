@@ -1,26 +1,40 @@
 import { Result } from "resultra";
 import { BREAK } from "./constants";
 import { Decoder } from "./Decoder";
+import { EndOfInputError } from "./errors";
+import { IReader } from "./types";
 
-export class BytesIter
-  implements Iterator<Result<Uint8Array>>, Iterable<Result<Uint8Array>>
+export class BytesIter<Err, ReaderError>
+  implements
+    Iterator<Result<Uint8Array, Err | ReaderError | EndOfInputError>>,
+    Iterable<Result<Uint8Array, Err | ReaderError | EndOfInputError>>
 {
   private finished: boolean;
   constructor(
-    private decoder: Decoder<any>,
+    private decoder: Decoder<IReader<ReaderError>>,
     private len: number | bigint | null,
-    private parseItem: (item: any) => Result<Uint8Array>
+    private parseItem: (item: any) => Result<Uint8Array, Err>
   ) {
     this.finished = false;
   }
-  [Symbol.iterator](): Iterator<Result<Uint8Array>, any, undefined> {
+  [Symbol.iterator](): Iterator<
+    Result<Uint8Array, Err | ReaderError | EndOfInputError>,
+    any,
+    undefined
+  > {
     return this;
   }
-  private finish(): IteratorResult<Result<Uint8Array>, unknown> {
+  private finish(): IteratorResult<
+    Result<Uint8Array, Err | ReaderError | EndOfInputError>,
+    unknown
+  > {
     this.finished = true;
     return { done: true, value: undefined };
   }
-  next(): IteratorResult<Result<Uint8Array>, any> {
+  next(): IteratorResult<
+    Result<Uint8Array, Err | ReaderError | EndOfInputError>,
+    any
+  > {
     if (this.finished || this.len === 0) {
       return { done: true, value: undefined };
     }

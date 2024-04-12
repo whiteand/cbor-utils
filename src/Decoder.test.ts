@@ -1275,7 +1275,7 @@ describe("Decoder", () => {
       d.skip().unwrap(); // undefined array
     }).not.toThrow();
     expect(() => d.skip().unwrap()).toThrowErrorMatchingInlineSnapshot(
-      '"End of input"'
+      `[Error: End of input]`
     );
   });
   it("correctly decodes nullable null", () => {

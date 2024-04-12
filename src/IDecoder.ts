@@ -52,7 +52,8 @@ export interface IDecoder<
   arrayIter<T, E>(
     item: (d: this) => Result<T, E>
   ): Result<
-    Iterator<Result<T, E>> & Iterable<Result<T, E>>,
+    Iterator<Result<T, E | ReaderError | EndOfInputError>> &
+      Iterable<Result<T, E | ReaderError | EndOfInputError>>,
     ReaderError | EndOfInputError | TypeMismatchError
   >;
   strIter(): Result<Iterator<Result<string>> & Iterable<Result<string>>>;
