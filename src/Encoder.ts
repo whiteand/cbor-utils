@@ -7,7 +7,7 @@ import { utf8 } from "./utils/utf8";
 
 type WE<W> = W extends IWriter<infer E> ? E : never;
 
-export class Encoder<W extends IWriter<any>> implements IEncoder<WE<W>, W> {
+export class Encoder<W extends IWriter<any>> implements IEncoder<W> {
   _INFER_WRITER: W = null as never;
   _INFER_WRITER_ERROR: WE<W> = null as never;
   constructor(private readonly writer: W) {}

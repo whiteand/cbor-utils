@@ -2,12 +2,9 @@ import { Result } from "resultra";
 import { Encoder } from "./Encoder";
 import { IEncoder } from "./IEncoder";
 import { Uint8ArrayWriter } from "./defaults/Uint8ArrayWriter";
-import { BufferOverflowError } from "./errors";
 
 export function encode<E>(
-  cb: (
-    encoder: IEncoder<BufferOverflowError, Uint8ArrayWriter>
-  ) => void | Result<any, E>
+  cb: (encoder: IEncoder<Uint8ArrayWriter>) => void | Result<any, E>
 ): Uint8Array {
   const buffer = new Uint8ArrayWriter(new Uint8Array(1024), { growable: true });
   const encoder = new Encoder(buffer);
