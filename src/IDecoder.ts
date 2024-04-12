@@ -11,7 +11,7 @@ type RE<R extends IReader> = R extends {
   : Error;
 
 export interface IDecoder<
-  ReaderError,
+  ReaderError = unknown,
   R extends IReader<ReaderError> = IReader<ReaderError>
 > {
   position(): number;
