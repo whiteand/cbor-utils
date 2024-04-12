@@ -9,6 +9,7 @@ function getNewCapacity(oldCapacity: number): number {
 const DEFAULT_OPTIONS = { growable: false };
 
 export class Uint8ArrayWriter implements IWriter<BufferOverflowError> {
+  _INFER_ERROR: BufferOverflowError = null as never;
   private buffer: Uint8Array;
   private size: number;
   private growable: boolean;

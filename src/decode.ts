@@ -7,7 +7,7 @@ import { DecodeRuntimeError } from "./errors";
 
 export function decode<R, E>(
   bytes: Uint8Array,
-  cb: (d: IDecoder<never, Uint8ArrayReader>) => Result<R, E>
+  cb: (d: IDecoder<Uint8ArrayReader>) => Result<R, E>
 ): Result<R, E | DecodeRuntimeError> {
   const decoder = new Decoder(new Uint8ArrayReader(bytes), {
     bufferSize: bytes.byteLength,

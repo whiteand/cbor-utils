@@ -1,10 +1,12 @@
 import { Result } from "resultra";
 
 export interface IWriter<E = Error> {
+  _INFER_ERROR: E;
   write(data: Uint8Array): Result<number, E>;
 }
 
 export interface IReader<E = Error> {
+  _INFER_ERROR: E;
   read(data: Uint8Array): Result<number, E>;
 }
 

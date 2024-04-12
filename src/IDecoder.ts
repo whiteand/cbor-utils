@@ -4,66 +4,77 @@ import { IReader } from "./types";
 import { EndOfInputError, InvalidParams } from "./errors";
 import { TypeMismatchError } from "./errors";
 
-type RE<R extends IReader> = R extends {
-  read(...args: any): Result<any, infer E>;
-}
-  ? E
-  : Error;
-
-export interface IDecoder<
-  ReaderError = unknown,
-  R extends IReader<ReaderError> = IReader<ReaderError>
-> {
+export interface IDecoder<R extends IReader<any> = IReader<unknown>> {
+  _INFER_READER: R;
+  _INFER_READER_ERROR: R["_INFER_ERROR"];
   position(): number;
-  read(): Result<number, ReaderError | EndOfInputError>;
-  peek(): Result<number, EndOfInputError | ReaderError>;
+  read(): Result<number, R["_INFER_ERROR"] | EndOfInputError>;
+  peek(): Result<number, EndOfInputError | R["_INFER_ERROR"]>;
   current(): number | null;
-  bool(): Result<boolean, EndOfInputError | ReaderError | TypeMismatchError>;
+  bool(): Result<
+    boolean,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  >;
   getReader(): R;
-  u8(): Result<number, EndOfInputError | ReaderError | TypeMismatchError>;
-  u16(): Result<number, EndOfInputError | ReaderError | TypeMismatchError>;
-  u32(): Result<number, EndOfInputError | ReaderError | TypeMismatchError>;
+  u8(): Result<number, EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError>;
+  u16(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  >;
+  u32(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  >;
   u64(): Result<
     number | bigint,
-    EndOfInputError | ReaderError | TypeMismatchError
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
   >;
-  i8(): Result<number, EndOfInputError | ReaderError | TypeMismatchError>;
-  i16(): Result<number, EndOfInputError | ReaderError | TypeMismatchError>;
-  i32(): Result<number, EndOfInputError | ReaderError | TypeMismatchError>;
+  i8(): Result<number, EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError>;
+  i16(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  >;
+  i32(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  >;
   int(): Result<
     number | bigint,
-    EndOfInputError | ReaderError | TypeMismatchError
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
   >;
   i64(): Result<
     number | bigint,
-    EndOfInputError | ReaderError | TypeMismatchError
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
   >;
   readSlice(
     size: number | bigint
-  ): Result<Uint8Array, InvalidParams | ReaderError | EndOfInputError>;
+  ): Result<Uint8Array, InvalidParams | R["_INFER_ERROR"] | EndOfInputError>;
   bytes(): Result<
     Uint8Array,
-    EndOfInputError | ReaderError | TypeMismatchError
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
   >;
   array(): Result<
     bigint | number | null,
-    ReaderError | EndOfInputError | TypeMismatchError
+    R["_INFER_ERROR"] | EndOfInputError | TypeMismatchError
   >;
   arrayIter<T, E>(
     item: (d: this) => Result<T, E>
   ): Result<
-    Iterator<Result<T, E | ReaderError | EndOfInputError>> &
-      Iterable<Result<T, E | ReaderError | EndOfInputError>>,
-    ReaderError | EndOfInputError | TypeMismatchError
+    Iterator<Result<T, E | R["_INFER_ERROR"] | EndOfInputError>> &
+      Iterable<Result<T, E | R["_INFER_ERROR"] | EndOfInputError>>,
+    R["_INFER_ERROR"] | EndOfInputError | TypeMismatchError
   >;
   strIter(): Result<Iterator<Result<string>> & Iterable<Result<string>>>;
-  str(): Result<string, EndOfInputError | ReaderError | TypeMismatchError>;
+  str(): Result<
+    string,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  >;
   bytesIter(
     item: (d: IDecoder<R>) => Result<Uint8Array>
   ): Result<Iterator<Result<Uint8Array>> & Iterable<Result<Uint8Array>>>;
-  peekType(): Result<Type | null, ReaderError | EndOfInputError>;
-  skip(): Result<this, EndOfInputError | ReaderError>;
+  peekType(): Result<Type | null, R["_INFER_ERROR"] | EndOfInputError>;
+  skip(): Result<this, EndOfInputError | R["_INFER_ERROR"]>;
   nullable<T, E>(
     item: (d: this) => Result<T, E>
-  ): Result<T | null, E | ReaderError | EndOfInputError>;
+  ): Result<T | null, E | R["_INFER_ERROR"] | EndOfInputError>;
 }

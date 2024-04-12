@@ -69,8 +69,10 @@ function getDefaultBufferSize<R extends IReader<any>>(reader: R) {
   return 1024;
 }
 
-type RE<R> = R extends IReader<infer E> ? E : never;
-export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
+type RE<R extends IReader<any>> = R["_INFER_ERROR"];
+export class Decoder<R extends IReader<any>> implements IDecoder<R> {
+  _INFER_READER: R = null as never;
+  _INFER_READER_ERROR: R["_INFER_ERROR"] = null as never;
   private reader: R;
   private buffer: Uint8Array;
   private bufSize: number;
@@ -87,7 +89,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
     this.currentByte = null;
   }
 
-  private loadNextChunk(): Result<number, RE<R> | EndOfInputError> {
+  private loadNextChunk(): Result<number, R["_INFER_ERROR"] | EndOfInputError> {
     const result = this.reader.read(this.buffer);
     if (!result.ok()) return result;
     if (result.value <= 0) {
@@ -101,7 +103,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
     return this.globalPos;
   }
 
-  read(): Result<u8, RE<R> | EndOfInputError> {
+  read(): Result<u8, R["_INFER_ERROR"] | EndOfInputError> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
       if (!res.ok()) return res;
@@ -118,7 +120,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
 
   readSlice(
     sizeParam: number | bigint
-  ): Result<Uint8Array, InvalidParams | RE<R> | EndOfInputError> {
+  ): Result<Uint8Array, InvalidParams | R["_INFER_ERROR"] | EndOfInputError> {
     if (sizeParam < 0) {
       return err(new InvalidParams("negative size"));
     }
@@ -142,7 +144,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
     }
     return ok(res);
   }
-  peek(): Result<u8, EndOfInputError | RE<R>> {
+  peek(): Result<u8, EndOfInputError | R["_INFER_ERROR"]> {
     if (this.pos >= this.bufSize) {
       const res = this.loadNextChunk();
       if (!res.ok()) return res;
@@ -157,7 +159,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
     return this.currentByte;
   }
 
-  bool(): Result<boolean, EndOfInputError | RE<R>> {
+  bool(): Result<boolean, EndOfInputError | R["_INFER_ERROR"]> {
     const p = this.globalPos;
     const result = this.read();
     if (!result.ok()) return result;
@@ -182,7 +184,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
     return this.reader;
   }
 
-  u8(): Result<u8, EndOfInputError | RE<R> | TypeMismatchError> {
+  u8(): Result<u8, EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError> {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -220,7 +222,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u8")
     );
   }
-  u16(): Result<number, EndOfInputError | RE<R> | TypeMismatchError> {
+  u16(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -249,7 +254,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u16")
     );
   }
-  u32(): Result<number, EndOfInputError | RE<R> | TypeMismatchError> {
+  u32(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     let p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -276,7 +284,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected u32")
     );
   }
-  u64(): Result<number | bigint, EndOfInputError | RE<R> | TypeMismatchError> {
+  u64(): Result<
+    number | bigint,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     let p = this.globalPos;
 
     let marker = this.read();
@@ -287,7 +298,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
   private unsigned(
     n: number,
     p: number
-  ): Result<number | bigint, EndOfInputError | RE<R> | TypeMismatchError> {
+  ): Result<
+    number | bigint,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     if (n <= 0x17) {
       return ok(n);
     }
@@ -311,7 +325,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       )
     );
   }
-  i8(): Result<number, EndOfInputError | RE<R> | TypeMismatchError> {
+  i8(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -364,7 +381,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i8")
     );
   }
-  i16(): Result<number, EndOfInputError | RE<R> | TypeMismatchError> {
+  i16(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -417,7 +437,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i16")
     );
   }
-  i32(): Result<number, EndOfInputError | RE<R> | TypeMismatchError> {
+  i32(): Result<
+    number,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -469,7 +492,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i32")
     );
   }
-  int(): Result<number | bigint, EndOfInputError | RE<R> | TypeMismatchError> {
+  int(): Result<
+    number | bigint,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -516,7 +542,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i64")
     );
   }
-  i64(): Result<number | bigint, EndOfInputError | RE<R> | TypeMismatchError> {
+  i64(): Result<
+    number | bigint,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -563,7 +592,10 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
       new TypeMismatchError(this.typeOfOrUnknown(n), p, "expected i64")
     );
   }
-  bytes(): Result<Uint8Array, EndOfInputError | RE<R> | TypeMismatchError> {
+  bytes(): Result<
+    Uint8Array,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     const p = this.globalPos;
     const marker = this.read();
     if (!marker.ok()) return marker;
@@ -582,7 +614,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
     const n = nRes.value;
     return this.readSlice(n);
   }
-  peekType(): Result<Type | null, RE<R> | EndOfInputError> {
+  peekType(): Result<Type | null, R["_INFER_ERROR"] | EndOfInputError> {
     const nextValue = this.peek();
     if (!nextValue.ok()) return nextValue;
     return this.typeOf(nextValue.value);
@@ -592,7 +624,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
    */
   skip(): Result<
     this,
-    EndOfInputError | RE<R> | NotImplementedError<"decoder.map">
+    EndOfInputError | R["_INFER_ERROR"] | NotImplementedError<"decoder.map">
   > {
     // Unless we encounter indefinite-length arrays or maps inside of regular
     // maps or arrays we only need to count how many more CBOR items we need
@@ -752,7 +784,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
    */
   array(): Result<
     bigint | number | null,
-    RE<R> | EndOfInputError | TypeMismatchError
+    R["_INFER_ERROR"] | EndOfInputError | TypeMismatchError
   > {
     const p = this.globalPos;
     const marker = this.read();
@@ -774,14 +806,17 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
   arrayIter<T, E>(
     item: (d: this) => Result<T, E>
   ): Result<
-    ArrayIter<T, RE<R>, E>,
-    RE<R> | EndOfInputError | TypeMismatchError
+    ArrayIter<T, R["_INFER_ERROR"], E>,
+    R["_INFER_ERROR"] | EndOfInputError | TypeMismatchError
   > {
     const len = this.array();
     if (!len.ok()) return len;
     return ok(new ArrayIter(this, len.value, item));
   }
-  str(): Result<string, EndOfInputError | RE<R> | TypeMismatchError> {
+  str(): Result<
+    string,
+    EndOfInputError | R["_INFER_ERROR"] | TypeMismatchError
+  > {
     let p = this.globalPos;
     let marker = this.read();
     if (!marker.ok()) return marker;
@@ -850,7 +885,9 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
     //     }
   }
 
-  private typeOf(b: number): Result<Type | null, RE<R> | EndOfInputError> {
+  private typeOf(
+    b: number
+  ): Result<Type | null, R["_INFER_ERROR"] | EndOfInputError> {
     if (b >= 0 && b <= 0x18) return ok(Type.U8);
     if (b === 0x19) return ok(Type.U16);
     if (b === 0x1a) return ok(Type.U32);
@@ -942,7 +979,7 @@ export class Decoder<R extends IReader<any>> implements IDecoder<RE<R>, R> {
   }
   nullable<T, E>(
     item: (d: this) => Result<T, E>
-  ): Result<T | null, E | RE<R> | EndOfInputError> {
+  ): Result<T | null, E | R["_INFER_ERROR"] | EndOfInputError> {
     const type = this.peekType();
     if (!type.ok()) return type;
     if (type.value === Type.Null) {

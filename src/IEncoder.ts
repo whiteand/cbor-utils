@@ -5,6 +5,8 @@ export interface IEncoder<
   WriterError = unknown,
   Writer extends IWriter<WriterError> = IWriter<WriterError>
 > {
+  _INFER_WRITER_ERROR: WriterError;
+  _INFER_WRITER: Writer;
   getWriter(): Writer;
   bool(b: boolean): Result<this, WriterError>;
   put(bytes: Uint8Array): Result<this, WriterError>;

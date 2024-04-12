@@ -4,6 +4,7 @@ import { IReader, ISliceReader, IWriter } from "../types";
 export class Uint8ArrayReader
   implements IReader<never>, ISliceReader<never>, IWriter<never>
 {
+  _INFER_ERROR: never = null as never;
   private chunks: Uint8Array[];
   private chunkIndex: number;
   private chunkOffset: number;
