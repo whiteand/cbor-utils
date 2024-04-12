@@ -1,7 +1,10 @@
 import { Result } from "resultra";
 import { IWriter } from "./types";
 
-export interface IEncoder<WriterError, Writer extends IWriter<WriterError>> {
+export interface IEncoder<
+  WriterError = unknown,
+  Writer extends IWriter<WriterError> = IWriter<WriterError>
+> {
   getWriter(): Writer;
   bool(b: boolean): Result<this, WriterError>;
   put(bytes: Uint8Array): Result<this, WriterError>;
