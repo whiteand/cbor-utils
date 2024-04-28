@@ -7,7 +7,7 @@ export class EndOfInputError extends Error {
 }
 
 export const EOF = new EndOfInputError();
-export const EOF_ERR = Object.freeze(err(EOF)) as Result<
+export const EOI_ERR = Object.freeze(err(EOF)) as Result<
   never,
   EndOfInputError
 >;

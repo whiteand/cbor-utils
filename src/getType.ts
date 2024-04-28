@@ -1,3 +1,3 @@
 export function getType(marker: number): number {
-  return (marker >> 5) & 255;
+  return (marker >> 5) & 0xff;
 }

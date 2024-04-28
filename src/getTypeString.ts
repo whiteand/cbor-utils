@@ -1,6 +1,15 @@
 import { getType } from "./getType";
 
-const TYPE_TO_STRING = ["number"];
+const TYPE_TO_STRING = [
+  "uint",
+  "negative-int",
+  "bytes",
+  "string",
+  "array",
+  "map",
+  "tag",
+  "special",
+];
 
 export function getTypeString(marker: number): string {
   const ty = getType(marker);
