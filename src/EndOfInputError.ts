@@ -1,13 +1,10 @@
-import { Result, err } from "resultra";
+import { ResultError } from "./ResultError";
 
-export class EndOfInputError extends Error {
+export class EndOfInputError extends ResultError {
   constructor() {
     super("End of input");
   }
 }
 
-export const EOF = new EndOfInputError();
-export const EOI_ERR = Object.freeze(err(EOF)) as Result<
-  never,
-  EndOfInputError
->;
+export const EOI = new EndOfInputError();
+export const EOI_ERR = EOI.err();

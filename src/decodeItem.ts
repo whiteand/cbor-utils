@@ -1,18 +1,14 @@
 import { OkResult, Result, err, ok } from "resultra";
 import { DataItem, Simple, TaggedDataItem } from "./DataItem";
-import { EOI_ERR, EndOfInputError } from "./EndOfInputError";
+import { EOI_ERR } from "./EndOfInputError";
 import { concatBytesOfLength } from "./utils/concatBytes";
 import { InvalidCborError } from "./InvalidCborError";
 import { TypeMismatchError } from "./TypeMismatchError";
 import { getTypeString } from "./getTypeString";
-import { getType } from "./getType";
+import { getType } from "./marker";
 import { Metadata } from "./Metadata";
 import { fromUtf8 } from "./utils/utf8";
-
-export type DecodingError =
-  | EndOfInputError
-  | InvalidCborError
-  | TypeMismatchError;
+import { DecodingError } from "./DecodingError";
 
 type TDecoder<V extends DataItem> = (
   bytes: Uint8Array,
@@ -1060,10 +1056,9 @@ export function decodeItem(
     throw new Error(
       `Cannot decode type: ${type
         .toString(2)
-        .padStart(
-          3,
-          "0",
-        )} with value=${value}. Input: ${Buffer.from(bytes).toString("hex")}`,
+        .padStart(3, "0")} with value=${value}. Input: ${Buffer.from(
+        bytes,
+      ).toString("hex")}`,
     );
   }
   return decoder(bytes, offset, marker, metadata);
