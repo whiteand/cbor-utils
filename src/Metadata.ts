@@ -1,4 +1,4 @@
-import { getType } from "./getType";
+import { getType } from "./marker";
 
 export class Metadata {
   public ty: number;

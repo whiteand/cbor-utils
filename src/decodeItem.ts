@@ -7,6 +7,16 @@ import { TypeMismatchError } from "./TypeMismatchError";
 import { getTypeString } from "./getTypeString";
 import { getType } from "./marker";
 import { Metadata } from "./Metadata";
+import {
+  ARRAY_TYPE_MASK,
+  BYTES_TYPE_MASK,
+  MAP_TYPE_MASK,
+  NEGATIVE_INT_TYPE_MASK,
+  NUMBER_TYPE_MASK,
+  SPECIAL_TYPE_MASK,
+  STRING_TYPE_MASK,
+  TAG_TYPE_MASK,
+} from "./constants";
 import { fromUtf8 } from "./utils/utf8";
 import { DecodingError } from "./DecodingError";
 
@@ -170,7 +180,7 @@ function decodeBigNum(
     return item;
   }
   const innerTy = metadata.getType();
-  if (innerTy !== BYTES_TYPE >> 5) {
+  if (innerTy !== BYTES_TYPE_MASK >> 5) {
     return err(new TypeMismatchError("bytes", getTypeString(innerTy)));
   }
   const bignumBytes = item.value as Uint8Array;
@@ -185,18 +195,17 @@ function decodeBigNum(
   return ok(res);
 }
 
-const TAG_TYPE = 0b11000000;
 for (let i = 0; i < 24; i++) {
-  vTable[TAG_TYPE | i] = decodeSmallIntTagDataItem;
+  vTable[TAG_TYPE_MASK | i] = decodeSmallIntTagDataItem;
 }
 // DATE_TIME in standard format 2013-03-21T20:04:00Z
-vTable[TAG_TYPE | 0] = (bytes, offset, marker, metadata) => {
+vTable[TAG_TYPE_MASK | 0] = (bytes, offset, marker, metadata) => {
   const t = getType(marker);
   if (offset + 2 >= bytes.length) return EOI_ERR;
   let ptr = offset + 1;
   const itemMarker = bytes[ptr++];
   const itemType = getType(itemMarker);
-  if (itemType === STRING_TYPE >> 5) {
+  if (itemType === STRING_TYPE_MASK >> 5) {
     const res = decodeItem(bytes, offset + 1, metadata);
     metadata.setType(t);
     return res;
@@ -206,8 +215,7 @@ vTable[TAG_TYPE | 0] = (bytes, offset, marker, metadata) => {
   );
 };
 // DATE_TIME in unix time
-const NUMBER_TYPE = 0b000_000;
-vTable[TAG_TYPE | 1] = (bytes, offset, marker, metadata) => {
+vTable[TAG_TYPE_MASK | 1] = (bytes, offset, marker, metadata) => {
   const t = getType(marker);
   if (offset + 2 >= bytes.length) return EOI_ERR;
   let ptr = offset + 1;
@@ -215,9 +223,9 @@ vTable[TAG_TYPE | 1] = (bytes, offset, marker, metadata) => {
   const itemType = getType(itemMarker);
   const itemInfo = 0x1f & itemMarker;
   if (
-    itemType === NUMBER_TYPE >> 5 ||
-    itemType === NEGATIVE_INT_TYPE >> 5 ||
-    (itemType === SPECIAL_TYPE >> 5 &&
+    itemType === NUMBER_TYPE_MASK >> 5 ||
+    itemType === NEGATIVE_INT_TYPE_MASK >> 5 ||
+    (itemType === SPECIAL_TYPE_MASK >> 5 &&
       (itemInfo === 25 || itemInfo === 26 || itemInfo === 27))
   ) {
     const res = decodeItem(bytes, offset + 1, metadata);
@@ -229,7 +237,7 @@ vTable[TAG_TYPE | 1] = (bytes, offset, marker, metadata) => {
   );
 };
 // Predefined bignum tag
-vTable[TAG_TYPE | 2] = (
+vTable[TAG_TYPE_MASK | 2] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -241,7 +249,7 @@ vTable[TAG_TYPE | 2] = (
     : decodeBigNum(bytes, offset + 1, bytes[offset + 1], metadata);
 };
 
-vTable[TAG_TYPE | 3] = (
+vTable[TAG_TYPE_MASK | 3] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -272,7 +280,7 @@ vTable[TAG_TYPE | 3] = (
 // 34	text string	base64; see Section 3.4.5.3
 // 36	text string	MIME message; see Section 3.4.5.3
 // 55799	(any)	Self-described CBOR; see Section 3.4.6
-vTable[TAG_TYPE | 24] = (
+vTable[TAG_TYPE_MASK | 24] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -285,7 +293,7 @@ vTable[TAG_TYPE | 24] = (
     case 24: {
       if (offset + 2 >= bytes.length) return EOI_ERR;
       const nextByte = bytes[offset + 2];
-      if (getType(nextByte) !== BYTES_TYPE >> 5) {
+      if (getType(nextByte) !== BYTES_TYPE_MASK >> 5) {
         return err(
           new TypeMismatchError("cbor-bytes", getTypeString(nextByte)),
         );
@@ -309,7 +317,7 @@ vTable[TAG_TYPE | 24] = (
     case 34: {
       if (offset + 2 >= bytes.length) return EOI_ERR;
       const nextByte = bytes[offset + 2];
-      if (getType(nextByte) !== STRING_TYPE >> 5) {
+      if (getType(nextByte) !== STRING_TYPE_MASK >> 5) {
         return err(new TypeMismatchError("string", getTypeString(nextByte)));
       }
       const item = decodeItem(bytes, offset + 2, metadata) as Result<
@@ -334,23 +342,21 @@ vTable[TAG_TYPE | 24] = (
   }
 };
 
-const BYTES_TYPE = 0b01000000;
-
 for (let len = 0; len < 24; len++) {
-  vTable[BYTES_TYPE | len] = (
+  vTable[BYTES_TYPE_MASK | len] = (
     bytes: Uint8Array,
     offset: number,
     marker: number,
     metadata: Metadata,
   ) => {
-    metadata.setType(BYTES_TYPE >> 5);
+    metadata.setType(BYTES_TYPE_MASK >> 5);
     if (offset + len >= bytes.length) return EOI_ERR;
     metadata.setNext(offset + len + 1);
     return ok(bytes.slice(offset + 1, offset + len + 1));
   };
 }
 
-vTable[BYTES_TYPE | 31] = (
+vTable[BYTES_TYPE_MASK | 31] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -367,7 +373,7 @@ vTable[BYTES_TYPE | 31] = (
       break;
     }
     const itemType = getType(bytes[metadata.next]);
-    if (itemType !== BYTES_TYPE >> 5) {
+    if (itemType !== BYTES_TYPE_MASK >> 5) {
       return err(
         new TypeMismatchError("bytes", getTypeString(bytes[metadata.next])),
       );
@@ -387,10 +393,8 @@ vTable[BYTES_TYPE | 31] = (
   return ok(concatBytesOfLength(chunks, totalLength));
 };
 
-const NEGATIVE_INT_TYPE = 0b00100000;
-
 for (let i = 0; i < 24; i++) {
-  vTable[NEGATIVE_INT_TYPE | i] = (
+  vTable[NEGATIVE_INT_TYPE_MASK | i] = (
     bytes: Uint8Array,
     offset: number,
     marker: number,
@@ -400,25 +404,25 @@ for (let i = 0; i < 24; i++) {
     return ok(-1 - i);
   };
 }
-vTable[NEGATIVE_INT_TYPE | 24] = (
+vTable[NEGATIVE_INT_TYPE_MASK | 24] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
   metadata: Metadata,
 ) => {
-  metadata.setType(NEGATIVE_INT_TYPE >> 5);
+  metadata.setType(NEGATIVE_INT_TYPE_MASK >> 5);
 
   if (offset + 1 >= bytes.length) return EOI_ERR;
   metadata.setNext(offset + 2);
   return ok(-1 - bytes[offset + 1]);
 };
-vTable[NEGATIVE_INT_TYPE | 25] = (
+vTable[NEGATIVE_INT_TYPE_MASK | 25] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
   metadata: Metadata,
 ): Result<number, DecodingError> => {
-  metadata.setType(NEGATIVE_INT_TYPE >> 5);
+  metadata.setType(NEGATIVE_INT_TYPE_MASK >> 5);
   let ptr = offset + 1;
   if (ptr >= bytes.length) return EOI_ERR;
   let res = bytes[ptr++];
@@ -427,13 +431,13 @@ vTable[NEGATIVE_INT_TYPE | 25] = (
   metadata.setNext(ptr);
   return ok(-1 - res);
 };
-vTable[NEGATIVE_INT_TYPE | 26] = (
+vTable[NEGATIVE_INT_TYPE_MASK | 26] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
   metadata: Metadata,
 ): Result<number, DecodingError> => {
-  metadata.setType(NEGATIVE_INT_TYPE >> 5);
+  metadata.setType(NEGATIVE_INT_TYPE_MASK >> 5);
   let ptr = offset + 1;
   if (ptr >= bytes.length) return EOI_ERR;
   let res = bytes[ptr++];
@@ -446,13 +450,13 @@ vTable[NEGATIVE_INT_TYPE | 26] = (
   metadata.setNext(ptr);
   return ok(-1 - res);
 };
-vTable[NEGATIVE_INT_TYPE | 27] = (
+vTable[NEGATIVE_INT_TYPE_MASK | 27] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
   metadata: Metadata,
 ): Result<bigint, DecodingError> => {
-  metadata.setType(NEGATIVE_INT_TYPE >> 5);
+  metadata.setType(NEGATIVE_INT_TYPE_MASK >> 5);
   let ptr = offset + 1;
   if (ptr >= bytes.length) return EOI_ERR;
   let res = BigInt(bytes[ptr++]);
@@ -474,7 +478,6 @@ vTable[NEGATIVE_INT_TYPE | 27] = (
   return ok(-1n - res);
 };
 
-const SPECIAL_TYPE = 0b11100000;
 function decodeHalfFloat(
   bytes: Uint8Array,
   offset: number,
@@ -556,23 +559,21 @@ function smallSimple<const T extends number>(value: T): TDecoder<Simple<T>> {
 }
 
 for (let i = 0; i < 20; i++) {
-  vTable[SPECIAL_TYPE | i] = smallSimple(i);
+  vTable[SPECIAL_TYPE_MASK | i] = smallSimple(i);
 }
-vTable[SPECIAL_TYPE | 20] = constant(false);
-vTable[SPECIAL_TYPE | 21] = constant(true);
-vTable[SPECIAL_TYPE | 22] = constant(null);
-vTable[SPECIAL_TYPE | 23] = constant(undefined);
-vTable[SPECIAL_TYPE | 24] = (bytes, offset, marker, metadata) => {
+vTable[SPECIAL_TYPE_MASK | 20] = constant(false);
+vTable[SPECIAL_TYPE_MASK | 21] = constant(true);
+vTable[SPECIAL_TYPE_MASK | 22] = constant(null);
+vTable[SPECIAL_TYPE_MASK | 23] = constant(undefined);
+vTable[SPECIAL_TYPE_MASK | 24] = (bytes, offset, marker, metadata) => {
   if (offset + 1 >= bytes.length) return EOI_ERR;
   const value = bytes[offset + 1];
   metadata.setTypeFromMarker(marker).setNext(offset + 2);
   return ok(new Simple(value));
 };
-vTable[SPECIAL_TYPE | 25] = decodeHalfFloat;
-vTable[SPECIAL_TYPE | 26] = decodeFloat32;
-vTable[SPECIAL_TYPE | 27] = decodeFloat64;
-
-const MAP_TYPE = 0b10100000;
+vTable[SPECIAL_TYPE_MASK | 25] = decodeHalfFloat;
+vTable[SPECIAL_TYPE_MASK | 26] = decodeFloat32;
+vTable[SPECIAL_TYPE_MASK | 27] = decodeFloat64;
 
 function decodeMapU32Len(
   bytes: Uint8Array,
@@ -617,7 +618,7 @@ function decodeMapU64Len(
   return ok(res);
 }
 
-vTable[MAP_TYPE | 0] = (
+vTable[MAP_TYPE_MASK | 0] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -627,7 +628,7 @@ vTable[MAP_TYPE | 0] = (
   return ok(new Map());
 };
 for (let len = 1; len < 24; len++) {
-  vTable[MAP_TYPE | len] = (
+  vTable[MAP_TYPE_MASK | len] = (
     bytes: Uint8Array,
     offset: number,
     marker: number,
@@ -641,7 +642,7 @@ for (let len = 1; len < 24; len++) {
     return res;
   };
 }
-vTable[MAP_TYPE | 24] = (
+vTable[MAP_TYPE_MASK | 24] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -656,7 +657,7 @@ vTable[MAP_TYPE | 24] = (
   metadata.setType(t);
   return res;
 };
-vTable[MAP_TYPE | 25] = (
+vTable[MAP_TYPE_MASK | 25] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -675,7 +676,7 @@ vTable[MAP_TYPE | 25] = (
   metadata.setType(t);
   return res;
 };
-vTable[MAP_TYPE | 26] = (
+vTable[MAP_TYPE_MASK | 26] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -698,7 +699,7 @@ vTable[MAP_TYPE | 26] = (
   metadata.setType(t);
   return res;
 };
-vTable[MAP_TYPE | 27] = (
+vTable[MAP_TYPE_MASK | 27] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -729,10 +730,10 @@ vTable[MAP_TYPE | 27] = (
   metadata.setType(t);
   return res;
 };
-vTable[MAP_TYPE | 28] = invalidCbor(MAP_TYPE | 28);
-vTable[MAP_TYPE | 29] = invalidCbor(MAP_TYPE | 29);
-vTable[MAP_TYPE | 30] = invalidCbor(MAP_TYPE | 30);
-vTable[MAP_TYPE | 31] = (
+vTable[MAP_TYPE_MASK | 28] = invalidCbor(MAP_TYPE_MASK | 28);
+vTable[MAP_TYPE_MASK | 29] = invalidCbor(MAP_TYPE_MASK | 29);
+vTable[MAP_TYPE_MASK | 30] = invalidCbor(MAP_TYPE_MASK | 30);
+vTable[MAP_TYPE_MASK | 31] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -762,22 +763,20 @@ vTable[MAP_TYPE | 31] = (
   return ok(res);
 };
 
-const STRING_TYPE = 0b011_00000;
-
 function decodeStringU32Len(
   bytes: Uint8Array,
   offset: number,
   marker: number,
   metadata: Metadata,
   len: number,
-) {
+): Result<string, DecodingError> {
   if (offset + len > bytes.length) {
     return EOI_ERR;
   }
   let slice = bytes.subarray(offset, offset + len);
   let str = fromUtf8(slice);
   if (!str.ok()) {
-    return str;
+    return new InvalidCborError(marker, offset, str.error).err();
   }
   metadata.setNext(offset + len);
   return str;
@@ -795,14 +794,14 @@ function decodeStringU64Len(
   let slice = bytes.subarray(offset, offset + Number(len));
   let str = fromUtf8(slice);
   if (!str.ok()) {
-    return str;
+    return new InvalidCborError(marker, offset, str.error).err();
   }
   metadata.setNext(offset + Number(len));
   return str;
 }
 
 for (let i = 0; i < 24; i++) {
-  vTable[STRING_TYPE | i] = (
+  vTable[STRING_TYPE_MASK | i] = (
     bytes: Uint8Array,
     offset: number,
     marker: number,
@@ -812,7 +811,7 @@ for (let i = 0; i < 24; i++) {
     return decodeStringU32Len(bytes, offset + 1, marker, metadata, i);
   };
 }
-vTable[STRING_TYPE | 24] = (
+vTable[STRING_TYPE_MASK | 24] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -823,7 +822,7 @@ vTable[STRING_TYPE | 24] = (
   let len = bytes[offset + 1];
   return decodeStringU32Len(bytes, offset + 2, marker, metadata, len);
 };
-vTable[STRING_TYPE | 25] = (
+vTable[STRING_TYPE_MASK | 25] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -837,7 +836,7 @@ vTable[STRING_TYPE | 25] = (
   len |= bytes[ptr++];
   return decodeStringU32Len(bytes, ptr, marker, metadata, len);
 };
-vTable[STRING_TYPE | 26] = (
+vTable[STRING_TYPE_MASK | 26] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -855,7 +854,7 @@ vTable[STRING_TYPE | 26] = (
   len |= bytes[ptr++];
   return decodeStringU32Len(bytes, ptr, marker, metadata, len);
 };
-vTable[STRING_TYPE | 27] = (
+vTable[STRING_TYPE_MASK | 27] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -873,7 +872,7 @@ vTable[STRING_TYPE | 27] = (
   len |= bytes[ptr++];
   return decodeStringU64Len(bytes, ptr, marker, metadata, len);
 };
-vTable[STRING_TYPE | 31] = (
+vTable[STRING_TYPE_MASK | 31] = (
   bytes: Uint8Array,
   offset: number,
   marker: number,
@@ -889,7 +888,7 @@ vTable[STRING_TYPE | 31] = (
       break;
     }
     const chunkType = getType(chunkMarker);
-    if (chunkType !== STRING_TYPE >> 5) {
+    if (chunkType !== STRING_TYPE_MASK >> 5) {
       return err(new TypeMismatchError("string", getTypeString(chunkMarker)));
     }
     const item = decodeItem(bytes, metadata.next, metadata) as Result<
@@ -904,8 +903,6 @@ vTable[STRING_TYPE | 31] = (
   }
   return ok(chunks.join(""));
 };
-
-const ARRAY_TYPE = 0b100_00000;
 
 function decodeArrayU32Len(
   bytes: Uint8Array,
@@ -943,7 +940,7 @@ function decodeArrayU64Len(
 }
 
 for (let i = 0; i < 24; i++) {
-  vTable[ARRAY_TYPE | i] = (bytes, offset, marker, metadata) => {
+  vTable[ARRAY_TYPE_MASK | i] = (bytes, offset, marker, metadata) => {
     const t = getType(marker);
     const res = decodeArrayU32Len(bytes, offset + 1, i, metadata);
     metadata.setType(t);
@@ -953,7 +950,7 @@ for (let i = 0; i < 24; i++) {
     return res;
   };
 }
-vTable[ARRAY_TYPE | 24] = (bytes, offset, marker, metadata) => {
+vTable[ARRAY_TYPE_MASK | 24] = (bytes, offset, marker, metadata) => {
   const t = getType(marker);
   let ptr = offset + 1;
   let len = bytes[ptr++];
@@ -964,7 +961,7 @@ vTable[ARRAY_TYPE | 24] = (bytes, offset, marker, metadata) => {
   }
   return res;
 };
-vTable[ARRAY_TYPE | 25] = (bytes, offset, marker, metadata) => {
+vTable[ARRAY_TYPE_MASK | 25] = (bytes, offset, marker, metadata) => {
   const t = getType(marker);
   let ptr = offset + 1;
   let len = bytes[ptr++];
@@ -977,7 +974,7 @@ vTable[ARRAY_TYPE | 25] = (bytes, offset, marker, metadata) => {
   }
   return res;
 };
-vTable[ARRAY_TYPE | 26] = (bytes, offset, marker, metadata) => {
+vTable[ARRAY_TYPE_MASK | 26] = (bytes, offset, marker, metadata) => {
   const t = getType(marker);
   let ptr = offset + 1;
   let len = bytes[ptr++];
@@ -994,7 +991,7 @@ vTable[ARRAY_TYPE | 26] = (bytes, offset, marker, metadata) => {
   }
   return res;
 };
-vTable[ARRAY_TYPE | 27] = (bytes, offset, marker, metadata) => {
+vTable[ARRAY_TYPE_MASK | 27] = (bytes, offset, marker, metadata) => {
   const t = getType(marker);
   let ptr = offset + 1;
   let len = BigInt(bytes[ptr++]);
@@ -1020,7 +1017,7 @@ vTable[ARRAY_TYPE | 27] = (bytes, offset, marker, metadata) => {
   return res;
 };
 
-vTable[ARRAY_TYPE | 31] = (bytes, offset, marker, metadata) => {
+vTable[ARRAY_TYPE_MASK | 31] = (bytes, offset, marker, metadata) => {
   const t = getType(marker);
   metadata.setNext(offset + 1);
   const res: DataItem[] = [];

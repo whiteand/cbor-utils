@@ -1,4 +1,5 @@
 import { err, ok, Result } from "resultra";
+import { InvalidCborError } from "../InvalidCborError";
 
 export function utf8(str: string): number[] {
   const utf8: number[] = [];
@@ -11,7 +12,7 @@ export function utf8(str: string): number[] {
       utf8.push(
         0xe0 | (charcode >> 12),
         0x80 | ((charcode >> 6) & 0x3f),
-        0x80 | (charcode & 0x3f)
+        0x80 | (charcode & 0x3f),
       );
     }
     // surrogate pair
@@ -26,7 +27,7 @@ export function utf8(str: string): number[] {
         0xf0 | (charcode >> 18),
         0x80 | ((charcode >> 12) & 0x3f),
         0x80 | ((charcode >> 6) & 0x3f),
-        0x80 | (charcode & 0x3f)
+        0x80 | (charcode & 0x3f),
       );
     }
   }
@@ -48,7 +49,7 @@ export function fromUtf8(utf8: Numbers): Result<string> {
     return err(
       Object.assign(new Error("Unknown error during utf8 decoding"), {
         cause: error,
-      })
+      }),
     );
   }
 }
