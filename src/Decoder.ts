@@ -6,9 +6,6 @@ import {
   decodeErrSymbol,
 } from "./traits";
 import { IDecodableType } from "./types";
-import { u8 } from "./cbor-types/u8";
-
-type AsParam<T> = (value: T) => void;
 
 export class Decoder {
   buf: Uint8Array;

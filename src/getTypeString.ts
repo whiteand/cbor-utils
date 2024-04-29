@@ -1,4 +1,4 @@
-import { getType } from "./getType";
+import { getType } from "./marker";
 
 const TYPE_TO_STRING = [
   "uint",
