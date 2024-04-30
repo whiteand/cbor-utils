@@ -4,7 +4,7 @@ import { convert } from "../operators/convert";
 import { bytes } from "./bytes";
 import { flatMap } from "../operators/flatMap";
 import { TaggedDataItem } from "./DataItem";
-import { ok } from "resultra";
+import { Result, ok } from "resultra";
 import { TypeMismatchError } from "../TypeMismatchError";
 
 function bigintFromBe(be: Uint8Array) {
@@ -28,9 +28,9 @@ function bigintToBe(b: bigint) {
 export const bignum = bytes.pipe(
   tagged(),
   flatMap(
-    (v: bigint) =>
+    (v: bigint): Result<TaggedDataItem<Uint8Array>, never> =>
       ok(
-        new TaggedDataItem(v >= 0n ? 2 : 1, bigintToBe(v >= 0n ? v : -1n - v))
+        new TaggedDataItem(v >= 0n ? 2 : 1, bigintToBe(v >= 0n ? v : -1n - v)),
       ),
     (t: TaggedDataItem<Uint8Array>) => {
       const tag = Number(t.tag);
@@ -43,9 +43,9 @@ export const bignum = bytes.pipe(
         default:
           return new TypeMismatchError(
             "bignum",
-            `Invalid tag for bignum: ${tag}`
+            `Invalid tag for bignum: ${tag}`,
           ).err();
       }
-    }
-  )
+    },
+  ),
 );
