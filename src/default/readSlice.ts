@@ -4,7 +4,7 @@ import { IDecoder } from "../types";
 
 export function readSlice(
   d: IDecoder,
-  n: number,
+  n: number
 ): Result<Uint8Array, OverflowError> {
   const remainingBytes = d.buf.length - d.ptr;
   if (n > remainingBytes) {

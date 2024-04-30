@@ -1,13 +1,13 @@
 import { Result, ok } from "resultra";
-import { DecodingError } from "./DecodingError";
-import { EOI_ERR } from "./EndOfInputError";
-import { TypeMismatchError } from "./TypeMismatchError";
+import { EOI_ERR, EndOfInputError } from "./EndOfInputError";
 import { getInfo } from "./marker";
 import { IDecoder } from "./types";
+import { InvalidCborError } from "./InvalidCborError";
 
 export function readArg(
-  d: IDecoder,
-): Result<bigint | number | null, DecodingError> {
+  d: IDecoder
+): Result<bigint | number | null, EndOfInputError | InvalidCborError> {
+  const p = d.ptr;
   const marker = d.buf[d.ptr++];
   const info = getInfo(marker);
   if (info < 24) {
@@ -81,6 +81,6 @@ export function readArg(
       return ok(null);
     }
     default:
-      return new TypeMismatchError("argument", marker.toString()).err();
+      return new InvalidCborError(marker, p).err();
   }
 }

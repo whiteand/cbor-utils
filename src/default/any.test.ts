@@ -1,5 +1,8 @@
 import { Simple, TaggedDataItem } from "./DataItem";
-import { fromHex } from "./utils/fromHex";
+import { describe, expect, test } from "vitest";
+import { fromHex } from "../utils/fromHex";
+import { any } from "./any";
+import { Decoder } from "../Decoder";
 
 export const TESTS = [
   {
@@ -289,21 +292,21 @@ export const TESTS = [
     cbor: "8A==",
     hex: "f0",
     roundtrip: true,
-    decoded: new Simple(16),
+    decoded: Simple.of(16),
     diagnostic: "simple(16)",
   },
   {
     cbor: "+Bg=",
     hex: "f818",
     roundtrip: true,
-    decoded: new Simple(24),
+    decoded: Simple.of(24),
     diagnostic: "simple(24)",
   },
   {
     cbor: "+P8=",
     hex: "f8ff",
     roundtrip: true,
-    decoded: new Simple(255),
+    decoded: Simple.of(255),
     diagnostic: "simple(255)",
   },
   {
@@ -473,7 +476,7 @@ export const TESTS = [
         c: "C",
         d: "D",
         e: "E",
-      }),
+      })
     ),
   },
   {
@@ -553,3 +556,17 @@ export const TESTS = [
     ]),
   },
 ];
+
+describe("any", () => {
+  test.each(TESTS)("decodes $hex => $decoded", (t) => {
+    const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
+    const decoded = d.decode(any);
+    const value = decoded.unwrap();
+    expect(d.ptr).toBe(d.buf.length);
+    if (Number.isNaN(t.decoded)) {
+      expect(value).toBeNaN();
+      return;
+    }
+    expect(value).toStrictEqual(t.decoded);
+  });
+});

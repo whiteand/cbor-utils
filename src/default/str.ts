@@ -3,7 +3,7 @@ import { DecodingError } from "../DecodingError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
-import { BYTES_TYPE } from "../constants";
+import { STRING_TYPE } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
@@ -11,10 +11,11 @@ import { writeTypeAndArg } from "../writeTypeAndArg";
 import { okNull } from "../okNull";
 import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
-import { concatBytesOfLength } from "../utils/concatBytes";
+import { fromUtf8, utf8 } from "../utils/utf8";
+import { InvalidCborError } from "../InvalidCborError";
 
-function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
-  const chunks: Uint8Array[] = [];
+function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
+  const chunks: string[] = [];
   let total = 0;
   while (d.ptr < d.buf.length) {
     const m = d.buf[d.ptr];
@@ -22,17 +23,18 @@ function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
       d.ptr++;
       break;
     }
-    const bs = decodeBytes(d);
+    const bs = decodeString(d);
     if (!bs.ok()) return bs;
     total += bs.value.length;
     chunks.push(bs.value);
   }
-  return ok(concatBytesOfLength(chunks, total));
+  return ok(chunks.join(""));
 }
 
-function decodeBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
-  const marker = d.buf[d.ptr];
-  if (getType(marker) !== BYTES_TYPE) {
+function decodeString(d: IDecoder): Result<string, DecodingError> {
+  const p = d.ptr;
+  const marker = d.buf[p];
+  if (getType(marker) !== STRING_TYPE) {
     return new TypeMismatchError("number", getTypeString(marker)).err();
   }
   const argRes = readArg(d);
@@ -41,20 +43,30 @@ function decodeBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
   }
   const len = argRes.value;
 
-  return len == null ? decodeIndefiniteBytes(d) : readSlice(d, Number(len));
+  if (len == null) return decodeIndefiniteString(d);
+
+  const bytes = readSlice(d, Number(len));
+  if (!bytes.ok()) return bytes;
+  const str = fromUtf8(bytes.value);
+  if (!str.ok()) {
+    return new InvalidCborError(marker, p, str.error).err();
+  }
+
+  return str;
 }
 
-function encodeBytes(v: Uint8Array, e: IEncoder): Result<null, OverflowError> {
-  const res = writeTypeAndArg(e, BYTES_TYPE, v.length);
+function encodeString(v: string, e: IEncoder): Result<null, OverflowError> {
+  const bytes = new Uint8Array(utf8(v));
+  const res = writeTypeAndArg(e, STRING_TYPE, bytes.length);
   if (!res.ok()) return res;
-  e.writeSlice(v);
+  e.writeSlice(bytes);
   return okNull;
 }
 
-export const bytes = new CborType<
-  Uint8Array,
+export const str = new CborType<
+  string,
   unknown,
   OverflowError,
   unknown,
   DecodingError
->(encodeBytes, decodeBytes);
+>(encodeString, decodeString);

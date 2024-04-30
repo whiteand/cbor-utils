@@ -25,6 +25,17 @@ export class Encoder implements IEncoder {
     this.buf = buffer;
     this.ptr = ptr;
   }
+
+  save() {
+    return this.ptr;
+  }
+  restore(value: number) {
+    if (this.buf.length > value) {
+      this.ptr = value;
+    } else {
+      throw new Error("invalid restore position: " + value);
+    }
+  }
   write(byte: number): this {
     if (this.ptr >= this.buf.length) {
       this.realloc(nextSize(this.buf.length, this.buf.length + 1));

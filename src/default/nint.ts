@@ -4,13 +4,13 @@ import { InvalidCborError } from "../InvalidCborError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
-import { NUMBER_TYPE } from "../constants";
+import { NEGATIVE_INT_TYPE, NUMBER_TYPE } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
 
-export const uint = new CborType<
+export const nint = new CborType<
   number | bigint,
   unknown,
   OverflowError,
@@ -18,12 +18,16 @@ export const uint = new CborType<
   DecodingError
 >(
   (v, e) => {
-    return writeTypeAndArg(e, NUMBER_TYPE, v);
+    return writeTypeAndArg(
+      e,
+      NEGATIVE_INT_TYPE,
+      typeof v === "bigint" ? -1n - v : -1 - v
+    );
   },
   (d) => {
     const marker = d.buf[d.ptr];
-    if (getType(marker) !== NUMBER_TYPE) {
-      return new TypeMismatchError("uint", getTypeString(marker)).err();
+    if (getType(marker) !== NEGATIVE_INT_TYPE) {
+      return new TypeMismatchError("negative-int", getTypeString(marker)).err();
     }
     const argRes = readArg(d);
     if (!argRes.ok()) {
@@ -33,6 +37,9 @@ export const uint = new CborType<
     if (v == null) {
       return new InvalidCborError(marker, d.ptr).err();
     }
-    return ok(v);
+    if (typeof v === "bigint") {
+      return ok(-1n - v);
+    }
+    return ok(-1 - v);
   }
 );

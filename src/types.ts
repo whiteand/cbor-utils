@@ -19,17 +19,19 @@ export interface IDecoder {
 export interface IEncoder {
   write(byte: number): this;
   writeSlice(bytes: Uint8Array): this;
+  save(): number;
+  restore(pos: number): void;
 }
 
 export type TDecodeFunction<T, Ctx, Err> = (
   decoder: IDecoder,
-  ctx: Ctx,
+  ctx: Ctx
 ) => Result<T, Err>;
 
 export type TEncodeFunction<T, Ctx, Err> = (
   value: T,
-  decoder: IEncoder,
-  ctx: Ctx,
+  encoder: IEncoder,
+  ctx: Ctx
 ) => Result<null, Err>;
 
 export interface IDecodableType<T = any, Ctx = any, Err = any> {
