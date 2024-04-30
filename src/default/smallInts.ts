@@ -8,6 +8,11 @@ import { flatMap } from "../operators/flatMap";
 import { uint } from "./uint";
 import { CborType } from "../base";
 
+const MAX_VALUE_DICT = {
+  8: 255,
+  16: 65535,
+  32: 4294967295,
+} as const;
 function createSmallIntType(
   size: 8 | 16 | 32,
 ): CborType<
@@ -17,7 +22,7 @@ function createSmallIntType(
   unknown,
   DecodingError
 > {
-  const MAX_VALUE = (1 << size) - 1;
+  const MAX_VALUE = MAX_VALUE_DICT[size];
   const tyName = `u` + size;
   const MIN_VALUE = 0;
   return uint.pipe(
