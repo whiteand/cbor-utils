@@ -9,6 +9,7 @@ import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
 import { okNull } from "../okNull";
+import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
 import { concatBytesOfLength } from "../utils/concatBytes";
 
@@ -17,7 +18,6 @@ function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
   const chunks: Uint8Array[] = [];
   let total = 0;
   while (d.ptr < d.buf.length) {
-    const p = d.ptr;
     const m = d.buf[d.ptr];
     if (m === 0xff) {
       d.ptr++;
@@ -40,20 +40,9 @@ function decodeBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
   if (!argRes.ok()) {
     return argRes;
   }
-  const v = argRes.value;
-  if (v == null) {
-    return decodeIndefiniteBytes(d);
-  }
-  const remainingBytes = d.buf.length - d.ptr;
-  const n = Number(v);
+  const len = argRes.value;
 
-  if (n > remainingBytes) {
-    return new OverflowError(remainingBytes, v).err();
-  }
-
-  const bytes = d.buf.slice(d.ptr, d.ptr + n);
-  d.ptr += n;
-  return ok(bytes);
+  return len == null ? decodeIndefiniteBytes(d) : readSlice(d, Number(len));
 }
 
 function encodeBytes(v: Uint8Array, e: IEncoder): Result<null, OverflowError> {

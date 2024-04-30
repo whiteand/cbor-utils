@@ -10,6 +10,7 @@ import { getType } from "../marker";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { DecodingError } from "../DecodingError";
+import { getTypeString } from "../getTypeString";
 
 function decodeArrayIndefinite<T, DC, DE>(
   ty: IDecodableType<T, DC, DE>,
