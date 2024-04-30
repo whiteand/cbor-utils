@@ -1,15 +1,14 @@
 import { Result } from "resultra";
-import { DecodingError } from "../DecodingError";
-import { OverflowError } from "../OverflowError";
-import { IEncoder } from "../types";
+import { OverflowError } from "./OverflowError";
 import { MAX_U128, MAX_U16, MAX_U32, MAX_U64, MAX_U8 } from "./limits";
-import { okNull } from "./ok";
+import { okNull } from "./okNull";
+import { IEncoder } from "./types";
 
 export function writeTypeAndArg(
   e: IEncoder,
   ty: number,
   value: bigint | number | null,
-): Result<null, DecodingError> {
+): Result<null, OverflowError> {
   const tyMask = ty << 5;
   if (value == null) {
     e.write(tyMask | 31);

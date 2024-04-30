@@ -1,9 +1,9 @@
 import { Result, ok } from "resultra";
-import { DecodingError } from "../DecodingError";
-import { EOI_ERR } from "../EndOfInputError";
-import { TypeMismatchError } from "../TypeMismatchError";
-import { getInfo } from "../marker";
-import { IDecoder } from "../types";
+import { DecodingError } from "./DecodingError";
+import { EOI_ERR } from "./EndOfInputError";
+import { TypeMismatchError } from "./TypeMismatchError";
+import { getInfo } from "./marker";
+import { IDecoder } from "./types";
 
 export function readArg(
   d: IDecoder,

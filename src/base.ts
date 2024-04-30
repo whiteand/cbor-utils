@@ -8,14 +8,37 @@ import {
   encodeErrSymbol,
   encodeSymbol,
   encodeTypeSymbol,
-} from "../traits";
+} from "./traits";
 import {
   ICborType,
   IDecoder,
   IEncoder,
   TDecodeFunction,
   TEncodeFunction,
-} from "../types";
+} from "./types";
+import { Pipeable } from "./pipe";
+
+export class CborType<T, EC, EE, DC, DE>
+  extends Pipeable
+  implements ICborType<T, EC, EE, DC, DE>
+{
+  [decodeTypeSymbol]: T = null as never;
+  [decodeCtxSymbol]: DC = null as never;
+  [decodeErrSymbol]: DE = null as never;
+  [encodeTypeSymbol]: T = null as never;
+  [encodeCtxSymbol]: EC = null as never;
+  [encodeErrSymbol]: EE = null as never;
+  [encodeSymbol]: TEncodeFunction<T, EC, EE> = null as never;
+  [decodeSymbol]: TDecodeFunction<T, DC, DE> = null as never;
+  constructor(
+    enc: TEncodeFunction<T, EC, EE>,
+    dec: TDecodeFunction<T, DC, DE>,
+  ) {
+    super();
+    this[encodeSymbol] = enc;
+    this[decodeSymbol] = dec;
+  }
+}
 
 export function createContextfulType<T, EC, EE, DC, DE>(
   encode: TEncodeFunction<T, EC, EE>,
