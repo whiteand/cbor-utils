@@ -15,6 +15,7 @@ export { nullType } from "./default/null";
 export { map } from "./default/map";
 export { undefinedType } from "./default/undefined";
 export { tagged } from "./operators/tagged";
+export { nullable } from "./operators/nullable";
 export { flatMap } from "./operators/flatMap";
 export { convert } from "./operators/convert";
 export { cast } from "./operators/cast";

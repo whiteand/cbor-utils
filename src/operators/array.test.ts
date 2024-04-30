@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { u16, u8 } from "../default/smallInts";
-import { constant } from "./constant";
+import { u8 } from "../default/smallInts";
 import { Encoder } from "../Encoder";
 import { Decoder } from "../Decoder";
 import { array } from "./array";
@@ -14,7 +13,7 @@ describe("array", () => {
     res = enc.encode(u8Array, [1, 2, 3, 4]);
     expect(res.ok()).toBe(true);
     expect(Buffer.from(enc.finish()).toString("hex")).toMatchInlineSnapshot(
-      `"8401020304"`
+      `"8401020304"`,
     );
   });
   it("propery decodes", () => {
@@ -22,18 +21,18 @@ describe("array", () => {
     const failBytes = new Uint8Array(
       Buffer.from(
         "9f0102030405060708090a0b0c0d0e0f10111213141516171818181919ffffff",
-        "hex"
-      )
+        "hex",
+      ),
     );
     const r = new Decoder(failBytes).decode(four);
     expect(!r.ok() && r.error).toMatchInlineSnapshot(
-      `[Error: Expected u8, but got uint]`
+      `[Error: Expected u8, but got uint]`,
     );
     const validBytes = new Uint8Array(
       Buffer.from(
         "9f0102030405060708090a0b0c0d0e0f101112131415161718181819ff",
-        "hex"
-      )
+        "hex",
+      ),
     );
     const r2 = new Decoder(validBytes).decode(four);
     expect(r2.ok() && r2.value).toMatchInlineSnapshot(`
