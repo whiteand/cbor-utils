@@ -9,6 +9,9 @@ import { IEncodableType, IEncoder } from "./types";
 
 function nextSize(current: number, minimal: number) {
   if (current >= minimal) return current;
+  if (current <= 0) {
+    return minimal;
+  }
   while (current < minimal) {
     current *= 2;
   }
@@ -18,27 +21,26 @@ function nextSize(current: number, minimal: number) {
 export class Encoder implements IEncoder {
   buf: Uint8Array;
   ptr: number;
-  constructor(buffer: Uint8Array, ptr: number = 0) {
+  constructor(buffer: Uint8Array = new Uint8Array(), ptr: number = 0) {
     this.buf = buffer;
     this.ptr = ptr;
   }
   write(byte: number): this {
     if (this.ptr >= this.buf.length) {
-      const s = nextSize(this.buf.length, this.buf.length + 1);
-      this.realloc(s);
+      this.realloc(nextSize(this.buf.length, this.buf.length + 1));
     }
     this.buf[this.ptr++] = byte;
     return this;
   }
   private realloc(newSize: number) {
+    if (newSize === this.buf.length) return;
     const newBuf = new Uint8Array(newSize);
     newBuf.set(this.buf);
     this.buf = newBuf;
   }
   writeSlice(bytes: Uint8Array): this {
     if (this.ptr + bytes.length - 1 >= this.buf.length) {
-      const s = nextSize(this.buf.length, this.buf.length + bytes.length);
-      this.realloc(s);
+      this.realloc(nextSize(this.buf.length, this.buf.length + bytes.length));
     }
     this.buf.set(bytes, this.ptr);
     this.ptr += bytes.length;
@@ -46,17 +48,17 @@ export class Encoder implements IEncoder {
   }
   encode<Ty extends IEncodableType<any, unknown, any>>(
     ty: Ty,
-    value: Ty[typeof encodeTypeSymbol],
+    value: Ty[typeof encodeTypeSymbol]
   ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]>;
   encode<Ty extends IEncodableType<any, any, any>>(
     ty: Ty,
     value: Ty[typeof encodeTypeSymbol],
-    c: Ty[typeof encodeCtxSymbol],
+    c: Ty[typeof encodeCtxSymbol]
   ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]>;
   encode<Ty extends IEncodableType>(
     ty: Ty,
     value: Ty[typeof encodeTypeSymbol],
-    c?: unknown,
+    c?: unknown
   ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]> {
     return ty[encodeSymbol](value, this, c);
   }

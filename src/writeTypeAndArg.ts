@@ -7,7 +7,7 @@ import { IEncoder } from "./types";
 export function writeTypeAndArg(
   e: IEncoder,
   ty: number,
-  value: bigint | number | null,
+  value: bigint | number | null
 ): Result<null, OverflowError> {
   const tyMask = ty << 5;
   if (value == null) {

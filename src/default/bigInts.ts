@@ -5,7 +5,7 @@ import { UnderflowError } from "../UnderflowError";
 import { getTypeString } from "../getTypeString";
 import { ICborType } from "../types";
 import { DecodingError } from "../DecodingError";
-import { number } from "./number";
+import { uint } from "./uint";
 import { MAX_U128 } from "../limits";
 import { flatMap } from "../operators/flatMap";
 
@@ -22,7 +22,7 @@ function createBigInt(
   const tyName = `u` + size;
   const MIN_VALUE = 0n;
 
-  return number.pipe(
+  return uint.pipe(
     flatMap(
       (value: bigint): Result<bigint, OverflowError | UnderflowError> => {
         if (value > MAX_U128) {

@@ -5,12 +5,12 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { UnderflowError } from "../UnderflowError";
 import { getTypeString } from "../getTypeString";
 import { flatMap } from "../operators/flatMap";
-import { ICborType } from "../types";
-import { number } from "./number";
+import { uint } from "./uint";
+import { CborType } from "../base";
 
 function createSmallIntType(
   size: 8 | 16 | 32,
-): ICborType<
+): CborType<
   number,
   unknown,
   OverflowError | UnderflowError,
@@ -20,7 +20,7 @@ function createSmallIntType(
   const MAX_VALUE = (1 << size) - 1;
   const tyName = `u` + size;
   const MIN_VALUE = 0;
-  return number.pipe(
+  return uint.pipe(
     flatMap(
       (value: number): Result<number, OverflowError | UnderflowError> => {
         if (value > MAX_VALUE) {

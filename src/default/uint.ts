@@ -10,7 +10,7 @@ import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
 
-export const number = new CborType<
+export const uint = new CborType<
   number | bigint,
   unknown,
   OverflowError,

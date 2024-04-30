@@ -152,7 +152,7 @@ function decodeSmallIntTagDataItem(
   offset: number,
   marker: number,
   metadata: Metadata,
-): Result<DataItem> {
+): Result<DataItem, DecodingError> {
   const ty = getType(marker);
   const tag = marker & 0x1f;
   if (offset + 1 >= bytes.length) return EOI_ERR;
@@ -861,15 +861,23 @@ vTable[STRING_TYPE_MASK | 27] = (
   metadata: Metadata,
 ) => {
   metadata.setTypeFromMarker(marker);
-  if (offset + 4 >= bytes.length) return EOI_ERR;
+  if (offset + 8 >= bytes.length) return EOI_ERR;
   let ptr = offset + 1;
-  let len = bytes[ptr++];
-  len <<= 8;
-  len |= bytes[ptr++];
-  len <<= 8;
-  len |= bytes[ptr++];
-  len <<= 8;
-  len |= bytes[ptr++];
+  let len = BigInt(bytes[ptr++]);
+  len <<= 8n;
+  len |= BigInt(bytes[ptr++]);
+  len <<= 8n;
+  len |= BigInt(bytes[ptr++]);
+  len <<= 8n;
+  len |= BigInt(bytes[ptr++]);
+  len <<= 8n;
+  len |= BigInt(bytes[ptr++]);
+  len <<= 8n;
+  len |= BigInt(bytes[ptr++]);
+  len <<= 8n;
+  len |= BigInt(bytes[ptr++]);
+  len <<= 8n;
+  len |= BigInt(bytes[ptr++]);
   return decodeStringU64Len(bytes, ptr, marker, metadata, len);
 };
 vTable[STRING_TYPE_MASK | 31] = (

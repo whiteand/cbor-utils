@@ -6,26 +6,24 @@
   "scripts": {
     "test": "vitest",
     "build": "tsup && tsc",
-    "prepublish": "npm run build",
+    "lint": "npm run build && npx size-limit",
+    "prepublish": "npm run lint && npm run build",
     "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/whiteand/cbor-utils.git"
   },
-  "files": [
-    "dist"
+  "size-limit": [
+    {
+      "path": "dist/index.js",
+      "limit": "5 kB"
+    }
   ],
-  "keywords": [
-    "cbor",
-    "encoder",
-    "decoder",
-    "format"
-  ],
+  "files": ["dist"],
+  "keywords": ["cbor", "encoder", "decoder", "format"],
   "tsup": {
-    "entry": [
-      "src/index.ts"
-    ],
+    "entry": ["src/index.ts"],
     "splitting": false,
     "sourcemap": true,
     "clean": true
@@ -33,6 +31,7 @@
   "author": "andrewbeletskiy",
   "license": "ISC",
   "devDependencies": {
+    "@size-limit/preset-small-lib": "^11.1.2",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5",
     "vitest": "^1.5.0"

@@ -16,10 +16,10 @@ export function flatMap<U, T, NEC, NEE, NDC, NDE>(
   newDec: MapDec<T, NDC, U, NDE>,
 ): <EC, EE, DC, DE>(
   ty: ICborType<T, EC, EE, DC, DE>,
-) => ICborType<U, NEC & EC, NEE | EE, NDC & DC, NDE | DE> {
+) => CborType<U, NEC & EC, NEE | EE, NDC & DC, NDE | DE> {
   return <EC, EE, DC, DE>(
     ty: ICborType<T, EC, EE, DC, DE>,
-  ): ICborType<U, NEC & EC, NEE | EE, NDC & DC, NDE | DE> =>
+  ): CborType<U, NEC & EC, NEE | EE, NDC & DC, NDE | DE> =>
     new CborType(
       (value: U, e: IEncoder, ctx: NEC & EC): Result<null, NEE | EE> => {
         const inner = newEnc(value, ctx);
