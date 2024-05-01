@@ -8,8 +8,12 @@ import { getTypeString } from "../getTypeString";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
 import { okNull } from "../okNull";
+import { getJsType } from "../utils/getJsType";
 
 function encodeF32(v: number, e: IEncoder) {
+  if (typeof v !== "number") {
+    return new TypeMismatchError("number", typeof v).err();
+  }
   e.write(SPECIAL_TYPE_MASK | 26);
   const bs = new Uint8Array(4);
   new DataView(bs.buffer, 0).setFloat32(0, v, false);
@@ -18,8 +22,9 @@ function encodeF32(v: number, e: IEncoder) {
 }
 
 function decodeF32(
-  d: IDecoder
+  d: IDecoder,
 ): Result<number, TypeMismatchError | EndOfInputError> {
+  if (d.ptr >= d.buf.length) return EOI_ERR;
   const m = d.buf[d.ptr];
   const t = getType(m);
 
@@ -32,7 +37,7 @@ function decodeF32(
   }
   const res = new DataView(
     d.buf.buffer,
-    d.buf.byteOffset + d.ptr + 1
+    d.buf.byteOffset + d.ptr + 1,
   ).getFloat32(0, false);
   d.ptr += 5;
   return ok(res);
