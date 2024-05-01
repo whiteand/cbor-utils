@@ -14,6 +14,7 @@ import { getTypeString } from "../getTypeString";
 import { TaggedDataItem } from "../default/DataItem";
 import { InvalidCborError } from "../InvalidCborError";
 import { EOI, EOI_ERR } from "../EndOfInputError";
+import { done } from "../utils/done";
 
 export function tagged(): <T, EC, EE, DC, DE>(
   ty: ICborType<T, EC, EE, DC, DE>,
@@ -46,7 +47,7 @@ export function tagged(): <T, EC, EE, DC, DE>(
         return ty[encodeSymbol](value.value, e, ctx);
       },
       (d: IDecoder, ctx: DC): Result<TaggedDataItem<T>, DE | DecodingError> => {
-        if (d.ptr >= d.buf.length) return EOI_ERR;
+        if (done(d)) return EOI_ERR;
         const p = d.ptr;
         const marker = d.buf[p];
         const t = getType(marker);

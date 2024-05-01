@@ -10,6 +10,7 @@ import { IDecoder, IEncoder } from "../types";
 import { okNull } from "../okNull";
 import { hex } from "../utils/hex";
 import { UnderflowError } from "../UnderflowError";
+import { done } from "../utils/done";
 
 const EPSILON = Number.EPSILON;
 const INVERSE_OF_EPSILON = 1 / EPSILON;
@@ -137,7 +138,7 @@ function encodeF16(
 function decodeHalfFloat(
   d: IDecoder,
 ): Result<number, TypeMismatchError | EndOfInputError> {
-  if (d.ptr >= d.buf.length) return EOI_ERR;
+  if (done(d)) return EOI_ERR;
   const m = d.buf[d.ptr];
   const t = getType(m);
   if (t !== SPECIAL_TYPE || getInfo(m) !== 25) {

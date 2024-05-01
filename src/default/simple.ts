@@ -10,6 +10,7 @@ import { okNull } from "../okNull";
 import { IDecoder, IEncoder } from "../types";
 import { Simple } from "./DataItem";
 import { getJsType } from "../utils/getJsType";
+import { done } from "../utils/done";
 
 function decodeSpecial(
   d: IDecoder,
@@ -17,7 +18,7 @@ function decodeSpecial(
   Simple<number>,
   TypeMismatchError | EndOfInputError | InvalidCborError
 > {
-  if (d.ptr >= d.buf.length) return EOI_ERR;
+  if (done(d)) return EOI_ERR;
   const m = d.buf[d.ptr];
   const t = getType(m);
   if (t !== SPECIAL_TYPE) {
@@ -56,7 +57,7 @@ function encodeSpecial(
 export const simple = new CborType<
   Simple<number>,
   unknown,
-  never,
+  TypeMismatchError,
   unknown,
   TypeMismatchError | EndOfInputError | InvalidCborError
 >(encodeSpecial, decodeSpecial);

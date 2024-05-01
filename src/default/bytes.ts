@@ -14,6 +14,7 @@ import { IDecoder, IEncoder } from "../types";
 import { getJsType } from "../utils/getJsType";
 import { concatBytesOfLength } from "../utils/concatBytes";
 import { EOI_ERR } from "../EndOfInputError";
+import { done } from "../utils/done";
 
 function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
   const chunks: Uint8Array[] = [];
@@ -33,7 +34,7 @@ function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
 }
 
 function decodeBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
-  if (d.ptr >= d.buf.length) return EOI_ERR;
+  if (done(d)) return EOI_ERR;
   const marker = d.buf[d.ptr];
   if (getType(marker) !== BYTES_TYPE) {
     return new TypeMismatchError(

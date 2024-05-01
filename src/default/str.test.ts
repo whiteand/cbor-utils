@@ -1,25 +1,24 @@
-import { simple } from "./simple";
+import { str } from "./str";
 import { Decoder } from "../Decoder";
 import { Encoder } from "../Encoder";
 import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { EOI_ERR } from "../EndOfInputError";
-import { Simple } from "./DataItem";
-import { SPECIAL_TYPE_MASK } from "../constants";
 
-describe("simple", () => {
+describe("str", () => {
   const tests = [
-    ...Array.from({ length: 256 }, (_, i) => ({
-      v: Simple.of(i),
-      b: i < 20 ? (SPECIAL_TYPE_MASK | i).toString(16) : "f8" + i.toString(16),
-    })),
-    { v: "1", ee: new TypeMismatchError("Simple", "String") },
-    { b: "f97e00", de: new TypeMismatchError("simple", "f16") },
+    { v: "", b: "60" },
+    {
+      v: "123",
+      b: "63313233",
+    },
+    { v: 1, ee: new TypeMismatchError("string", "number") },
+    { b: "f97e00", de: new TypeMismatchError("str", "f16") },
     { b: "", de: EOI_ERR.error },
   ];
 
-  const ty = simple;
+  const ty = str;
 
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de == null))(
     "correctly decodes $b => $v",
@@ -50,7 +49,7 @@ describe("simple", () => {
       expect(hex(e.finish())).toBe(b);
     },
   );
-  it.each(tests.filter((e) => "v" in e && "ee" in e))(
+  it.each(tests.filter((e) => "v" in e && e.ee != null))(
     "fails to encode $v => $ee",
     ({ v, ee }) => {
       const e = new Encoder();

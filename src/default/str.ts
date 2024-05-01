@@ -13,11 +13,13 @@ import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
 import { fromUtf8, utf8 } from "../utils/utf8";
 import { InvalidCborError } from "../InvalidCborError";
+import { EOI_ERR } from "../EndOfInputError";
+import { done } from "../utils/done";
 
 function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
   const chunks: string[] = [];
   let total = 0;
-  while (d.ptr < d.buf.length) {
+  while (!done(d)) {
     const m = d.buf[d.ptr];
     if (m === 0xff) {
       d.ptr++;
@@ -32,10 +34,11 @@ function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
 }
 
 function decodeString(d: IDecoder): Result<string, DecodingError> {
+  if (done(d)) return EOI_ERR;
   const p = d.ptr;
   const marker = d.buf[p];
   if (getType(marker) !== STRING_TYPE) {
-    return new TypeMismatchError("number", getTypeString(marker)).err();
+    return new TypeMismatchError("str", getTypeString(marker)).err();
   }
   const argRes = readArg(d);
   if (!argRes.ok()) {
@@ -55,7 +58,13 @@ function decodeString(d: IDecoder): Result<string, DecodingError> {
   return str;
 }
 
-function encodeString(v: string, e: IEncoder): Result<null, OverflowError> {
+function encodeString(
+  v: string,
+  e: IEncoder,
+): Result<null, OverflowError | TypeMismatchError> {
+  if (typeof v !== "string") {
+    return new TypeMismatchError("string", typeof v).err();
+  }
   const bytes = new Uint8Array(utf8(v));
   const res = writeTypeAndArg(e, STRING_TYPE, bytes.length);
   if (!res.ok()) return res;
@@ -66,7 +75,7 @@ function encodeString(v: string, e: IEncoder): Result<null, OverflowError> {
 export const str = new CborType<
   string,
   unknown,
-  OverflowError,
+  OverflowError | TypeMismatchError,
   unknown,
   DecodingError
 >(encodeString, decodeString);

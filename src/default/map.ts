@@ -13,6 +13,7 @@ import { readArg } from "../readArg";
 import { InvalidCborError } from "../InvalidCborError";
 import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { getJsType } from "../utils/getJsType";
+import { done } from "../utils/done";
 
 export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
   kt: ICborType<K, KEC, KEE, KDC, KDE>,
@@ -58,7 +59,7 @@ export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
       Map<K, V>,
       KDE | VDE | InvalidCborError | EndOfInputError | TypeMismatchError
     > => {
-      if (d.ptr >= d.buf.length) return EOI_ERR;
+      if (done(d)) return EOI_ERR;
       const m = d.buf[d.ptr];
       if (getType(m) !== MAP_TYPE) {
         return new TypeMismatchError("map", getTypeString(m)).err();

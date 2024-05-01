@@ -8,6 +8,7 @@ import { getTypeString } from "../getTypeString";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
 import { okNull } from "../okNull";
+import { done } from "../utils/done";
 
 function encodeF64(v: number, e: IEncoder) {
   if (typeof v !== "number") {
@@ -23,7 +24,7 @@ function encodeF64(v: number, e: IEncoder) {
 function decodeF64(
   d: IDecoder,
 ): Result<number, TypeMismatchError | EndOfInputError> {
-  if (d.ptr >= d.buf.length) return EOI_ERR;
+  if (done(d)) return EOI_ERR;
   const m = d.buf[d.ptr];
   const t = getType(m);
 

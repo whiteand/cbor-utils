@@ -4,6 +4,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
+import { done } from "../utils/done";
 import { okNull } from "../okNull";
 import { getInfo } from "../marker";
 
@@ -23,7 +24,7 @@ export const bool = new CborType<
     return okNull;
   },
   (d) => {
-    if (d.ptr >= d.buf.length) {
+    if (done(d)) {
       return EOI_ERR;
     }
     const m = d.buf[d.ptr++];

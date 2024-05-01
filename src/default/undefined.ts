@@ -6,6 +6,7 @@ import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
 import { UnexpectedValue } from "../UnexpectedValue";
 import { okNull } from "../okNull";
+import { done } from "../utils/done";
 
 export const undefinedType = new CborType<
   undefined,
@@ -22,7 +23,7 @@ export const undefinedType = new CborType<
     return okNull;
   },
   function decodeUndefined(d) {
-    if (d.ptr >= d.buf.length) {
+    if (done(d)) {
       return EOI_ERR;
     }
     if (d.buf[d.ptr] === (SPECIAL_TYPE_MASK | 23)) {

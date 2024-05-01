@@ -3,6 +3,7 @@ import { EOI_ERR, EndOfInputError } from "./EndOfInputError";
 import { getInfo } from "./marker";
 import { IDecoder } from "./types";
 import { InvalidCborError } from "./InvalidCborError";
+import { done } from "./utils/done";
 
 export function readArg(
   d: IDecoder,
@@ -15,7 +16,7 @@ export function readArg(
   }
   switch (info) {
     case 24: {
-      if (d.ptr >= d.buf.length) {
+      if (done(d)) {
         return EOI_ERR;
       }
       const value = d.buf[d.ptr++];

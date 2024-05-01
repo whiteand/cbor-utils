@@ -12,6 +12,7 @@ import { writeTypeAndArg } from "../writeTypeAndArg";
 import { MAX_U128 } from "../limits";
 import { UnderflowError } from "../UnderflowError";
 import { EOI_ERR } from "../EndOfInputError";
+import { done } from "../utils/done";
 
 function isNegative(v: number | bigint) {
   return typeof v === "number";
@@ -50,7 +51,7 @@ export const nint = new CborType<
     );
   },
   (d) => {
-    if (d.ptr >= d.buf.length) return EOI_ERR;
+    if (done(d)) return EOI_ERR;
     const marker = d.buf[d.ptr];
     if (getType(marker) !== NEGATIVE_INT_TYPE) {
       return new TypeMismatchError("negative-int", getTypeString(marker)).err();
