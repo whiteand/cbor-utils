@@ -19,6 +19,9 @@ export const uint = new CborType<
   DecodingError
 >(
   (v, e) => {
+    if (typeof v !== "number" && typeof v !== "bigint") {
+      return new TypeMismatchError("bigint | number", typeof v).err();
+    }
     return writeTypeAndArg(e, NUMBER_TYPE, v);
   },
   (d) => {

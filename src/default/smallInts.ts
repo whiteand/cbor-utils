@@ -28,11 +28,17 @@ function createSmallIntType(
   return uint.pipe(
     flatMap(
       (value: number): Result<number, OverflowError | UnderflowError> => {
+        if (typeof value !== "number") {
+          return new TypeMismatchError("number", typeof value).err();
+        }
         if (value > MAX_VALUE) {
           return new OverflowError(MAX_VALUE, value).err();
         }
         if (value < MIN_VALUE) {
           return new UnderflowError(MIN_VALUE, value).err();
+        }
+        if (!Number.isInteger(value)) {
+          return new TypeMismatchError(tyName, "f64").err();
         }
         return ok(value);
       },

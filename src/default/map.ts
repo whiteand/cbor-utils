@@ -11,11 +11,12 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { getTypeString } from "../getTypeString";
 import { readArg } from "../readArg";
 import { InvalidCborError } from "../InvalidCborError";
-import { EndOfInputError } from "../EndOfInputError";
+import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { getJsType } from "../utils/getJsType";
 
 export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
   kt: ICborType<K, KEC, KEE, KDC, KDE>,
-  vt: ICborType<V, VEC, VEE, VDC, VDE>
+  vt: ICborType<V, VEC, VEE, VDC, VDE>,
 ): CborType<
   Map<K, V>,
   KEC & VEC,
@@ -26,11 +27,14 @@ export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
   return new CborType<
     Map<K, V>,
     KEC & VEC,
-    KEE | VEE | OverflowError,
+    KEE | VEE | OverflowError | TypeMismatchError,
     KDC & VDC,
     KDE | VDE | InvalidCborError | EndOfInputError
   >(
     (m, e, c): Result<null, KEE | VEE | OverflowError> => {
+      if (!m || !(m instanceof Map)) {
+        return new TypeMismatchError("Map", getJsType(m)).err();
+      }
       const entries = [...m.entries()];
       const res = writeTypeAndArg(e, MAP_TYPE, entries.length);
       if (!res.ok()) {
@@ -49,11 +53,12 @@ export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
     },
     (
       d,
-      c
+      c,
     ): Result<
       Map<K, V>,
       KDE | VDE | InvalidCborError | EndOfInputError | TypeMismatchError
     > => {
+      if (d.ptr >= d.buf.length) return EOI_ERR;
       const m = d.buf[d.ptr];
       if (getType(m) !== MAP_TYPE) {
         return new TypeMismatchError("map", getTypeString(m)).err();
@@ -98,6 +103,6 @@ export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
       }
 
       return ok(res);
-    }
+    },
   );
 }
