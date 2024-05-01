@@ -4,7 +4,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { NULL_BYTE } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
-import { UnexpectedValue } from "../operators/constant";
+import { UnexpectedValue } from "../UnexpectedValue";
 import { okNull } from "../okNull";
 
 export const nullType = new CborType<

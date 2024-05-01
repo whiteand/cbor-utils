@@ -4,7 +4,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
-import { UnexpectedValue } from "../operators/constant";
+import { UnexpectedValue } from "../UnexpectedValue";
 import { okNull } from "../okNull";
 
 export const undefinedType = new CborType<
@@ -31,7 +31,7 @@ export const undefinedType = new CborType<
     }
     return new TypeMismatchError(
       "undefined",
-      getTypeString(d.buf[d.ptr])
+      getTypeString(d.buf[d.ptr]),
     ).err();
-  }
+  },
 );

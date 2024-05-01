@@ -1,11 +1,10 @@
-import { tagged } from "../operators/tagged";
-import { untag } from "../operators/untag";
-import { convert } from "../operators/convert";
-import { bytes } from "./bytes";
-import { flatMap } from "../operators/flatMap";
-import { TaggedDataItem } from "./DataItem";
 import { Result, ok } from "resultra";
 import { TypeMismatchError } from "../TypeMismatchError";
+import { flatMap } from "../operators/flatMap";
+import { tagged } from "../operators/tagged";
+import { TaggedDataItem } from "./DataItem";
+import { bytes } from "./bytes";
+import { UnexpectedValue } from "../UnexpectedValue";
 
 function bigintFromBe(be: Uint8Array) {
   let res = 0n;
@@ -22,16 +21,22 @@ function bigintToBe(b: bigint) {
     b >>= 8n;
   }
   res.reverse();
+  if (res.length <= 0) {
+    res.push(0);
+  }
   return new Uint8Array(res);
 }
 
 export const bignum = bytes.pipe(
   tagged(),
   flatMap(
-    (v: bigint): Result<TaggedDataItem<Uint8Array>, never> =>
-      ok(
-        new TaggedDataItem(v >= 0n ? 2 : 1, bigintToBe(v >= 0n ? v : -1n - v)),
-      ),
+    (v: bigint): Result<TaggedDataItem<Uint8Array>, TypeMismatchError> => {
+      if (typeof v !== "bigint")
+        return new TypeMismatchError("bigint", typeof v).err();
+      return ok(
+        new TaggedDataItem(v >= 0n ? 2 : 3, bigintToBe(v >= 0n ? v : -1n - v)),
+      );
+    },
     (t: TaggedDataItem<Uint8Array>) => {
       const tag = Number(t.tag);
 
@@ -41,10 +46,7 @@ export const bignum = bytes.pipe(
         case 3:
           return ok(-1n - bigintFromBe(t.value));
         default:
-          return new TypeMismatchError(
-            "bignum",
-            `Invalid tag for bignum: ${tag}`,
-          ).err();
+          return new UnexpectedValue("2 | 3", `${tag}`).err();
       }
     },
   ),

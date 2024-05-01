@@ -1,18 +1,12 @@
 import { CborType } from "../base";
 import { ICborType } from "../types";
-import { ResultError } from "../ResultError";
 import { decodeSymbol, encodeSymbol } from "../traits";
 import { Result, ok } from "resultra";
-
-export class UnexpectedValue<In, V> extends ResultError {
-  constructor(public readonly expected: V, public readonly actual: In) {
-    super(`Expected ${expected}, but got ${actual}`);
-  }
-}
+import { UnexpectedValue } from "../UnexpectedValue";
 
 export function constant<In, const V extends In>(
   expectedValue: V,
-  isEqual: (exp: NoInfer<V>, b: NoInfer<In>) => boolean = Object.is
+  isEqual: (exp: NoInfer<V>, b: NoInfer<In>) => boolean = Object.is,
 ): <EC, EE, DC, DE>(
   ty: ICborType<
     In,
@@ -20,7 +14,7 @@ export function constant<In, const V extends In>(
     EE | UnexpectedValue<In, V>,
     DC,
     DE | UnexpectedValue<In, V>
-  >
+  >,
 ) => CborType<
   V,
   EC,
@@ -35,7 +29,7 @@ export function constant<In, const V extends In>(
       EE | UnexpectedValue<In, V>,
       DC,
       DE | UnexpectedValue<In, V>
-    >
+    >,
   ) =>
     new CborType<
       V,
@@ -59,6 +53,6 @@ export function constant<In, const V extends In>(
           return new UnexpectedValue(expectedValue, v.value).err();
         }
         return ok(v.value as V);
-      }
+      },
     );
 }

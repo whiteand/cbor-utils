@@ -13,9 +13,10 @@ import { DecodingError } from "../DecodingError";
 import { getTypeString } from "../getTypeString";
 import { TaggedDataItem } from "../default/DataItem";
 import { InvalidCborError } from "../InvalidCborError";
+import { EOI, EOI_ERR } from "../EndOfInputError";
 
 export function tagged(): <T, EC, EE, DC, DE>(
-  ty: ICborType<T, EC, EE, DC, DE>
+  ty: ICborType<T, EC, EE, DC, DE>,
 ) => ICborType<
   TaggedDataItem<T>,
   EC,
@@ -24,7 +25,7 @@ export function tagged(): <T, EC, EE, DC, DE>(
   DE | DecodingError
 > {
   return <T, EC, EE, DC, DE>(
-    ty: ICborType<T, EC, EE, DC, DE>
+    ty: ICborType<T, EC, EE, DC, DE>,
   ): ICborType<
     TaggedDataItem<T>,
     EC,
@@ -36,7 +37,7 @@ export function tagged(): <T, EC, EE, DC, DE>(
       (
         value: TaggedDataItem<T>,
         e: IEncoder,
-        ctx: EC
+        ctx: EC,
       ): Result<null, EE | OverflowError> => {
         let res = writeTypeAndArg(e, TAG_TYPE, value.tag);
         if (!res.ok()) {
@@ -45,6 +46,7 @@ export function tagged(): <T, EC, EE, DC, DE>(
         return ty[encodeSymbol](value.value, e, ctx);
       },
       (d: IDecoder, ctx: DC): Result<TaggedDataItem<T>, DE | DecodingError> => {
+        if (d.ptr >= d.buf.length) return EOI_ERR;
         const p = d.ptr;
         const marker = d.buf[p];
         const t = getType(marker);
@@ -58,12 +60,12 @@ export function tagged(): <T, EC, EE, DC, DE>(
           return new InvalidCborError(
             marker,
             p,
-            new Error(`Tag cannot be null`)
+            new Error(`Tag cannot be null`),
           ).err();
         }
         const value = ty[decodeSymbol](d, ctx);
         if (!value.ok()) return value;
         return ok(new TaggedDataItem(len, value.value));
-      }
+      },
     );
 }
