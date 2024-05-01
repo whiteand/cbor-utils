@@ -3,7 +3,7 @@ import { DecodingError } from "../DecodingError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
-import { BYTES_TYPE } from "../constants";
+import { BYTES_TYPE, BYTES_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
@@ -11,7 +11,9 @@ import { writeTypeAndArg } from "../writeTypeAndArg";
 import { okNull } from "../okNull";
 import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
+import { getJsType } from "../utils/getJsType";
 import { concatBytesOfLength } from "../utils/concatBytes";
+import { EOI_ERR } from "../EndOfInputError";
 
 function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
   const chunks: Uint8Array[] = [];
@@ -31,9 +33,13 @@ function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
 }
 
 function decodeBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
+  if (d.ptr >= d.buf.length) return EOI_ERR;
   const marker = d.buf[d.ptr];
   if (getType(marker) !== BYTES_TYPE) {
-    return new TypeMismatchError("number", getTypeString(marker)).err();
+    return new TypeMismatchError(
+      getTypeString(BYTES_TYPE_MASK),
+      getTypeString(marker),
+    ).err();
   }
   const argRes = readArg(d);
   if (!argRes.ok()) {
@@ -44,7 +50,13 @@ function decodeBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
   return len == null ? decodeIndefiniteBytes(d) : readSlice(d, Number(len));
 }
 
-function encodeBytes(v: Uint8Array, e: IEncoder): Result<null, OverflowError> {
+function encodeBytes(
+  v: Uint8Array,
+  e: IEncoder,
+): Result<null, OverflowError | TypeMismatchError> {
+  if (!(v instanceof Uint8Array)) {
+    return new TypeMismatchError("Uint8Array", getJsType(v)).err();
+  }
   const res = writeTypeAndArg(e, BYTES_TYPE, v.length);
   if (!res.ok()) return res;
   e.writeSlice(v);
