@@ -6,7 +6,7 @@ import { InvalidCborError } from "./InvalidCborError";
 
 export function readArg(
   d: IDecoder,
-): Result<bigint | number | null, EndOfInputError | InvalidCborError> {
+): Result<number | bigint | null, EndOfInputError | InvalidCborError> {
   const p = d.ptr;
   const marker = d.buf[d.ptr++];
   const info = getInfo(marker);
