@@ -9,19 +9,19 @@ import { getInfo, getType } from "../marker";
 import { okNull } from "../okNull";
 import { IDecoder, IEncoder } from "../types";
 import { Simple } from "./DataItem";
+import { getJsType } from "../utils/getJsType";
 
 function decodeSpecial(
-  d: IDecoder
+  d: IDecoder,
 ): Result<
   Simple<number>,
   TypeMismatchError | EndOfInputError | InvalidCborError
 > {
   if (d.ptr >= d.buf.length) return EOI_ERR;
-  const p = d.ptr;
   const m = d.buf[d.ptr];
   const t = getType(m);
   if (t !== SPECIAL_TYPE) {
-    return new TypeMismatchError("special", getTypeString(m)).err();
+    return new TypeMismatchError("simple", getTypeString(m)).err();
   }
   const info = getInfo(m);
 
@@ -36,18 +36,20 @@ function decodeSpecial(
     return ok(Simple.of(d.buf[d.ptr++]));
   }
 
-  return new InvalidCborError(
-    m,
-    p,
-    new Error(`Expected valid simple value`)
-  ).err();
+  return new TypeMismatchError("simple", getTypeString(m)).err();
 }
-function encodeSpecial(v: Simple<number>, e: IEncoder): Result<null, never> {
+function encodeSpecial(
+  v: Simple<number>,
+  e: IEncoder,
+): Result<null, TypeMismatchError> {
+  if (!v || !(v instanceof Simple)) {
+    return new TypeMismatchError("Simple", getJsType(v)).err();
+  }
   if (v.value < 20) {
     e.write(SPECIAL_TYPE_MASK | v.value);
     return okNull;
   }
-  e.write(SPECIAL_TYPE | 24).write(v.value);
+  e.write(SPECIAL_TYPE_MASK | 24).write(v.value);
   return okNull;
 }
 
