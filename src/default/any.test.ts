@@ -1,6 +1,6 @@
 import { Simple, TaggedDataItem } from "./DataItem";
 import { describe, expect, test } from "vitest";
-import { fromHex } from "../utils/fromHex";
+import { fromHex } from "../utils/hex";
 import { any } from "./any";
 import { Decoder } from "../Decoder";
 
@@ -476,7 +476,7 @@ export const TESTS = [
         c: "C",
         d: "D",
         e: "E",
-      })
+      }),
     ),
   },
   {

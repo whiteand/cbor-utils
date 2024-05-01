@@ -8,3 +8,7 @@ export function fromHex(hex: string): number[] {
   }
   return bytes;
 }
+
+export function hex(arg0: Uint8Array): any {
+  return Buffer.from(arg0).toString("hex");
+}
