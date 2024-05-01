@@ -25,7 +25,7 @@ function createBigInt(
   return uint.pipe(
     flatMap(
       (value: bigint): Result<bigint, OverflowError | UnderflowError> => {
-        if (value > MAX_U128) {
+        if (value > MAX_VALUE) {
           return new OverflowError(MAX_VALUE, value).err();
         }
         if (value < MIN_VALUE) {

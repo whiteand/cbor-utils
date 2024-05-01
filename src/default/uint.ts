@@ -9,6 +9,7 @@ import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
+import { EOI_ERR } from "../EndOfInputError";
 
 export const uint = new CborType<
   number | bigint,
@@ -21,6 +22,7 @@ export const uint = new CborType<
     return writeTypeAndArg(e, NUMBER_TYPE, v);
   },
   (d) => {
+    if (d.ptr >= d.buf.length) return EOI_ERR;
     const marker = d.buf[d.ptr];
     if (getType(marker) !== NUMBER_TYPE) {
       return new TypeMismatchError("uint", getTypeString(marker)).err();
@@ -34,5 +36,5 @@ export const uint = new CborType<
       return new InvalidCborError(marker, d.ptr).err();
     }
     return ok(v);
-  }
+  },
 );
