@@ -38,6 +38,7 @@ import { untag } from "../operators/untag";
 import { mapErrors } from "../operators/mapErrors";
 import { MAX_U128 } from "../limits";
 import { OverflowError } from "../OverflowError";
+import { InvalidCborError } from "../InvalidCborError";
 
 export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
   const p = d.ptr;
@@ -82,6 +83,11 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
           if (info < 20 || info === 24) {
             return simple[decodeSymbol](d, null);
           }
+          return new InvalidCborError(
+            m,
+            p,
+            new Error("not recognized special"),
+          ).err();
         }
       }
     }

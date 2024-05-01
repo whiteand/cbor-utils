@@ -28,7 +28,7 @@ describe("array", () => {
     );
     const r = new Decoder(failBytes).decode(nullableByte);
     expect(!r.ok() && r.error).toMatchInlineSnapshot(
-      `[Error: Expected u8, but got uint]`,
+      `[Error: Expected u8, but got u16]`,
     );
     const validBytes = new Uint8Array([0xf6, 0x01]);
     const d = new Decoder(validBytes);

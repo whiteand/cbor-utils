@@ -12,7 +12,7 @@ describe("u128", () => {
     { v: 0n, b: "00" },
     { v: 2n ** 128n - 1n, b: "1cffffffffffffffffffffffffffffffff" },
     { v: 2n ** 128n, ee: new OverflowError(2n ** 128n - 1n, 2n ** 128n) },
-    { b: "f97e00", de: new TypeMismatchError("uint", "special") },
+    { b: "f97e00", de: new TypeMismatchError("uint", "f16") },
     { b: "", de: EOI_ERR.error },
   ];
 

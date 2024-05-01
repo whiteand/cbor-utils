@@ -1,15 +1,17 @@
 import {
-  ARRAY_TYPE_MASK,
-  BYTES_TYPE_MASK,
-  MAP_TYPE_MASK,
-  NEGATIVE_INT_TYPE_MASK,
   NUMBER_TYPE_MASK,
-  SPECIAL_TYPE_MASK,
+  NEGATIVE_INT_TYPE_MASK,
+  BYTES_TYPE_MASK,
   STRING_TYPE_MASK,
+  ARRAY_TYPE_MASK,
+  MAP_TYPE_MASK,
   TAG_TYPE_MASK,
+  SPECIAL_TYPE_MASK,
 } from "./constants";
+import { TypeString, getTypeString } from "./getTypeString";
+import { describe, it, expect } from "vitest";
 
-const TYPE_TABLE = [
+const TYPE_TABLE: Array<[number, TypeString]> = [
   [NUMBER_TYPE_MASK | 0, "u8"],
   [NUMBER_TYPE_MASK | 25, "u16"],
   [NUMBER_TYPE_MASK | 26, "u32"],
@@ -40,28 +42,16 @@ const TYPE_TABLE = [
   [SPECIAL_TYPE_MASK | 31, "break"],
 ] as const;
 
-function slow(marker: number) {
-  let ptr = 0;
-  while (ptr < TYPE_TABLE.length && TYPE_TABLE[ptr][0] <= marker) ptr++;
-  ptr--;
-
-  return TYPE_TABLE[ptr][1];
-}
-
-const generateMap = (() => {
-  const res: TypeString[] = [];
-  return (marker: number) => {
-    if (marker <= 255) {
-      while (res.length <= marker) {
-        res.push(slow(res.length));
+describe("getTypeString", () => {
+  it("has proper types", () => {
+    for (let i = 0; i < 256; i++) {
+      let ind = TYPE_TABLE.findIndex((x) => x[0] > i);
+      if (ind < 0) {
+        ind = TYPE_TABLE.length - 1;
+      } else {
+        ind--;
       }
+      expect(getTypeString(i)).toBe(TYPE_TABLE[ind][1]);
     }
-    return res;
-  };
-})();
-
-export type TypeString = (typeof TYPE_TABLE)[number][1];
-
-export function getTypeString(marker: number): TypeString {
-  return generateMap(marker)[marker] || "invalid";
-}
+  });
+});
