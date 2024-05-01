@@ -10,6 +10,9 @@ import { IDecoder, IEncoder } from "../types";
 import { okNull } from "../okNull";
 
 function encodeF64(v: number, e: IEncoder) {
+  if (typeof v !== "number") {
+    return new TypeMismatchError("number", typeof v).err();
+  }
   e.write(SPECIAL_TYPE_MASK | 27);
   const bs = new Uint8Array(8);
   new DataView(bs.buffer, 0).setFloat64(0, v, false);
@@ -18,8 +21,9 @@ function encodeF64(v: number, e: IEncoder) {
 }
 
 function decodeF64(
-  d: IDecoder
+  d: IDecoder,
 ): Result<number, TypeMismatchError | EndOfInputError> {
+  if (d.ptr >= d.buf.length) return EOI_ERR;
   const m = d.buf[d.ptr];
   const t = getType(m);
 
@@ -32,7 +36,7 @@ function decodeF64(
   }
   const res = new DataView(
     d.buf.buffer,
-    d.buf.byteOffset + d.ptr + 1
+    d.buf.byteOffset + d.ptr + 1,
   ).getFloat64(0, false);
   d.ptr += 9;
   return ok(res);

@@ -5,7 +5,7 @@ import { IDecoder } from "./types";
 import { InvalidCborError } from "./InvalidCborError";
 
 export function readArg(
-  d: IDecoder
+  d: IDecoder,
 ): Result<bigint | number | null, EndOfInputError | InvalidCborError> {
   const p = d.ptr;
   const marker = d.buf[d.ptr++];
@@ -15,7 +15,7 @@ export function readArg(
   }
   switch (info) {
     case 24: {
-      if (d.done()) {
+      if (d.ptr >= d.buf.length) {
         return EOI_ERR;
       }
       const value = d.buf[d.ptr++];

@@ -14,7 +14,6 @@ import {
 export interface IDecoder {
   buf: Uint8Array;
   ptr: number;
-  done(): boolean;
 }
 export interface IEncoder {
   write(byte: number): this;
@@ -25,13 +24,13 @@ export interface IEncoder {
 
 export type TDecodeFunction<T, Ctx, Err> = (
   decoder: IDecoder,
-  ctx: Ctx
+  ctx: Ctx,
 ) => Result<T, Err>;
 
 export type TEncodeFunction<T, Ctx, Err> = (
   value: T,
   encoder: IEncoder,
-  ctx: Ctx
+  ctx: Ctx,
 ) => Result<null, Err>;
 
 export interface IDecodableType<T = any, Ctx = any, Err = any> {
