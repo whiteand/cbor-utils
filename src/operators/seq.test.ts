@@ -1,3 +1,4 @@
+import { bytes } from "../default/bytes";
 import { u8 } from "../default/smallInts";
 import { seq } from "./seq";
 import { Decoder } from "../Decoder";

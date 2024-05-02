@@ -14,22 +14,49 @@ type InferSeqType<TS> = TS extends []
       : InferSeqType<RS>
     : [];
 
-export function seq<EE, DE, Types extends ICborType<any, void, EE, void, DE>[]>(
+type InferSeqEE<TS> = TS extends []
+  ? never
+  : TS extends [infer Ty, ...infer RS]
+    ? Ty extends ICborType<any, any, infer T, any, any>
+      ? T | InferSeqEE<RS>
+      : InferSeqEE<RS>
+    : never;
+type InferSeqDE<TS> = TS extends []
+  ? never
+  : TS extends [infer Ty, ...infer RS]
+    ? Ty extends ICborType<any, any, any, any, infer T>
+      ? T | InferSeqDE<RS>
+      : InferSeqDE<RS>
+    : never;
+
+export function seq<Types extends ICborType<any, void, any, void, any>[]>(
   ...types: Types
-): CborType<InferSeqType<Types>, void, EE | TypeMismatchError, void, DE>;
-export function seq<
+): CborType<
+  InferSeqType<Types>,
+  void,
+  InferSeqEE<Types> | TypeMismatchError,
+  void,
+  InferSeqDE<Types>
+>;
+export function seq<EC, DC, Types extends ICborType<any, EC, any, DC, any>[]>(
+  ...types: Types
+): CborType<
+  InferSeqType<Types>,
   EC,
-  EE,
+  InferSeqEE<Types> | TypeMismatchError,
   DC,
-  DE,
-  Types extends ICborType<any, EC, EE, DC, DE>[],
->(
-  ...types: Types
-): CborType<InferSeqType<Types>, EC, EE | TypeMismatchError, DC, DE> {
+  InferSeqDE<Types>
+> {
   const n = types.length;
   const typeStr = `array[${n}]`;
-  return new CborType<InferSeqType<Types>, EC, EE | TypeMismatchError, DC, DE>(
-    (v, e, ctx): Result<void, EE | TypeMismatchError> => {
+  return new CborType<
+    InferSeqType<Types>,
+    EC,
+    InferSeqEE<Types> | TypeMismatchError,
+    DC,
+    InferSeqDE<Types>
+  >(
+    (v, e, ctx) => {
       if (!v || typeof v.length != "number")
         return new TypeMismatchError(typeStr, getJsType(v)).err();
       if (v.length !== n) {
@@ -39,11 +66,11 @@ export function seq<
         const item = v[i];
         const itemTy = types[i];
         const res = itemTy[encodeSymbol](item, e, ctx);
-        if (!res.ok()) return res;
+        if (!res.ok()) return res as InferSeqEE<Types>;
       }
       return success;
     },
-    (d, c): Result<InferSeqType<Types>, DE> => {
+    (d, c) => {
       const tuple: unknown[] = new Array(n).fill(null);
       for (let i = 0; i < n; i++) {
         const res = types[i][decodeSymbol](d, c);
