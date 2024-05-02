@@ -18,7 +18,7 @@ describe("seq", () => {
     { b: "", de: EOI_ERR.error },
   ];
 
-  const ty = seq(u8, u8);
+  const ty = seq([u8, u8]);
 
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de == null))(
     "correctly decodes $b => $v",

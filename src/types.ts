@@ -34,10 +34,10 @@ export type TEncodeFunction<T, Ctx, Err> = (
 ) => Result<void, Err>;
 
 export interface IDecodableType<T = any, Ctx = void, Err = any> {
-  [decodeTypeSymbol]: T;
-  [decodeCtxSymbol]: Ctx;
-  [decodeErrSymbol]: Err;
-  [decodeSymbol]: TDecodeFunction<T, Ctx, Err>;
+  readonly [decodeTypeSymbol]: T;
+  readonly [decodeCtxSymbol]: Ctx;
+  readonly [decodeErrSymbol]: Err;
+  readonly [decodeSymbol]: TDecodeFunction<T, Ctx, Err>;
 }
 export interface IDecodableTypeDecoder<T = any, Ctx = void, Err = any>
   extends IDecodableType<T, Ctx, Err> {
@@ -45,10 +45,10 @@ export interface IDecodableTypeDecoder<T = any, Ctx = void, Err = any>
 }
 
 export interface IEncodableType<T = any, Ctx = any, Err = any> {
-  [encodeTypeSymbol]: T;
-  [encodeCtxSymbol]: Ctx;
-  [encodeErrSymbol]: Err;
-  [encodeSymbol]: TEncodeFunction<T, Ctx, Err>;
+  readonly [encodeTypeSymbol]: T;
+  readonly [encodeCtxSymbol]: Ctx;
+  readonly [encodeErrSymbol]: Err;
+  readonly [encodeSymbol]: TEncodeFunction<T, Ctx, Err>;
 }
 export interface IEncodableTypeEncoder<T = any, Ctx = void, Err = any>
   extends IEncodableType<T, Ctx, Err> {

@@ -6,31 +6,33 @@ import { getJsType } from "../utils/getJsType";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { success } from "../success";
 
-type InferSeqType<TS> = TS extends []
+export type InferSeqType<TS> = TS extends readonly []
   ? []
-  : TS extends [infer Ty, ...infer RS]
+  : TS extends readonly [infer Ty, ...infer RS]
     ? Ty extends ICborType<infer T, any, any, any, any>
       ? [T, ...InferSeqType<RS>]
       : InferSeqType<RS>
     : [];
 
-type InferSeqEE<TS> = TS extends []
+type InferSeqEE<TS> = TS extends readonly []
   ? never
-  : TS extends [infer Ty, ...infer RS]
+  : TS extends readonly [infer Ty, ...infer RS]
     ? Ty extends ICborType<any, any, infer T, any, any>
       ? T | InferSeqEE<RS>
       : InferSeqEE<RS>
     : never;
-type InferSeqDE<TS> = TS extends []
+type InferSeqDE<TS> = TS extends readonly []
   ? never
-  : TS extends [infer Ty, ...infer RS]
+  : TS extends readonly [infer Ty, ...infer RS]
     ? Ty extends ICborType<any, any, any, any, infer T>
       ? T | InferSeqDE<RS>
       : InferSeqDE<RS>
     : never;
 
-export function seq<Types extends ICborType<any, void, any, void, any>[]>(
-  ...types: Types
+export function seq<
+  Types extends readonly ICborType<any, void, any, void, any>[],
+>(
+  types: Types,
 ): CborType<
   InferSeqType<Types>,
   void,
@@ -38,8 +40,12 @@ export function seq<Types extends ICborType<any, void, any, void, any>[]>(
   void,
   InferSeqDE<Types>
 >;
-export function seq<EC, DC, Types extends ICborType<any, EC, any, DC, any>[]>(
-  ...types: Types
+export function seq<
+  EC,
+  DC,
+  Types extends readonly ICborType<any, EC, any, DC, any>[],
+>(
+  types: Types,
 ): CborType<
   InferSeqType<Types>,
   EC,
