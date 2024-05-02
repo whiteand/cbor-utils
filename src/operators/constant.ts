@@ -6,7 +6,25 @@ import { UnexpectedValueError } from "../UnexpectedValueError";
 
 export function constant<In, const V extends In>(
   expectedValue: V,
-  isEqual: (exp: NoInfer<V>, b: NoInfer<In>) => boolean = Object.is,
+  isEqual?: (exp: NoInfer<V>, b: NoInfer<In>) => boolean,
+): <EE, DE>(
+  ty: ICborType<
+    In,
+    void,
+    EE | UnexpectedValueError<In, V>,
+    void,
+    DE | UnexpectedValueError<In, V>
+  >,
+) => CborType<
+  V,
+  void,
+  EE | UnexpectedValueError<In, V>,
+  void,
+  DE | UnexpectedValueError<In, V>
+>;
+export function constant<In, const V extends In>(
+  expectedValue: V,
+  isEqual?: (exp: NoInfer<V>, b: NoInfer<In>) => boolean,
 ): <EC, EE, DC, DE>(
   ty: ICborType<
     In,
@@ -21,21 +39,39 @@ export function constant<In, const V extends In>(
   EE | UnexpectedValueError<In, V>,
   DC,
   DE | UnexpectedValueError<In, V>
+>;
+export function constant<In, const V extends In>(
+  expectedValue: V,
+  isEqual: (exp: NoInfer<V>, b: NoInfer<In>) => boolean = Object.is,
+): <EE, DE>(
+  ty: ICborType<
+    In,
+    any,
+    EE | UnexpectedValueError<In, V>,
+    any,
+    DE | UnexpectedValueError<In, V>
+  >,
+) => CborType<
+  V,
+  any,
+  EE | UnexpectedValueError<In, V>,
+  any,
+  DE | UnexpectedValueError<In, V>
 > {
-  return <EC, EE, DC, DE>(
+  return <EE, DE>(
     ty: ICborType<
       In,
-      EC,
+      any,
       EE | UnexpectedValueError<In, V>,
-      DC,
+      any,
       DE | UnexpectedValueError<In, V>
     >,
   ) =>
     new CborType<
       V,
-      EC,
+      any,
       EE | UnexpectedValueError<In, V>,
-      DC,
+      any,
       DE | UnexpectedValueError<In, V>
     >(
       (value, e, ctx) => {

@@ -11,13 +11,9 @@ type InferOrType<TS> = TS extends []
       : InferOrType<RS>
     : never;
 
-export function or<
-  EC,
-  EE,
-  DC,
-  DE,
-  Types extends ICborType<any, void, EE, void, DE>[],
->(...types: Types): CborType<InferOrType<Types>, void, EE[], void, DE[]>;
+export function or<EE, DE, Types extends ICborType<any, void, EE, void, DE>[]>(
+  ...types: Types
+): CborType<InferOrType<Types>, void, EE[], void, DE[]>;
 export function or<
   EC,
   EE,

@@ -59,9 +59,15 @@ function decodeArrayU64<T, DC, DE>(
   return ok(res);
 }
 
+export function array(): <T, EE, DE>(
+  ty: ICborType<T, void, EE, void, DE>,
+) => CborType<T[], void, EE | OverflowError, void, DE | DecodingError>;
 export function array(): <T, EC, EE, DC, DE>(
   ty: ICborType<T, EC, EE, DC, DE>,
-) => CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> {
+) => CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError>;
+export function array(): <T, EE, DE>(
+  ty: ICborType<T, any, EE, any, DE>,
+) => CborType<T[], any, EE | OverflowError, any, DE | DecodingError> {
   return <T, EC, EE, DC, DE>(
     ty: ICborType<T, EC, EE, DC, DE>,
   ): CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> =>
