@@ -3,19 +3,19 @@ import { ICborType, IDecoder, IEncoder } from "../types";
 import { CborType } from "../base";
 import { decodeSymbol, encodeSymbol } from "../traits";
 
-export function convert<Encoded, Decoded>(
-  toEncoded: (value: Encoded) => NoInfer<Decoded>,
-  fromDecoded: (value: Decoded) => Encoded,
+export function convert<T, EncodedAs>(
+  toEncodedValue: (value: T) => NoInfer<EncodedAs>,
+  fromEncodedValue: (value: EncodedAs) => T,
 ): <EC, EE, DC, DE>(
-  ty: ICborType<Decoded, EC, EE, DC, DE>,
-) => CborType<Encoded, EC, EE, DC, DE> {
+  ty: ICborType<EncodedAs, EC, EE, DC, DE>,
+) => CborType<T, EC, EE, DC, DE> {
   return <EC, EE, DC, DE>(
-    ty: ICborType<Decoded, EC, EE, DC, DE>,
-  ): CborType<Encoded, EC, EE, DC, DE> =>
+    ty: ICborType<EncodedAs, EC, EE, DC, DE>,
+  ): CborType<T, EC, EE, DC, DE> =>
     new CborType(
-      (value: Encoded, e: IEncoder, ctx: EC): Result<void, EE> =>
-        ty[encodeSymbol](toEncoded(value), e, ctx),
-      (d: IDecoder, ctx: DC): Result<Encoded, DE> =>
-        ty[decodeSymbol](d, ctx).map(fromDecoded),
+      (value: T, e: IEncoder, ctx: EC): Result<void, EE> =>
+        ty[encodeSymbol](toEncodedValue(value), e, ctx),
+      (d: IDecoder, ctx: DC): Result<T, DE> =>
+        ty[decodeSymbol](d, ctx).map(fromEncodedValue),
     );
 }
