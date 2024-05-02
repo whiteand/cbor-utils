@@ -30,37 +30,37 @@ type InferSeqDE<TS> = TS extends readonly []
     : never;
 
 export function seq<
-  const Types extends readonly ICborType<any, void, any, void, any>[],
+  const TypesList extends readonly ICborType<any, void, any, void, any>[],
 >(
-  types: Types,
+  types: TypesList,
 ): CborType<
-  InferSeqType<Types>,
+  InferSeqType<TypesList>,
   void,
-  InferSeqEE<Types> | TypeMismatchError,
+  InferSeqEE<TypesList> | TypeMismatchError,
   void,
-  InferSeqDE<Types>
+  InferSeqDE<TypesList>
 >;
 export function seq<
   EC,
   DC,
-  const Types extends readonly ICborType<any, EC, any, DC, any>[],
+  const TypesList extends readonly ICborType<any, EC, any, DC, any>[],
 >(
-  types: Types,
+  types: TypesList,
 ): CborType<
-  InferSeqType<Types>,
+  InferSeqType<TypesList>,
   EC,
-  InferSeqEE<Types> | TypeMismatchError,
+  InferSeqEE<TypesList> | TypeMismatchError,
   DC,
-  InferSeqDE<Types>
+  InferSeqDE<TypesList>
 > {
   const n = types.length;
   const typeStr = `array[${n}]`;
   return new CborType<
-    InferSeqType<Types>,
+    InferSeqType<TypesList>,
     EC,
-    InferSeqEE<Types> | TypeMismatchError,
+    InferSeqEE<TypesList> | TypeMismatchError,
     DC,
-    InferSeqDE<Types>
+    InferSeqDE<TypesList>
   >(
     (v, e, ctx) => {
       if (!v || typeof v.length != "number")
@@ -72,7 +72,7 @@ export function seq<
         const item = v[i];
         const itemTy = types[i];
         const res = itemTy[encodeSymbol](item, e, ctx);
-        if (!res.ok()) return res as InferSeqEE<Types>;
+        if (!res.ok()) return res as InferSeqEE<TypesList>;
       }
       return success;
     },
@@ -83,7 +83,7 @@ export function seq<
         if (!res.ok()) return res;
         (tuple as any[])[i] = res.value;
       }
-      return ok(tuple as InferSeqType<Types>);
+      return ok(tuple as InferSeqType<TypesList>);
     },
   );
 }
