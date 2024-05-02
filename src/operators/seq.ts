@@ -1,4 +1,4 @@
-import { Result, err, ok } from "resultra";
+import { ok } from "resultra";
 import { CborType } from "../base";
 import { ICborType } from "../types";
 import { decodeSymbol, encodeSymbol } from "../traits";
@@ -30,7 +30,7 @@ type InferSeqDE<TS> = TS extends readonly []
     : never;
 
 export function seq<
-  Types extends readonly ICborType<any, void, any, void, any>[],
+  const Types extends readonly ICborType<any, void, any, void, any>[],
 >(
   types: Types,
 ): CborType<
@@ -43,7 +43,7 @@ export function seq<
 export function seq<
   EC,
   DC,
-  Types extends readonly ICborType<any, EC, any, DC, any>[],
+  const Types extends readonly ICborType<any, EC, any, DC, any>[],
 >(
   types: Types,
 ): CborType<
