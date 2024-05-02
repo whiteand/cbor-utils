@@ -2,6 +2,12 @@
 
 This library provides you with low level tools to use CBOR format
 
+## Installation
+
+```sh
+npm install cbor-utils
+```
+
 ## Example:
 
 If you want to encode something to Uint8Array you can use `encode` function.
