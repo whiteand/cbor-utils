@@ -13,10 +13,12 @@ import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
 import { getJsType } from "../utils/getJsType";
 import { concatBytesOfLength } from "../utils/concatBytes";
-import { EOI_ERR } from "../EndOfInputError";
+import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { done } from "../utils/done";
 
-function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
+function decodeIndefiniteBytes(
+  d: IDecoder,
+): Result<Uint8Array, EndOfInputError | TypeMismatchError> {
   const chunks: Uint8Array[] = [];
   let total = 0;
   while (d.ptr < d.buf.length) {
@@ -33,7 +35,9 @@ function decodeIndefiniteBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
   return ok(concatBytesOfLength(chunks, total));
 }
 
-function decodeBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
+function decodeBytes(
+  d: IDecoder,
+): Result<Uint8Array, EndOfInputError | TypeMismatchError> {
   if (done(d)) return EOI_ERR;
   const marker = d.buf[d.ptr];
   if (getType(marker) !== BYTES_TYPE) {
