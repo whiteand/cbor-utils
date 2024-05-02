@@ -2,15 +2,10 @@ import { Result, ok } from "resultra";
 import { ICborType, IDecodableType, IDecoder, IEncoder } from "../types";
 import { CborType } from "../base";
 import { decodeSymbol, encodeSymbol } from "../traits";
-import { writeTypeAndArg } from "../writeTypeAndArg";
-import { readArg } from "../readArg";
-import { ARRAY_TYPE } from "../constants";
+import { arrayLen } from "../default/arrayLen";
 import { success } from "../success";
-import { getType } from "../marker";
 import { OverflowError } from "../OverflowError";
-import { TypeMismatchError } from "../TypeMismatchError";
 import { DecodingError } from "../DecodingError";
-import { getTypeString } from "../getTypeString";
 
 function decodeArrayIndefinite<T, DC, DE>(
   ty: IDecodableType<T, DC, DE>,
@@ -73,7 +68,7 @@ export function array(): <T, EE, DE>(
   ): CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> =>
     new CborType(
       (value: T[], e: IEncoder, ctx: EC): Result<void, EE | OverflowError> => {
-        const res = writeTypeAndArg(e, ARRAY_TYPE, value.length);
+        const res = arrayLen[encodeSymbol](value.length, e);
         if (!res.ok()) {
           return res;
         }
@@ -87,12 +82,7 @@ export function array(): <T, EE, DE>(
         return success;
       },
       (d: IDecoder, ctx: DC): Result<T[], DE | DecodingError> => {
-        const marker = d.buf[d.ptr];
-        const t = getType(marker);
-        if (t !== ARRAY_TYPE) {
-          return new TypeMismatchError("array", getTypeString(marker)).err();
-        }
-        const lenRes = readArg(d);
+        const lenRes = arrayLen[decodeSymbol](d);
         if (!lenRes.ok()) return lenRes;
         const len = lenRes.value;
         switch (typeof len) {
