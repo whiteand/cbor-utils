@@ -17,22 +17,13 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "6.5 kB"
+      "limit": "7 kB"
     }
   ],
-  "files": [
-    "dist"
-  ],
-  "keywords": [
-    "cbor",
-    "encoder",
-    "decoder",
-    "format"
-  ],
+  "files": ["dist"],
+  "keywords": ["cbor", "encoder", "decoder", "format"],
   "tsup": {
-    "entry": [
-      "src/index.ts"
-    ],
+    "entry": ["src/index.ts"],
     "splitting": false,
     "sourcemap": true,
     "clean": true

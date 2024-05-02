@@ -3,14 +3,14 @@ import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { UnderflowError } from "../UnderflowError";
 import { getTypeString } from "../getTypeString";
-import { ICborType } from "../types";
 import { DecodingError } from "../DecodingError";
 import { uint } from "./uint";
 import { flatMap } from "../operators/flatMap";
+import { CborType } from "../base";
 
 function createBigInt(
   size: 64 | 128,
-): ICborType<
+): CborType<
   bigint,
   unknown,
   OverflowError | UnderflowError,
