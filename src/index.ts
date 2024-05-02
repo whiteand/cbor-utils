@@ -12,6 +12,7 @@ export { CborType } from "./base";
 export { decode, tryDecode } from "./decode";
 export { any } from "./default/any";
 export { u128, u64 } from "./default/bigInts";
+export { uint } from "./default/uint";
 export { bignum } from "./default/bignum";
 export { bool } from "./default/bool";
 export { bytes } from "./default/bytes";
