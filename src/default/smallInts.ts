@@ -7,6 +7,8 @@ import { getTypeString } from "../getTypeString";
 import { flatMap } from "../operators/flatMap";
 import { uint } from "./uint";
 import { CborType } from "../base";
+import { InvalidCborError } from "../InvalidCborError";
+import { EndOfInputError } from "../EndOfInputError";
 
 const MAX_VALUE_DICT = {
   8: 255,
@@ -15,7 +17,13 @@ const MAX_VALUE_DICT = {
 } as const;
 function createSmallIntType(
   size: 8 | 16 | 32,
-): CborType<number, void, OverflowError | UnderflowError, void, DecodingError> {
+): CborType<
+  number,
+  void,
+  OverflowError | UnderflowError,
+  void,
+  InvalidCborError | EndOfInputError | TypeMismatchError
+> {
   const MAX_VALUE = MAX_VALUE_DICT[size];
   const tyName = `u` + size;
   const MIN_VALUE = 0;

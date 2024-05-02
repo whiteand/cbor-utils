@@ -9,15 +9,15 @@ import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
-import { EOI_ERR } from "../EndOfInputError";
+import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { done } from "../utils/done";
 
 export const uint = new CborType<
   number | bigint,
   void,
-  OverflowError,
+  OverflowError | TypeMismatchError,
   void,
-  DecodingError
+  EndOfInputError | TypeMismatchError | InvalidCborError
 >(
   (v, e) => {
     if (typeof v !== "number" && typeof v !== "bigint") {
