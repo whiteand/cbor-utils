@@ -10,6 +10,7 @@ import { EOI_ERR } from "../EndOfInputError";
 describe("u64", () => {
   const tests = [
     { v: 0n, b: "00" },
+    { v: 1n, b: "01" },
     { v: 2n ** 64n - 1n, b: "1bffffffffffffffff" },
     { v: 2n ** 64n, ee: new OverflowError(2n ** 64n - 1n, 2n ** 64n) },
     { b: "f97e00", de: new TypeMismatchError("uint", "f16") },

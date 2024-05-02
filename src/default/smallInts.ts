@@ -9,11 +9,12 @@ import { uint } from "./uint";
 import { CborType } from "../base";
 import { InvalidCborError } from "../InvalidCborError";
 import { EndOfInputError } from "../EndOfInputError";
+import { MAX_U16, MAX_U32, MAX_U8 } from "../limits";
 
 const MAX_VALUE_DICT = {
-  8: 255,
-  16: 65535,
-  32: 4294967295,
+  8: MAX_U8,
+  16: MAX_U16,
+  32: MAX_U32,
 } as const;
 function createSmallIntType(
   size: 8 | 16 | 32,

@@ -4,6 +4,19 @@ import { MAX_U128, MAX_U16, MAX_U32, MAX_U64, MAX_U8 } from "./limits";
 import { success } from "./success";
 import { IEncoder } from "./types";
 
+function trySmall(value: number | bigint): number | null {
+  if (typeof value === "bigint") {
+    if (value > BigInt(MAX_U32)) {
+      return null;
+    }
+    return Number(value);
+  }
+  if (value > MAX_U32) {
+    return null;
+  }
+  return value;
+}
+
 export function writeTypeAndArg(
   e: IEncoder,
   ty: number,
@@ -14,8 +27,7 @@ export function writeTypeAndArg(
     e.write(tyMask | 31);
     return success;
   }
-  const smallInt =
-    typeof value === "number" ? value : value > MAX_U32 ? null : Number(value);
+  const smallInt = trySmall(value);
   if (smallInt != null) {
     if (smallInt < 24) {
       e.write(tyMask | smallInt);
