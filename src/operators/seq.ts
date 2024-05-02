@@ -14,6 +14,9 @@ type InferSeqType<TS> = TS extends []
       : InferSeqType<RS>
     : [];
 
+export function seq<EE, DE, Types extends ICborType<any, void, EE, void, DE>[]>(
+  ...types: Types
+): CborType<InferSeqType<Types>, void, EE | TypeMismatchError, void, DE>;
 export function seq<
   EC,
   EE,
