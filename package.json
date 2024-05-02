@@ -1,6 +1,6 @@
 {
   "name": "cbor-utils",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "CBOR encoder and decoder classes. Analogue to minicbor from Rust",
   "main": "dist/index.js",
   "scripts": {
@@ -20,10 +20,19 @@
       "limit": "6.5 kB"
     }
   ],
-  "files": ["dist"],
-  "keywords": ["cbor", "encoder", "decoder", "format"],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "cbor",
+    "encoder",
+    "decoder",
+    "format"
+  ],
   "tsup": {
-    "entry": ["src/index.ts"],
+    "entry": [
+      "src/index.ts"
+    ],
     "splitting": false,
     "sourcemap": true,
     "clean": true
