@@ -8,27 +8,27 @@ import {
 import { IEncodableType, IEncoder } from "./types";
 
 function nextSize(current: number, minimal: number) {
-  if (current >= minimal) return current;
-  if (current <= 0) {
-    return minimal;
-  }
+  current ||= 1;
   while (current < minimal) {
     current *= 2;
   }
   return current;
 }
 
-export class Encoder implements IEncoder {
+abstract class BaseEncoder {
   buf: Uint8Array;
   ptr: number;
+  offset: number;
   constructor(buffer: Uint8Array = new Uint8Array(), ptr: number = 0) {
     this.buf = buffer;
     this.ptr = ptr;
+    this.offset = ptr;
   }
 
   save() {
     return this.ptr;
   }
+
   restore(value: number) {
     if (this.buf.length > value) {
       this.ptr = value;
@@ -36,6 +36,7 @@ export class Encoder implements IEncoder {
       throw new Error("invalid restore position: " + value);
     }
   }
+
   write(byte: number): this {
     if (this.ptr >= this.buf.length) {
       this.realloc(nextSize(this.buf.length, this.buf.length + 1));
@@ -57,24 +58,45 @@ export class Encoder implements IEncoder {
     this.ptr += bytes.length;
     return this;
   }
+  finish(): Uint8Array {
+    return this.buf.slice(this.offset, this.ptr);
+  }
+}
+
+export class Encoder extends BaseEncoder implements IEncoder {
   encode<Ty extends IEncodableType<any, unknown, any>>(
     ty: Ty,
-    value: Ty[typeof encodeTypeSymbol]
+    value: Ty[typeof encodeTypeSymbol],
   ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]>;
   encode<Ty extends IEncodableType<any, any, any>>(
     ty: Ty,
     value: Ty[typeof encodeTypeSymbol],
-    c: Ty[typeof encodeCtxSymbol]
+    c: Ty[typeof encodeCtxSymbol],
   ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]>;
   encode<Ty extends IEncodableType>(
     ty: Ty,
     value: Ty[typeof encodeTypeSymbol],
-    c?: unknown
+    c?: unknown,
   ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]> {
     return ty[encodeSymbol](value, this, c);
   }
+}
 
-  finish(): Uint8Array {
-    return this.buf.slice(0, this.ptr);
+export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
+  encode<Ty extends IEncodableType<any, unknown, any>>(
+    ty: Ty,
+    value: Ty[typeof encodeTypeSymbol],
+  ): Ty[typeof encodeTypeSymbol];
+  encode<Ty extends IEncodableType<any, any, any>>(
+    ty: Ty,
+    value: Ty[typeof encodeTypeSymbol],
+    c: Ty[typeof encodeCtxSymbol],
+  ): Ty[typeof encodeTypeSymbol];
+  encode<Ty extends IEncodableType>(
+    ty: Ty,
+    value: Ty[typeof encodeTypeSymbol],
+    c?: unknown,
+  ): Ty[typeof encodeTypeSymbol] {
+    return ty[encodeSymbol](value, this, c).unwrap();
   }
 }

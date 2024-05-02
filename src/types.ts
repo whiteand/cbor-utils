@@ -1,5 +1,4 @@
 import { Result } from "resultra";
-import { EncodingError } from "./EncodingError";
 import {
   decodeCtxSymbol,
   decodeErrSymbol,

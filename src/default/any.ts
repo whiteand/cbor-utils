@@ -19,7 +19,7 @@ import { array } from "../operators/array";
 import { tagged } from "../operators/tagged";
 import { or } from "../operators/or";
 import { decodeSymbol, encodeSymbol } from "../traits";
-import { IDecoder, IEncoder } from "../types";
+import { IDecodableType, IDecoder, IEncodableType, IEncoder } from "../types";
 import { DataItem, Simple, TaggedDataItem } from "./DataItem";
 import { bool } from "./bool";
 import { bytes } from "./bytes";
@@ -40,6 +40,20 @@ import { MAX_U128 } from "../limits";
 import { OverflowError } from "../OverflowError";
 import { InvalidCborError } from "../InvalidCborError";
 
+function dec<T, E>(
+  t: IDecodableType<T, unknown, E>,
+  d: IDecoder,
+): Result<T, E> {
+  return t[decodeSymbol](d, null);
+}
+function enc<T, E>(
+  t: IEncodableType<T, unknown, E>,
+  v: T,
+  e: IEncoder,
+): Result<null, E> {
+  return t[encodeSymbol](v, e, null);
+}
+
 export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
   const p = d.ptr;
   if (p >= d.buf.length) {
@@ -49,39 +63,39 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
   const t = getType(m);
   switch (t) {
     case NUMBER_TYPE:
-      return uint[decodeSymbol](d, null);
+      return dec(uint, d);
     case ARRAY_TYPE:
-      return anyArray[decodeSymbol](d, null);
+      return dec(anyArray, d);
     case STRING_TYPE:
-      return str[decodeSymbol](d, null);
+      return dec(str, d);
     case MAP_TYPE:
-      return anyMap[decodeSymbol](d, null);
+      return dec(anyMap, d);
     case NEGATIVE_INT_TYPE:
-      return nint[decodeSymbol](d, null);
+      return dec(nint, d);
     case BYTES_TYPE:
-      return bytes[decodeSymbol](d, null);
+      return dec(bytes, d);
     case SPECIAL_TYPE: {
       const info = getInfo(m);
       switch (info) {
         case 20:
         case 21:
-          return bool[decodeSymbol](d, null);
+          return dec(bool, d);
         case 22:
-          return nullType[decodeSymbol](d, null);
+          return dec(nullType, d);
         case 23:
-          return undefinedType[decodeSymbol](d, null);
+          return dec(undefinedType, d);
         case 25: {
-          return f16[decodeSymbol](d, null);
+          return dec(f16, d);
         }
         case 26: {
-          return f32[decodeSymbol](d, null);
+          return dec(f32, d);
         }
         case 27: {
-          return f64[decodeSymbol](d, null);
+          return dec(f64, d);
         }
         default: {
           if (info < 20 || info === 24) {
-            return simple[decodeSymbol](d, null);
+            return dec(simple, d);
           }
           return new InvalidCborError(
             m,
@@ -95,26 +109,26 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
       const info = getInfo(m);
       switch (info) {
         case 0:
-          return dateTimeString[decodeSymbol](d, null);
+          return dec(dateTimeString, d);
         case 1:
-          return epochTime[decodeSymbol](d, null);
+          return dec(epochTime, d);
         case 2:
         case 3:
-          return bignum[decodeSymbol](d, null);
+          return dec(bignum, d);
         case 24: {
           if (d.ptr + 1 >= d.buf.length) return EOI_ERR;
           const tag = d.buf[d.ptr + 1];
           switch (tag) {
             case 32:
-              return uri[decodeSymbol](d, null);
+              return dec(uri, d);
             case 24:
-              return cborBytes[decodeSymbol](d, null);
+              return dec(cborBytes, d);
             default:
-              return taggedAny[decodeSymbol](d, null);
+              return dec(taggedAny, d);
           }
         }
         default:
-          return taggedAny[decodeSymbol](d, null);
+          return dec(taggedAny, d);
       }
     }
 
@@ -125,12 +139,12 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
 
 function encodeBigInt(b: bigint, e: IEncoder): Result<null, OverflowError> {
   if (b > MAX_U128 || b < -MAX_U128 - 1n) {
-    return bignum[encodeSymbol](b, e, null);
+    return enc(bignum, b, e);
   }
   if (b >= 0n) {
-    return uint[encodeSymbol](b, e, null);
+    return enc(uint, b, e);
   }
-  return nint[encodeSymbol](b, e, null);
+  return enc(nint, b, e);
 }
 function encodeAny(
   value: DataItem,
@@ -140,37 +154,37 @@ function encodeAny(
     if (Number.isInteger(value)) {
       return encodeBigInt(BigInt(value), e);
     }
-    return f64[encodeSymbol](value, e, null);
+    return enc(f64, value, e);
   }
   if (typeof value === "bigint") {
     return encodeBigInt(BigInt(value), e);
   }
   if (typeof value === "string") {
-    return str[encodeSymbol](value, e, null);
+    return enc(str, value, e);
   }
   if (typeof value === "boolean") {
-    return bool[encodeSymbol](value, e, null);
+    return enc(bool, value, e);
   }
   if (value === null) {
-    return nullType[encodeSymbol](value, e, null);
+    return enc(nullType, value, e);
   }
   if (value === undefined) {
-    return undefinedType[encodeSymbol](value, e, null);
+    return enc(undefinedType, value, e);
   }
   if (value instanceof Uint8Array) {
-    return bytes[encodeSymbol](value, e, null);
+    return enc(bytes, value, e);
   }
   if (Array.isArray(value)) {
-    return anyArray[encodeSymbol](value, e, null);
+    return enc(anyArray, value, e);
   }
   if (value instanceof Map) {
-    return anyMap[encodeSymbol](value, e, null);
+    return enc(anyMap, value, e);
   }
   if (value instanceof Simple) {
-    return simple[encodeSymbol](value, e, null);
+    return enc(simple, value, e);
   }
   if (value instanceof TaggedDataItem) {
-    return taggedAny[encodeSymbol](value, e, null);
+    return enc(taggedAny, value, e);
   }
   return err(
     new TypeMismatchError(
@@ -195,7 +209,7 @@ export const uri = str.pipe(tagged(32), untag(32, "uri"));
 export const dateTimeString = str.pipe(tagged(0), untag(0, "datetime string"));
 export const cborBytes = bytes.pipe(tagged(24), untag(24, "cbor-bytes"));
 
-export const epochTime = or(uint, f32, f16, f64).pipe(
+export const epochTime = or(uint, f64, f32, f16).pipe(
   mapErrors(
     (_, v) => new TypeMismatchError("epoch time", String(v)),
     (_, m) => new TypeMismatchError("epoch time", getTypeString(m)),

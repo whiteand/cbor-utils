@@ -6,7 +6,6 @@ import { getTypeString } from "../getTypeString";
 import { ICborType } from "../types";
 import { DecodingError } from "../DecodingError";
 import { uint } from "./uint";
-import { MAX_U128 } from "../limits";
 import { flatMap } from "../operators/flatMap";
 
 function createBigInt(
@@ -19,7 +18,7 @@ function createBigInt(
   DecodingError
 > {
   const MAX_VALUE = (1n << BigInt(size)) - 1n;
-  const tyName = `u` + size;
+  const tyName = "u" + size;
   const MIN_VALUE = 0n;
 
   return uint.pipe(

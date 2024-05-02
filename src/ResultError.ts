@@ -1,4 +1,4 @@
-import { ErrResult, Result, err } from "resultra";
+import { ErrResult, err } from "resultra";
 
 export abstract class ResultError extends Error {
   constructor(message: string, options?: ErrorOptions) {

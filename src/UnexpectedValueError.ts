@@ -6,10 +6,7 @@ export class UnexpectedValueError<In, V> extends ResultError {
     public readonly actual: In,
     message?: string,
   ) {
-    super(
-      message
-        ? `${message}: expected ${expected}, but got ${actual}`
-        : `expected ${expected}, but got ${actual}`,
-    );
+    const exp = `expected ${expected}, but got ${actual}`;
+    super(message ? `${message}: ${exp}` : exp);
   }
 }

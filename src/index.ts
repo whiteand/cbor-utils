@@ -1,7 +1,8 @@
 export { Result, err, ok } from "resultra";
 export { Decoder } from "./Decoder";
-export { Encoder } from "./Encoder";
+export { Encoder, ThrowOnFailEncoder } from "./Encoder";
 export { CborType } from "./base";
+export { decode, decodeThrowing } from "./decode";
 export { any } from "./default/any";
 export { u128, u64 } from "./default/bigInts";
 export { bignum } from "./default/bignum";
@@ -14,6 +15,7 @@ export { nullType } from "./default/null";
 export { u16, u32, u8 } from "./default/smallInts";
 export { str } from "./default/str";
 export { undefinedType } from "./default/undefined";
+export { encode } from "./encode";
 export { array } from "./operators/array";
 export { cast } from "./operators/cast";
 export { constant } from "./operators/constant";
