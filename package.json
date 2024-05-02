@@ -17,7 +17,7 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "6.05 kB"
+      "limit": "6.5 kB"
     }
   ],
   "files": ["dist"],
@@ -37,6 +37,6 @@
     "vitest": "^1.5.0"
   },
   "dependencies": {
-    "resultra": "^0.1.2"
+    "resultra": "^0.1.4"
   }
 }
