@@ -1,14 +1,15 @@
 import { Result } from "resultra";
+import { catchError } from "resultra/utils";
 import { ThrowOnFailDecoder, Decoder } from "./Decoder";
 
-const d = (c: any) => (b: any, c: any) => c(new c(b, 0));
-
-export const decodeThrowing: <T>(
+export const tryDecode: <T>(
   bytes: Uint8Array,
   cb: (e: ThrowOnFailDecoder) => T,
-) => T = d(ThrowOnFailDecoder);
+) => Result<T, unknown> = (b, cb) => {
+  return catchError(cb, new ThrowOnFailDecoder(b));
+};
 
 export const decode: <T, E>(
   bytes: Uint8Array,
   cb: (e: Decoder) => Result<T, E>,
-) => Result<T, E> = d(Decoder);
+) => Result<T, E> = (b, cb) => cb(new Decoder(b));

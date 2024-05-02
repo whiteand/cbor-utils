@@ -18,26 +18,40 @@ const bytes = encode((e) => {
 If you want to decode something you can use `decode` function.
 
 ```typescript
-import { ok, decode } from 'cbor-utils'
+import { ok, decode, Result, u8, bytes, bool } from "cbor-utils";
 
-const result = decode(bytes, d => {
-    const id = d.u8()
-    if (!id.ok()) return id
-    const hash = d.bytes()
-    if (!hash.ok()) return hash
-    const submitted = d.bool()
-    if (!submitted.ok()) return submitted
+/**
+ * @type {Result<{id: number, hash: Uint8Array, submitted: boolean }, DecodingError>
+ */
+const res = decode(cborBytes, (d) => {
+  const id = d.decode(u8);
+  if (!id.ok()) return id;
+  const hash = d.decode(bytes);
+  if (!hash.ok()) return hash;
+  const submitted = d.decode(bool);
+  if (!submitted.ok()) return submitted;
+  return ok({
+    id: id.value,
+    hash: hash.value,
+    submitted: submitted.value,
+  });
+});
 
-    return ok({
-        id: id.value,
-        hash: hash.value,
-        submitted: submitted.value
-    })
-})
+//or less type safe version, but without necessity to check each decoded item result:
+import { tryDecode, u8, bytes, bool } from "cbor-utils";
 
-## Will be in next versions
+/**
+ * @type {Result<{id: number, hash: Uint8Array, submitted: boolean }, unknown>
+ */
+const result2 = tryDecode(cborBytes, (d) => {
+  const id = d.decode(u8);
+  const hash = d.decode(bytes);
+  const submitted = d.decode(bool);
 
-- [ ] Decoder.map()
-- [ ] Decoder.strIter()
-- [ ] Decoder.bytesIter()
+  return {
+    id,
+    hash,
+    submitted,
+  };
+});
 ```
