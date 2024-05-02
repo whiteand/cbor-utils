@@ -20,6 +20,7 @@ export { encode } from "./encode";
 export { array } from "./operators/array";
 export { cast } from "./operators/cast";
 export { constant } from "./operators/constant";
+export { seq } from "./operators/seq";
 export { convert } from "./operators/convert";
 export { flatMap } from "./operators/flatMap";
 export { mapErrors } from "./operators/mapErrors";
