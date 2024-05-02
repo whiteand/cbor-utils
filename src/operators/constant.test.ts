@@ -19,7 +19,7 @@ describe("constant", () => {
     const failBytes = new Uint8Array([5]);
     const r = new Decoder(failBytes).decode(four);
     expect(!r.ok() && r.error).toMatchInlineSnapshot(
-      `[Error: Expected 4, but got 5]`
+      `[Error: expected 4, but got 5]`,
     );
     const validBytes = new Uint8Array([4]);
     const r2 = new Decoder(validBytes).decode(four);

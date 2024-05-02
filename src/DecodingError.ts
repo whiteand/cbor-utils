@@ -1,10 +1,10 @@
 import { EndOfInputError } from "./EndOfInputError";
 import { InvalidCborError } from "./InvalidCborError";
 import { TypeMismatchError } from "./TypeMismatchError";
-import { UnexpectedValue } from "./UnexpectedValue";
+import { UnexpectedValueError } from "./UnexpectedValueError";
 
 export type DecodingError =
   | EndOfInputError
   | InvalidCborError
-  | UnexpectedValue<any, any>
+  | UnexpectedValueError<any, any>
   | TypeMismatchError;

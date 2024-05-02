@@ -5,12 +5,12 @@ import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { EOI_ERR } from "../EndOfInputError";
-import { UnexpectedValue } from "../UnexpectedValue";
+import { UnexpectedValueError } from "../UnexpectedValueError";
 
 describe("null", () => {
   const tests = [
     { v: null, b: "f6" },
-    { v: "1", ee: new UnexpectedValue(null, "1") },
+    { v: "1", ee: new UnexpectedValueError(null, "1") },
     { b: "f97e00", de: new TypeMismatchError("null", "f16") },
     { b: "", de: EOI_ERR.error },
   ];

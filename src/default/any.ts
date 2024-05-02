@@ -191,9 +191,9 @@ export const any = new CborType<
 export const anyArray = any.pipe(array());
 export const taggedAny = any.pipe(tagged());
 export const anyMap = map(any, any);
-export const uri = str.pipe(tagged(), untag(32, "uri"));
-export const dateTimeString = str.pipe(tagged(), untag(0, "datetime string"));
-export const cborBytes = bytes.pipe(tagged(), untag(24, "cbor-bytes"));
+export const uri = str.pipe(tagged(32), untag(32, "uri"));
+export const dateTimeString = str.pipe(tagged(0), untag(0, "datetime string"));
+export const cborBytes = bytes.pipe(tagged(24), untag(24, "cbor-bytes"));
 
 export const epochTime = or(uint, f32, f16, f64).pipe(
   mapErrors(

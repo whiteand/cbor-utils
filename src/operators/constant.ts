@@ -2,7 +2,7 @@ import { CborType } from "../base";
 import { ICborType } from "../types";
 import { decodeSymbol, encodeSymbol } from "../traits";
 import { Result, ok } from "resultra";
-import { UnexpectedValue } from "../UnexpectedValue";
+import { UnexpectedValueError } from "../UnexpectedValueError";
 
 export function constant<In, const V extends In>(
   expectedValue: V,
@@ -11,46 +11,46 @@ export function constant<In, const V extends In>(
   ty: ICborType<
     In,
     EC,
-    EE | UnexpectedValue<In, V>,
+    EE | UnexpectedValueError<In, V>,
     DC,
-    DE | UnexpectedValue<In, V>
+    DE | UnexpectedValueError<In, V>
   >,
 ) => CborType<
   V,
   EC,
-  EE | UnexpectedValue<In, V>,
+  EE | UnexpectedValueError<In, V>,
   DC,
-  DE | UnexpectedValue<In, V>
+  DE | UnexpectedValueError<In, V>
 > {
   return <EC, EE, DC, DE>(
     ty: ICborType<
       In,
       EC,
-      EE | UnexpectedValue<In, V>,
+      EE | UnexpectedValueError<In, V>,
       DC,
-      DE | UnexpectedValue<In, V>
+      DE | UnexpectedValueError<In, V>
     >,
   ) =>
     new CborType<
       V,
       EC,
-      EE | UnexpectedValue<In, V>,
+      EE | UnexpectedValueError<In, V>,
       DC,
-      DE | UnexpectedValue<In, V>
+      DE | UnexpectedValueError<In, V>
     >(
       (value, e, ctx) => {
         if (!isEqual(value, expectedValue)) {
-          return new UnexpectedValue(expectedValue, value).err();
+          return new UnexpectedValueError(expectedValue, value).err();
         }
         return ty[encodeSymbol](value, e, ctx);
       },
-      (d, ctx): Result<V, DE | UnexpectedValue<In, V>> => {
+      (d, ctx): Result<V, DE | UnexpectedValueError<In, V>> => {
         const v = ty[decodeSymbol](d, ctx);
         if (!v.ok()) {
           return v;
         }
         if (!isEqual(expectedValue, v.value)) {
-          return new UnexpectedValue(expectedValue, v.value).err();
+          return new UnexpectedValueError(expectedValue, v.value).err();
         }
         return ok(v.value as V);
       },

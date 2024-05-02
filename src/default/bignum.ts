@@ -4,7 +4,7 @@ import { flatMap } from "../operators/flatMap";
 import { tagged } from "../operators/tagged";
 import { TaggedDataItem } from "./DataItem";
 import { bytes } from "./bytes";
-import { UnexpectedValue } from "../UnexpectedValue";
+import { UnexpectedValueError } from "../UnexpectedValueError";
 
 function bigintFromBe(be: Uint8Array) {
   let res = 0n;
@@ -46,7 +46,7 @@ export const bignum = bytes.pipe(
         case 3:
           return ok(-1n - bigintFromBe(t.value));
         default:
-          return new UnexpectedValue("2 | 3", `${tag}`).err();
+          return new UnexpectedValueError("2 | 3", `${tag}`).err();
       }
     },
   ),

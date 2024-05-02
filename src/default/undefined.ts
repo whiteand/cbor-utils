@@ -4,20 +4,20 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
-import { UnexpectedValue } from "../UnexpectedValue";
+import { UnexpectedValueError } from "../UnexpectedValueError";
 import { okNull } from "../okNull";
 import { done } from "../utils/done";
 
 export const undefinedType = new CborType<
   undefined,
   unknown,
-  UnexpectedValue<undefined, undefined>,
+  UnexpectedValueError<undefined, undefined>,
   unknown,
   EndOfInputError | TypeMismatchError
 >(
   function encodeUndefined(v, e) {
     if (v !== undefined) {
-      return new UnexpectedValue(undefined, v).err();
+      return new UnexpectedValueError(undefined, v).err();
     }
     e.write(SPECIAL_TYPE_MASK | 23);
     return okNull;

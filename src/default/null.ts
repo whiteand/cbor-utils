@@ -4,20 +4,20 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { NULL_BYTE } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
-import { UnexpectedValue } from "../UnexpectedValue";
+import { UnexpectedValueError } from "../UnexpectedValueError";
 import { okNull } from "../okNull";
 import { done } from "../utils/done";
 
 export const nullType = new CborType<
   null,
   unknown,
-  UnexpectedValue<null, null>,
+  UnexpectedValueError<null, null>,
   unknown,
   EndOfInputError | TypeMismatchError
 >(
   (v, e) => {
     if (v !== null) {
-      return new UnexpectedValue(null, v).err();
+      return new UnexpectedValueError(null, v).err();
     }
     e.write(NULL_BYTE);
     return okNull;
