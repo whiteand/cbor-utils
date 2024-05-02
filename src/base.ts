@@ -18,7 +18,6 @@ import {
   TEncodeFunction,
 } from "./types";
 import { Pipeable } from "./pipe";
-import { u8 } from "./default/smallInts";
 
 export class CborType<T, EC, EE, DC, DE>
   extends Pipeable
