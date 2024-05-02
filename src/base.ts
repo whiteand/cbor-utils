@@ -32,17 +32,24 @@ export class CborType<T, EC, EE, DC, DE>
   [decodeSymbol]: TDecodeFunction<T, DC, DE> = null as never;
   constructor(
     enc: TEncodeFunction<T, EC, EE>,
-    dec: TDecodeFunction<T, DC, DE>
+    dec: TDecodeFunction<T, DC, DE>,
   ) {
     super();
     this[encodeSymbol] = enc;
     this[decodeSymbol] = dec;
   }
+
+  encode(value: T, e: IEncoder, ctx: EC): Result<null, EE> {
+    return this[encodeSymbol](value, e, ctx);
+  }
+  decode(d: IDecoder, ctx: DC): Result<T, DE> {
+    return this[decodeSymbol](d, ctx);
+  }
 }
 
 export function createContextfulType<T, EC, EE, DC, DE>(
   encode: TEncodeFunction<T, EC, EE>,
-  decode: TDecodeFunction<T, DC, DE>
+  decode: TDecodeFunction<T, DC, DE>,
 ): ICborType<T, EC, EE, DC, DE> {
   return {
     [encodeSymbol]: encode,
@@ -58,7 +65,7 @@ export function createContextfulType<T, EC, EE, DC, DE>(
 
 export function createType<T, EE, DE>(
   encode: (value: T, e: IEncoder) => Result<null, EE>,
-  decode: (d: IDecoder) => Result<T, DE>
+  decode: (d: IDecoder) => Result<T, DE>,
 ): ICborType<T, unknown, EE, unknown, DE> {
   return createContextfulType(encode, decode);
 }

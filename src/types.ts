@@ -14,13 +14,20 @@ export interface IDecoder {
   buf: Uint8Array;
   ptr: number;
 }
+export interface ISmartDecoder extends IDecoder {
+  decode<T, E>(t: IDecodableType<T, unknown, E>): Result<T, E>;
+  decode<T, C, E>(t: IDecodableType<T, C, E>, c: C): Result<T, E>;
+}
 export interface IEncoder {
   write(byte: number): this;
   writeSlice(bytes: Uint8Array): this;
   save(): number;
   restore(pos: number): void;
 }
-
+export interface ISmartEncoder extends IEncoder {
+  encode<T, E>(t: IEncodableType<T, unknown, E>, value: T): Result<null, E>;
+  encode<T, C, E>(t: IEncodableType<T, C, E>, value: T, c: C): Result<null, E>;
+}
 export type TDecodeFunction<T, Ctx, Err> = (
   decoder: IDecoder,
   ctx: Ctx,
