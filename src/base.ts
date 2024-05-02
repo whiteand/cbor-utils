@@ -45,6 +45,18 @@ export class CborType<T, EC, EE, DC, DE>
   decode(d: IDecoder, ctx: DC): Result<T, DE> {
     return this[decodeSymbol](d, ctx);
   }
+
+  static from<T, EC, EE, DC, DE>(
+    t: ICborType<T, EC, EE, DC, DE>,
+  ): CborType<T, EC, EE, DC, DE> {
+    if (t instanceof CborType) {
+      return t;
+    }
+    return new CborType(
+      (v, e, c) => t[encodeSymbol](v, e, c),
+      (d, c) => t[decodeSymbol](d, c),
+    );
+  }
 }
 
 export function createContextfulType<T, EC, EE, DC, DE>(

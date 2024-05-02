@@ -8,10 +8,10 @@ import { ICborType, IDecoder, IEncoder } from "../types";
 
 export function nullable(): <T, EC, EE, DC, DE>(
   ty: ICborType<T, EC, EE, DC, DE>,
-) => ICborType<T | null, EC, EE, DC, DE | DecodingError> {
+) => CborType<T | null, EC, EE, DC, DE | DecodingError> {
   return <T, EC, EE, DC, DE>(
     ty: ICborType<T, EC, EE, DC, DE>,
-  ): ICborType<T | null, EC, EE, DC, DE | DecodingError> =>
+  ): CborType<T | null, EC, EE, DC, DE | DecodingError> =>
     new CborType(
       (value: T | null, e: IEncoder, ctx: EC): Result<null, EE> => {
         if (value == null) {

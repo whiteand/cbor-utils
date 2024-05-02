@@ -15,7 +15,7 @@ import { getTypeString } from "../getTypeString";
 function decodeArrayIndefinite<T, DC, DE>(
   ty: IDecodableType<T, DC, DE>,
   d: IDecoder,
-  ctx: DC
+  ctx: DC,
 ) {
   const res: T[] = [];
   while (d.ptr < d.buf.length) {
@@ -34,7 +34,7 @@ function decodeArrayU32<T, DC, DE>(
   ty: IDecodableType<T, DC, DE>,
   len: number,
   d: IDecoder,
-  ctx: DC
+  ctx: DC,
 ) {
   const res: T[] = [];
   for (let i = 0; i < len; i++) {
@@ -48,7 +48,7 @@ function decodeArrayU64<T, DC, DE>(
   ty: IDecodableType<T, DC, DE>,
   len: bigint,
   d: IDecoder,
-  ctx: DC
+  ctx: DC,
 ) {
   const res: T[] = [];
   for (let i = 0n; i < len; i++) {
@@ -60,11 +60,11 @@ function decodeArrayU64<T, DC, DE>(
 }
 
 export function array(): <T, EC, EE, DC, DE>(
-  ty: ICborType<T, EC, EE, DC, DE>
-) => ICborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> {
+  ty: ICborType<T, EC, EE, DC, DE>,
+) => CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> {
   return <T, EC, EE, DC, DE>(
-    ty: ICborType<T, EC, EE, DC, DE>
-  ): ICborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> =>
+    ty: ICborType<T, EC, EE, DC, DE>,
+  ): CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> =>
     new CborType(
       (value: T[], e: IEncoder, ctx: EC): Result<null, EE | OverflowError> => {
         const res = writeTypeAndArg(e, ARRAY_TYPE, value.length);
@@ -97,6 +97,6 @@ export function array(): <T, EC, EE, DC, DE>(
           case "bigint":
             return decodeArrayU64(ty, len, d, ctx);
         }
-      }
+      },
     );
 }
