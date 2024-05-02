@@ -10,9 +10,9 @@ import { done } from "../utils/done";
 
 export const nullType = new CborType<
   null,
-  unknown,
+  void,
   UnexpectedValueError<null, null>,
-  unknown,
+  void,
   EndOfInputError | TypeMismatchError
 >(
   (v, e) => {

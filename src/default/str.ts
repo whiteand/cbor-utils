@@ -74,8 +74,8 @@ function encodeString(
 
 export const str = new CborType<
   string,
-  unknown,
+  void,
   OverflowError | TypeMismatchError,
-  unknown,
+  void,
   DecodingError
 >(encodeString, decodeString);

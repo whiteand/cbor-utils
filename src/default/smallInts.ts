@@ -15,13 +15,7 @@ const MAX_VALUE_DICT = {
 } as const;
 function createSmallIntType(
   size: 8 | 16 | 32,
-): CborType<
-  number,
-  unknown,
-  OverflowError | UnderflowError,
-  unknown,
-  DecodingError
-> {
+): CborType<number, void, OverflowError | UnderflowError, void, DecodingError> {
   const MAX_VALUE = MAX_VALUE_DICT[size];
   const tyName = `u` + size;
   const MIN_VALUE = 0;

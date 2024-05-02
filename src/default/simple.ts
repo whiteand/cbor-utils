@@ -56,8 +56,8 @@ function encodeSpecial(
 
 export const simple = new CborType<
   Simple<number>,
-  unknown,
+  void,
   TypeMismatchError,
-  unknown,
+  void,
   TypeMismatchError | EndOfInputError | InvalidCborError
 >(encodeSpecial, decodeSpecial);

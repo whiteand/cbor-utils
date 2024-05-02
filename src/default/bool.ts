@@ -10,9 +10,9 @@ import { getInfo } from "../marker";
 
 export const bool = new CborType<
   boolean,
-  unknown,
+  void,
   TypeMismatchError,
-  unknown,
+  void,
   EndOfInputError | TypeMismatchError
 >(
   (v, e) => {

@@ -40,18 +40,15 @@ import { MAX_U128 } from "../limits";
 import { OverflowError } from "../OverflowError";
 import { InvalidCborError } from "../InvalidCborError";
 
-function dec<T, E>(
-  t: IDecodableType<T, unknown, E>,
-  d: IDecoder,
-): Result<T, E> {
-  return t[decodeSymbol](d, null);
+function dec<T, E>(t: IDecodableType<T, void, E>, d: IDecoder): Result<T, E> {
+  return t[decodeSymbol](d);
 }
 function enc<T, E>(
-  t: IEncodableType<T, unknown, E>,
+  t: IEncodableType<T, void, E>,
   v: T,
   e: IEncoder,
 ): Result<void, E> {
-  return t[encodeSymbol](v, e, null);
+  return t[encodeSymbol](v, e);
 }
 
 export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
@@ -196,9 +193,9 @@ function encodeAny(
 
 export const any = new CborType<
   DataItem,
-  unknown,
+  void,
   OverflowError | TypeMismatchError,
-  unknown,
+  void,
   DecodingError
 >(encodeAny, decodeAny);
 

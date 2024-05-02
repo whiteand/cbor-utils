@@ -6,17 +6,24 @@ import { decodeSymbol, encodeSymbol } from "../traits";
 type InferOrType<TS> = TS extends []
   ? never
   : TS extends [infer Ty, ...infer RS]
-  ? Ty extends ICborType<infer T, any, any, any, any>
-    ? T | InferOrType<RS>
-    : InferOrType<RS>
-  : never;
+    ? Ty extends ICborType<infer T, any, any, any, any>
+      ? T | InferOrType<RS>
+      : InferOrType<RS>
+    : never;
 
 export function or<
   EC,
   EE,
   DC,
   DE,
-  Types extends ICborType<any, EC, EE, DC, DE>[]
+  Types extends ICborType<any, void, EE, void, DE>[],
+>(...types: Types): CborType<InferOrType<Types>, void, EE[], void, DE[]>;
+export function or<
+  EC,
+  EE,
+  DC,
+  DE,
+  Types extends ICborType<any, EC, EE, DC, DE>[],
 >(...types: Types): CborType<InferOrType<Types>, EC, EE[], DC, DE[]> {
   return new CborType<InferOrType<Types>, EC, EE[], DC, DE[]>(
     (v, e, ctx) => {
@@ -46,6 +53,6 @@ export function or<
         }
       }
       return err(errors);
-    }
+    },
   );
 }

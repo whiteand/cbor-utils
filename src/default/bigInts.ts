@@ -10,13 +10,7 @@ import { CborType } from "../base";
 
 function createBigInt(
   size: 64 | 128,
-): CborType<
-  bigint,
-  unknown,
-  OverflowError | UnderflowError,
-  unknown,
-  DecodingError
-> {
+): CborType<bigint, void, OverflowError | UnderflowError, void, DecodingError> {
   const MAX_VALUE = (1n << BigInt(size)) - 1n;
   const tyName = "u" + size;
   const MIN_VALUE = 0n;

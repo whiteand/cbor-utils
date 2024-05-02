@@ -176,8 +176,8 @@ function decodeHalfFloat(
 
 export const f16 = new CborType<
   number,
-  unknown,
+  void,
   OverflowError,
-  unknown,
+  void,
   TypeMismatchError
 >(encodeF16, decodeHalfFloat);

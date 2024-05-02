@@ -45,8 +45,8 @@ function decodeF64(
 
 export const f64 = new CborType<
   number,
-  unknown,
+  void,
   OverflowError,
-  unknown,
+  void,
   TypeMismatchError
 >(encodeF64, decodeF64);

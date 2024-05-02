@@ -14,9 +14,9 @@ import { done } from "../utils/done";
 
 export const uint = new CborType<
   number | bigint,
-  unknown,
+  void,
   OverflowError,
-  unknown,
+  void,
   DecodingError
 >(
   (v, e) => {

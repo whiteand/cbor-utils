@@ -46,8 +46,8 @@ function decodeF32(
 
 export const f32 = new CborType<
   number,
-  unknown,
+  void,
   OverflowError,
-  unknown,
+  void,
   TypeMismatchError
 >(encodeF32, decodeF32);
