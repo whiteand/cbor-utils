@@ -11,6 +11,7 @@ import {
 } from "./traits";
 import {
   ICborType,
+  ICborTypeCodec,
   IDecoder,
   IEncoder,
   TDecodeFunction,
@@ -20,7 +21,7 @@ import { Pipeable } from "./pipe";
 
 export class CborType<T, EC, EE, DC, DE>
   extends Pipeable
-  implements ICborType<T, EC, EE, DC, DE>
+  implements ICborTypeCodec<T, EC, EE, DC, DE>
 {
   [decodeTypeSymbol]: T = null as never;
   [decodeCtxSymbol]: DC = null as never;
@@ -39,11 +40,11 @@ export class CborType<T, EC, EE, DC, DE>
     this[decodeSymbol] = dec;
   }
 
-  encode(value: T, e: IEncoder, ctx: EC): Result<null, EE> {
-    return this[encodeSymbol](value, e, ctx);
-  }
   decode(d: IDecoder, ctx: DC): Result<T, DE> {
     return this[decodeSymbol](d, ctx);
+  }
+  encode(value: T, e: IEncoder, ctx: EC): Result<void, EE> {
+    return this[encodeSymbol](value, e, ctx);
   }
 
   static from<T, EC, EE, DC, DE>(
@@ -76,7 +77,7 @@ export function createContextfulType<T, EC, EE, DC, DE>(
 }
 
 export function createType<T, EE, DE>(
-  encode: (value: T, e: IEncoder) => Result<null, EE>,
+  encode: (value: T, e: IEncoder) => Result<void, EE>,
   decode: (d: IDecoder) => Result<T, DE>,
 ): ICborType<T, unknown, EE, unknown, DE> {
   return createContextfulType(encode, decode);

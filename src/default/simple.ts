@@ -6,7 +6,7 @@ import { CborType } from "../base";
 import { SPECIAL_TYPE, SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getInfo, getType } from "../marker";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { IDecoder, IEncoder } from "../types";
 import { Simple } from "./DataItem";
 import { getJsType } from "../utils/getJsType";
@@ -42,16 +42,16 @@ function decodeSpecial(
 function encodeSpecial(
   v: Simple<number>,
   e: IEncoder,
-): Result<null, TypeMismatchError> {
+): Result<void, TypeMismatchError> {
   if (!v || !(v instanceof Simple)) {
     return new TypeMismatchError("Simple", getJsType(v)).err();
   }
   if (v.value < 20) {
     e.write(SPECIAL_TYPE_MASK | v.value);
-    return okNull;
+    return success;
   }
   e.write(SPECIAL_TYPE_MASK | 24).write(v.value);
-  return okNull;
+  return success;
 }
 
 export const simple = new CborType<

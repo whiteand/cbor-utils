@@ -8,7 +8,7 @@ import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
 import { fromUtf8, utf8 } from "../utils/utf8";
@@ -61,7 +61,7 @@ function decodeString(d: IDecoder): Result<string, DecodingError> {
 function encodeString(
   v: string,
   e: IEncoder,
-): Result<null, OverflowError | TypeMismatchError> {
+): Result<void, OverflowError | TypeMismatchError> {
   if (typeof v !== "string") {
     return new TypeMismatchError("string", typeof v).err();
   }
@@ -69,7 +69,7 @@ function encodeString(
   const res = writeTypeAndArg(e, STRING_TYPE, bytes.length);
   if (!res.ok()) return res;
   e.writeSlice(bytes);
-  return okNull;
+  return success;
 }
 
 export const str = new CborType<

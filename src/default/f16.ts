@@ -7,7 +7,7 @@ import { SPECIAL_TYPE, SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { hex } from "../utils/hex";
 import { UnderflowError } from "../UnderflowError";
 import { done } from "../utils/done";
@@ -80,13 +80,13 @@ function encodeF16Parts(
   exponent: number,
   significand: number,
   e: IEncoder,
-): Result<null, never> {
+): Result<void, never> {
   const a = (sign << 7) | (exponent << 2) | ((significand >> 8) & 0b11);
   const b = significand & 0xff;
   e.write(SPECIAL_TYPE_MASK | 25)
     .write(a)
     .write(b);
-  return okNull;
+  return success;
 }
 
 // f97e00
@@ -95,7 +95,7 @@ function encodeF16Parts(
 function encodeF16(
   value: number,
   e: IEncoder,
-): Result<null, OverflowError | UnderflowError> {
+): Result<void, OverflowError | UnderflowError> {
   if (Number.isNaN(value)) {
     return encodeF16Parts(0, 31, 512, e);
   }

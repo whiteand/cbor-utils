@@ -107,7 +107,7 @@ export function tagged(
             value: TaggedDataItem<T>,
             e: IEncoder,
             ctx: EC,
-          ): Result<null, EE | OverflowError> => {
+          ): Result<void, EE | OverflowError> => {
             return encodeTagged(e, ty, value, ctx);
           },
           (
@@ -127,7 +127,7 @@ export function tagged(
             value: TaggedDataItem<T>,
             e: IEncoder,
             ctx: EC,
-          ): Result<null, EE | OverflowError> => {
+          ): Result<void, EE | OverflowError> => {
             if (!sameTag(value.tag, tag)) {
               return new UnexpectedValueError(tag, value.tag).err();
             }

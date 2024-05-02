@@ -5,7 +5,7 @@ import { SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
 import { done } from "../utils/done";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { getInfo } from "../marker";
 
 export const bool = new CborType<
@@ -21,7 +21,7 @@ export const bool = new CborType<
     }
 
     e.write(SPECIAL_TYPE_MASK | (v ? 21 : 20));
-    return okNull;
+    return success;
   },
   (d) => {
     if (done(d)) {

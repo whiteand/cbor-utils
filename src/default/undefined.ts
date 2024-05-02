@@ -5,7 +5,7 @@ import { SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
 import { UnexpectedValueError } from "../UnexpectedValueError";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { done } from "../utils/done";
 
 export const undefinedType = new CborType<
@@ -20,7 +20,7 @@ export const undefinedType = new CborType<
       return new UnexpectedValueError(undefined, v).err();
     }
     e.write(SPECIAL_TYPE_MASK | 23);
-    return okNull;
+    return success;
   },
   function decodeUndefined(d) {
     if (done(d)) {

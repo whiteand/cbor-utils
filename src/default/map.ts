@@ -5,7 +5,7 @@ import { decodeSymbol, encodeSymbol } from "../traits";
 import { ICborType } from "../types";
 import { writeTypeAndArg } from "../writeTypeAndArg";
 import { OverflowError } from "../OverflowError";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { getType } from "../marker";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { getTypeString } from "../getTypeString";
@@ -32,7 +32,7 @@ export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
     KDC & VDC,
     KDE | VDE | InvalidCborError | EndOfInputError
   >(
-    (m, e, c): Result<null, KEE | VEE | OverflowError> => {
+    (m, e, c): Result<void, KEE | VEE | OverflowError> => {
       if (!m || !(m instanceof Map)) {
         return new TypeMismatchError("Map", getJsType(m)).err();
       }
@@ -50,7 +50,7 @@ export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
         const vr = vt[encodeSymbol](v, e, c);
         if (!vr.ok()) return vr;
       }
-      return okNull;
+      return success;
     },
     (
       d,

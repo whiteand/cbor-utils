@@ -5,7 +5,7 @@ import { NULL_BYTE } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
 import { UnexpectedValueError } from "../UnexpectedValueError";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { done } from "../utils/done";
 
 export const nullType = new CborType<
@@ -20,7 +20,7 @@ export const nullType = new CborType<
       return new UnexpectedValueError(null, v).err();
     }
     e.write(NULL_BYTE);
-    return okNull;
+    return success;
   },
   (d) => {
     if (done(d)) {

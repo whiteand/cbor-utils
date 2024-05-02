@@ -8,20 +8,20 @@ type MapDec<T, NDC, U, NDE> = (
   value: T,
   decoder: IDecoder,
   ctx: NDC,
-  startPosition: number
+  startPosition: number,
 ) => Result<U, NDE>;
 
 export function flatMap<U, T, NEC, NEE, NDC, NDE>(
   newEnc: MapEnc<U, NEC, NoInfer<T>, NEE>,
-  newDec: MapDec<T, NDC, U, NDE>
+  newDec: MapDec<T, NDC, U, NDE>,
 ): <EC, EE, DC, DE>(
-  ty: ICborType<T, EC, EE, DC, DE>
+  ty: ICborType<T, EC, EE, DC, DE>,
 ) => CborType<U, NEC & EC, NEE | EE, NDC & DC, NDE | DE> {
   return <EC, EE, DC, DE>(
-    ty: ICborType<T, EC, EE, DC, DE>
+    ty: ICborType<T, EC, EE, DC, DE>,
   ): CborType<U, NEC & EC, NEE | EE, NDC & DC, NDE | DE> =>
     new CborType(
-      (value: U, e: IEncoder, ctx: NEC & EC): Result<null, NEE | EE> => {
+      (value: U, e: IEncoder, ctx: NEC & EC): Result<void, NEE | EE> => {
         const inner = newEnc(value, ctx);
         if (!inner.ok()) {
           return inner;
@@ -35,6 +35,6 @@ export function flatMap<U, T, NEC, NEE, NDC, NDE>(
           return inner;
         }
         return newDec(inner.value, d, ctx, startPosition);
-      }
+      },
     );
 }

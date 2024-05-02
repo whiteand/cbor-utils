@@ -50,7 +50,7 @@ function enc<T, E>(
   t: IEncodableType<T, unknown, E>,
   v: T,
   e: IEncoder,
-): Result<null, E> {
+): Result<void, E> {
   return t[encodeSymbol](v, e, null);
 }
 
@@ -137,7 +137,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
   }
 }
 
-function encodeBigInt(b: bigint, e: IEncoder): Result<null, OverflowError> {
+function encodeBigInt(b: bigint, e: IEncoder): Result<void, OverflowError> {
   if (b > MAX_U128 || b < -MAX_U128 - 1n) {
     return enc(bignum, b, e);
   }
@@ -149,7 +149,7 @@ function encodeBigInt(b: bigint, e: IEncoder): Result<null, OverflowError> {
 function encodeAny(
   value: DataItem,
   e: IEncoder,
-): Result<null, OverflowError | TypeMismatchError> {
+): Result<void, OverflowError | TypeMismatchError> {
   if (typeof value === "number") {
     if (Number.isInteger(value)) {
       return encodeBigInt(BigInt(value), e);

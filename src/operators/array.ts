@@ -5,7 +5,7 @@ import { decodeSymbol, encodeSymbol } from "../traits";
 import { writeTypeAndArg } from "../writeTypeAndArg";
 import { readArg } from "../readArg";
 import { ARRAY_TYPE } from "../constants";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { getType } from "../marker";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
@@ -66,7 +66,7 @@ export function array(): <T, EC, EE, DC, DE>(
     ty: ICborType<T, EC, EE, DC, DE>,
   ): CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> =>
     new CborType(
-      (value: T[], e: IEncoder, ctx: EC): Result<null, EE | OverflowError> => {
+      (value: T[], e: IEncoder, ctx: EC): Result<void, EE | OverflowError> => {
         const res = writeTypeAndArg(e, ARRAY_TYPE, value.length);
         if (!res.ok()) {
           return res;
@@ -78,7 +78,7 @@ export function array(): <T, EC, EE, DC, DE>(
           }
         }
 
-        return okNull;
+        return success;
       },
       (d: IDecoder, ctx: DC): Result<T[], DE | DecodingError> => {
         const marker = d.buf[d.ptr];

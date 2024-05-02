@@ -7,7 +7,7 @@ import { SPECIAL_TYPE, SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { done } from "../utils/done";
 
 function encodeF64(v: number, e: IEncoder) {
@@ -18,7 +18,7 @@ function encodeF64(v: number, e: IEncoder) {
   const bs = new Uint8Array(8);
   new DataView(bs.buffer, 0).setFloat64(0, v, false);
   e.writeSlice(bs);
-  return okNull;
+  return success;
 }
 
 function decodeF64(

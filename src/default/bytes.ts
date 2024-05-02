@@ -8,7 +8,7 @@ import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
 import { getJsType } from "../utils/getJsType";
@@ -54,14 +54,14 @@ function decodeBytes(d: IDecoder): Result<Uint8Array, DecodingError> {
 function encodeBytes(
   v: Uint8Array,
   e: IEncoder,
-): Result<null, OverflowError | TypeMismatchError> {
+): Result<void, OverflowError | TypeMismatchError> {
   if (!(v instanceof Uint8Array)) {
     return new TypeMismatchError("Uint8Array", getJsType(v)).err();
   }
   const res = writeTypeAndArg(e, BYTES_TYPE, v.length);
   if (!res.ok()) return res;
   e.writeSlice(v);
-  return okNull;
+  return success;
 }
 
 export const bytes = new CborType<

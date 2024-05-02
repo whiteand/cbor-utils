@@ -25,7 +25,7 @@ export class Decoder extends BaseDecoder {
     super(bytes, ptr);
   }
 
-  decode<Ty extends IDecodableType<any, unknown, any>>(
+  decode<Ty extends IDecodableType<any, void, any>>(
     ty: Ty,
   ): Result<Ty[typeof decodeTypeSymbol], Ty[typeof decodeErrSymbol]>;
   decode<Ty extends IDecodableType<any, any, any>>(
@@ -34,17 +34,18 @@ export class Decoder extends BaseDecoder {
   ): Result<Ty[typeof decodeTypeSymbol], Ty[typeof decodeErrSymbol]>;
   decode<Ty extends IDecodableType>(
     ty: Ty,
-    c?: unknown,
+    c?: any,
   ): Result<Ty[typeof decodeTypeSymbol], Ty[typeof decodeErrSymbol]> {
     return ty[decodeSymbol](this, c);
   }
 }
+
 export class ThrowOnFailDecoder extends BaseDecoder {
   constructor(bytes: Uint8Array, ptr: number = 0) {
     super(bytes, ptr);
   }
 
-  decode<Ty extends IDecodableType<any, unknown, any>>(
+  decode<Ty extends IDecodableType<any, void, any>>(
     ty: Ty,
   ): Ty[typeof decodeTypeSymbol];
   decode<Ty extends IDecodableType<any, any, any>>(
@@ -53,7 +54,7 @@ export class ThrowOnFailDecoder extends BaseDecoder {
   ): Ty[typeof decodeTypeSymbol];
   decode<Ty extends IDecodableType>(
     ty: Ty,
-    c?: unknown,
+    c?: any,
   ): Ty[typeof decodeTypeSymbol] {
     return ty[decodeSymbol](this, c).unwrap();
   }

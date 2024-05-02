@@ -64,7 +64,7 @@ abstract class BaseEncoder {
 }
 
 export class Encoder extends BaseEncoder implements IEncoder {
-  encode<Ty extends IEncodableType<any, unknown, any>>(
+  encode<Ty extends IEncodableType<any, void, any>>(
     ty: Ty,
     value: Ty[typeof encodeTypeSymbol],
   ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]>;
@@ -76,14 +76,14 @@ export class Encoder extends BaseEncoder implements IEncoder {
   encode<Ty extends IEncodableType>(
     ty: Ty,
     value: Ty[typeof encodeTypeSymbol],
-    c?: unknown,
+    c?: any,
   ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]> {
     return ty[encodeSymbol](value, this, c);
   }
 }
 
 export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
-  encode<Ty extends IEncodableType<any, unknown, any>>(
+  encode<Ty extends IEncodableType<any, void, any>>(
     ty: Ty,
     value: Ty[typeof encodeTypeSymbol],
   ): Ty[typeof encodeTypeSymbol];
@@ -95,7 +95,7 @@ export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
   encode<Ty extends IEncodableType>(
     ty: Ty,
     value: Ty[typeof encodeTypeSymbol],
-    c?: unknown,
+    c?: any,
   ): Ty[typeof encodeTypeSymbol] {
     return ty[encodeSymbol](value, this, c).unwrap();
   }

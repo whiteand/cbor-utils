@@ -7,7 +7,7 @@ import { SPECIAL_TYPE, SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
-import { okNull } from "../okNull";
+import { success } from "../success";
 import { getJsType } from "../utils/getJsType";
 import { done } from "../utils/done";
 
@@ -19,7 +19,7 @@ function encodeF32(v: number, e: IEncoder) {
   const bs = new Uint8Array(4);
   new DataView(bs.buffer, 0).setFloat32(0, v, false);
   e.writeSlice(bs);
-  return okNull;
+  return success;
 }
 
 function decodeF32(
