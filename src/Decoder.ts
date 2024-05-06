@@ -6,6 +6,7 @@ import {
   DecodeContext,
   DecodeError,
   DecodedType,
+  IDecodableType,
 } from "./types";
 
 abstract class BaseDecoder {
@@ -26,11 +27,11 @@ export class Decoder extends BaseDecoder {
     super(bytes, ptr);
   }
 
-  decode<Ty extends AnyDecodableType>(
-    ty: Ty,
-    c: CtxParam<DecodeContext<Ty>>,
-  ): Result<DecodedType<Ty>, DecodeError<Ty>> {
-    return ty[decodeSymbol](this, c);
+  decode<T, DE extends Error, DC>(
+    ty: IDecodableType<T, DE, DC>,
+    c: CtxParam<DC>,
+  ): Result<T, DE> {
+    return ty[decodeSymbol](this, c as DC);
   }
 }
 
@@ -39,10 +40,10 @@ export class ThrowOnFailDecoder extends BaseDecoder {
     super(bytes, ptr);
   }
 
-  decode<Ty extends AnyDecodableType>(
-    ty: Ty,
-    c: CtxParam<DecodeContext<Ty>>,
-  ): DecodedType<Ty> {
-    return ty[decodeSymbol](this, c).unwrap();
+  decode<T, DE extends Error, DC>(
+    ty: IDecodableType<T, DE, DC>,
+    c: CtxParam<DC>,
+  ): T {
+    return ty[decodeSymbol](this, c as DC).unwrap();
   }
 }
