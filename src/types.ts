@@ -69,7 +69,7 @@ export type EncodeContext<T extends AnyEncodableType> = T extends T
   ? T[typeof encodeCtxSymbol]
   : never;
 
-export type CtxParam<C> = C extends unknown ? void | unknown : C;
+export type CtxParam<C> = C extends unknown ? void : C;
 
 export interface IDecodableTypeDecoder<
   T = any,
