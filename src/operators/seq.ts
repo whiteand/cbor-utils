@@ -17,50 +17,39 @@ export type InferSeqType<TS> = TS extends readonly []
 type InferSeqEE<TS> = TS extends readonly []
   ? never
   : TS extends readonly [infer Ty, ...infer RS]
-    ? Ty extends ICborType<any, any, infer T, any, any>
+    ? Ty extends ICborType<any, infer T, any, any, any>
       ? T | InferSeqEE<RS>
       : InferSeqEE<RS>
     : never;
 type InferSeqDE<TS> = TS extends readonly []
   ? never
   : TS extends readonly [infer Ty, ...infer RS]
-    ? Ty extends ICborType<any, any, any, any, infer T>
+    ? Ty extends ICborType<any, any, infer T, any, any>
       ? T | InferSeqDE<RS>
       : InferSeqDE<RS>
     : never;
 
 export function seq<
-  const TypesList extends readonly ICborType<any, void, any, void, any>[],
+  EC,
+  DC,
+  const TypesList extends readonly ICborType<any, any, any, EC, DC>[],
 >(
   types: TypesList,
 ): CborType<
   InferSeqType<TypesList>,
-  void,
   InferSeqEE<TypesList> | TypeMismatchError,
-  void,
-  InferSeqDE<TypesList>
->;
-export function seq<
+  InferSeqDE<TypesList>,
   EC,
-  DC,
-  const TypesList extends readonly ICborType<any, EC, any, DC, any>[],
->(
-  types: TypesList,
-): CborType<
-  InferSeqType<TypesList>,
-  EC,
-  InferSeqEE<TypesList> | TypeMismatchError,
-  DC,
-  InferSeqDE<TypesList>
+  DC
 > {
   const n = types.length;
   const typeStr = `array[${n}]`;
   return new CborType<
     InferSeqType<TypesList>,
-    EC,
     InferSeqEE<TypesList> | TypeMismatchError,
-    DC,
-    InferSeqDE<TypesList>
+    InferSeqDE<TypesList>,
+    EC,
+    DC
   >(
     (v, e, ctx) => {
       if (!v || typeof v.length != "number")

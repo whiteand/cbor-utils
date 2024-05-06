@@ -10,6 +10,7 @@ import {
   encodeTypeSymbol,
 } from "./traits";
 import {
+  CtxParam,
   ICborType,
   ICborTypeCodec,
   IDecoder,
@@ -19,9 +20,9 @@ import {
 } from "./types";
 import { Pipeable } from "./pipe";
 
-export class CborType<T, EC, EE, DC, DE>
+export class CborType<T, EE extends Error, DE extends Error, EC, DC>
   extends Pipeable
-  implements ICborTypeCodec<T, EC, EE, DC, DE>
+  implements ICborTypeCodec<T, EE, DE, EC, DC>
 {
   [decodeTypeSymbol]: T = null as never;
   [decodeCtxSymbol]: DC = null as never;
@@ -29,43 +30,31 @@ export class CborType<T, EC, EE, DC, DE>
   [encodeTypeSymbol]: T = null as never;
   [encodeCtxSymbol]: EC = null as never;
   [encodeErrSymbol]: EE = null as never;
-  [encodeSymbol]: TEncodeFunction<T, EC, EE> = null as never;
-  [decodeSymbol]: TDecodeFunction<T, DC, DE> = null as never;
+  [encodeSymbol]: TEncodeFunction<T, EE, EC> = null as never;
+  [decodeSymbol]: TDecodeFunction<T, DE, DC> = null as never;
   constructor(
-    enc: TEncodeFunction<T, EC, EE>,
-    dec: TDecodeFunction<T, DC, DE>,
+    enc: TEncodeFunction<T, EE, EC>,
+    dec: TDecodeFunction<T, DE, DC>,
   ) {
     super();
     this[encodeSymbol] = enc;
     this[decodeSymbol] = dec;
   }
 
-  decode(d: IDecoder, ctx: DC): Result<T, DE> {
-    return this[decodeSymbol](d, ctx);
+  decode(d: IDecoder, ctx: CtxParam<DC>): Result<T, DE> {
+    return this[decodeSymbol](d, ctx as DC);
   }
-  encode(value: T, e: IEncoder, ctx: EC): Result<void, EE> {
-    return this[encodeSymbol](value, e, ctx);
+  encode(value: T, e: IEncoder, ctx: CtxParam<EC>): Result<void, EE> {
+    return this[encodeSymbol](value, e, ctx as EC);
   }
 
-  static from<T, EE, DE>(
-    enc: (value: T, encoder: IEncoder) => Result<void, EE>,
-    dec: (d: IDecoder) => Result<T, DE>,
-  ): CborType<T, void, EE, void, DE>;
-  static from<T, EE, DC, DE>(
-    enc: (value: T, encoder: IEncoder) => Result<void, EE>,
-    dec: TDecodeFunction<T, DC, DE>,
-  ): CborType<T, void, EE, DC, DE>;
-  static from<T, EC, EE, DE>(
-    enc: TEncodeFunction<T, EC, EE>,
-    dec: (d: IDecoder) => Result<T, DE>,
-  ): CborType<T, EC, EE, void, DE>;
-  static from<T, EC, EE, DC, DE>(
-    enc: TEncodeFunction<T, EC, EE>,
-    dec: TDecodeFunction<T, DC, DE>,
-  ): CborType<T, EC, EE, DC, DE>;
-  static from<T, EC, EE, DC, DE>(
-    ty: ICborType<T, EC, EE, DC, DE>,
-  ): CborType<T, EC, EE, DC, DE>;
+  static from<T, EE extends Error, DE extends Error, EC, DC>(
+    enc: TEncodeFunction<T, EE, EC>,
+    dec: TDecodeFunction<T, DE, DC>,
+  ): CborType<T, EE, DE, EC, DC>;
+  static from<T, EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborType<T, EE, DE, EC, DC>,
+  ): CborType<T, EE, DE, EC, DC>;
   static from(encOrTy: any, dec?: any): any {
     if (encOrTy instanceof CborType) {
       return encOrTy;

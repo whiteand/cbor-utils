@@ -3,20 +3,18 @@ import { CborType } from "../base";
 import { decodeSymbol, encodeSymbol } from "../traits";
 import { ICborType } from "../types";
 
-export function mapErrors<T, EE, NEE, DE, NDE>(
+export function mapErrors<
+  T,
+  EE extends Error,
+  NEE extends Error,
+  DE extends Error,
+  NDE extends Error,
+>(
   ee: (e: EE, v: T) => NEE,
   de: (de: DE, marker: number, position: number) => NDE,
-): (ty: ICborType<T, void, EE, void, DE>) => CborType<T, void, NEE, void, NDE>;
-export function mapErrors<T, EE, NEE, DE, NDE>(
-  ee: (e: EE, v: T) => NEE,
-  de: (de: DE, marker: number, position: number) => NDE,
-): <EC, DC>(ty: ICborType<T, EC, EE, DC, DE>) => CborType<T, EC, NEE, DC, NDE>;
-export function mapErrors<T, EE, NEE, DE, NDE>(
-  ee: (e: EE, v: T) => NEE,
-  de: (de: DE, marker: number, position: number) => NDE,
-): (ty: ICborType<T, any, EE, any, DE>) => CborType<T, any, NEE, any, NDE> {
-  return (ty: ICborType<T, any, EE, any, DE>) =>
-    new CborType<T, any, NEE, any, NDE>(
+): <EC, DC>(ty: ICborType<T, EE, DE, EC, DC>) => CborType<T, NEE, NDE, EC, DC> {
+  return <EC, DC>(ty: ICborType<T, EE, DE, EC, DC>) =>
+    new CborType<T, NEE, NDE, EC, DC>(
       (v, e, c) => {
         const r = ty[encodeSymbol](v, e, c);
         if (r.ok()) {

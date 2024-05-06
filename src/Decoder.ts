@@ -1,11 +1,12 @@
 import { Result } from "resultra";
+import { decodeSymbol } from "./traits";
 import {
-  decodeSymbol,
-  decodeCtxSymbol,
-  decodeTypeSymbol,
-  decodeErrSymbol,
-} from "./traits";
-import { IDecodableType } from "./types";
+  AnyDecodableType,
+  CtxParam,
+  DecodeContext,
+  DecodeError,
+  DecodedType,
+} from "./types";
 
 abstract class BaseDecoder {
   buf: Uint8Array;
@@ -25,17 +26,10 @@ export class Decoder extends BaseDecoder {
     super(bytes, ptr);
   }
 
-  decode<Ty extends IDecodableType<any, void, any>>(
+  decode<Ty extends AnyDecodableType>(
     ty: Ty,
-  ): Result<Ty[typeof decodeTypeSymbol], Ty[typeof decodeErrSymbol]>;
-  decode<Ty extends IDecodableType<any, any, any>>(
-    ty: Ty,
-    c: Ty[typeof decodeCtxSymbol],
-  ): Result<Ty[typeof decodeTypeSymbol], Ty[typeof decodeErrSymbol]>;
-  decode<Ty extends IDecodableType>(
-    ty: Ty,
-    c?: any,
-  ): Result<Ty[typeof decodeTypeSymbol], Ty[typeof decodeErrSymbol]> {
+    c: CtxParam<DecodeContext<Ty>>,
+  ): Result<DecodedType<Ty>, DecodeError<Ty>> {
     return ty[decodeSymbol](this, c);
   }
 }
@@ -45,17 +39,10 @@ export class ThrowOnFailDecoder extends BaseDecoder {
     super(bytes, ptr);
   }
 
-  decode<Ty extends IDecodableType<any, void, any>>(
+  decode<Ty extends AnyDecodableType>(
     ty: Ty,
-  ): Ty[typeof decodeTypeSymbol];
-  decode<Ty extends IDecodableType<any, any, any>>(
-    ty: Ty,
-    c: Ty[typeof decodeCtxSymbol],
-  ): Ty[typeof decodeTypeSymbol];
-  decode<Ty extends IDecodableType>(
-    ty: Ty,
-    c?: any,
-  ): Ty[typeof decodeTypeSymbol] {
+    c: CtxParam<DecodeContext<Ty>>,
+  ): DecodedType<Ty> {
     return ty[decodeSymbol](this, c).unwrap();
   }
 }

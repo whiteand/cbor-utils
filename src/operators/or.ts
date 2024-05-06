@@ -2,6 +2,7 @@ import { Result, err } from "resultra";
 import { CborType } from "../base";
 import { ICborType } from "../types";
 import { decodeSymbol, encodeSymbol } from "../traits";
+import { ResultError } from "../ResultError";
 
 type InferOrType<TS> = TS extends []
   ? never
@@ -11,17 +12,24 @@ type InferOrType<TS> = TS extends []
       : InferOrType<RS>
     : never;
 
-export function or<EE, DE, Types extends ICborType<any, void, EE, void, DE>[]>(
-  ...types: Types
-): CborType<InferOrType<Types>, void, EE[], void, DE[]>;
+class OrError<Errs extends Error> extends ResultError {
+  constructor(public readonly errors: Errs[]) {
+    super(
+      `failed or error: ${errors.map((e) => `"${e.message}"`).join(" & ")}`,
+    );
+  }
+}
+
 export function or<
+  EE extends Error,
+  DE extends Error,
   EC,
-  EE,
   DC,
-  DE,
-  Types extends ICborType<any, EC, EE, DC, DE>[],
->(...types: Types): CborType<InferOrType<Types>, EC, EE[], DC, DE[]> {
-  return new CborType<InferOrType<Types>, EC, EE[], DC, DE[]>(
+  Types extends ICborType<any, EE, DE, EC, DC>[],
+>(
+  ...types: Types
+): CborType<InferOrType<Types>, OrError<EE>, OrError<DE>, EC, DC> {
+  return new CborType<InferOrType<Types>, OrError<EE>, OrError<DE>, EC, DC>(
     (v, e, ctx) => {
       const p = e.save();
       const errors: EE[] = [];
@@ -34,9 +42,9 @@ export function or<
           e.restore(p);
         }
       }
-      return err(errors);
+      return err(new OrError(errors));
     },
-    (d, c): Result<InferOrType<Types>, DE[]> => {
+    (d, c): Result<InferOrType<Types>, OrError<DE>> => {
       const p = d.ptr;
       const errors: DE[] = [];
       for (const ty of types) {
@@ -48,7 +56,7 @@ export function or<
           d.ptr = p;
         }
       }
-      return err(errors);
+      return err(new OrError(errors));
     },
   );
 }

@@ -10,10 +10,10 @@ import { getInfo } from "../marker";
 
 export const bool = new CborType<
   boolean,
-  void,
   TypeMismatchError,
-  void,
-  EndOfInputError | TypeMismatchError
+  EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
 >(
   (v, e) => {
     if (typeof v !== "boolean") {

@@ -23,9 +23,9 @@ function sameTag(v: number | bigint, tag: number | bigint) {
   return BigInt(v) === BigInt(tag);
 }
 
-function encodeTagged<T, C, E>(
+function encodeTagged<T, E extends Error, C>(
   e: IEncoder,
-  ty: IEncodableType<T, C, E>,
+  ty: IEncodableType<T, E, C>,
   value: TaggedDataItem<T>,
   ctx: C,
 ) {
@@ -63,43 +63,43 @@ function decodeTag(
 
 export function tagged(
   tag: number | bigint,
-): <T, EC, EE, DC, DE>(
-  ty: ICborType<T, EC, EE, DC, DE>,
+): <T, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborType<T, EE, DE, EC, DC>,
 ) => ICborType<
   TaggedDataItem<T>,
-  EC,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
-  DC,
-  DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>
+  DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
+  EC,
+  DC
 >;
-export function tagged(): <T, EC, EE, DC, DE>(
-  ty: ICborType<T, EC, EE, DC, DE>,
+export function tagged(): <T, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborType<T, EE, DE, EC, DC>,
 ) => ICborType<
   TaggedDataItem<T>,
-  EC,
   EE | OverflowError,
-  DC,
-  DE | DecodingError
+  DE | DecodingError,
+  EC,
+  DC
 >;
 export function tagged(
   tag?: number | bigint,
-): <T, EC, EE, DC, DE>(
-  ty: ICborType<T, EC, EE, DC, DE>,
+): <T, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborType<T, EE, DE, EC, DC>,
 ) => ICborType<
   TaggedDataItem<T>,
-  EC,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
-  DC,
-  DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>
+  DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
+  EC,
+  DC
 > {
-  return <T, EC, EE, DC, DE>(
-    ty: ICborType<T, EC, EE, DC, DE>,
+  return <T, EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborType<T, EE, DE, EC, DC>,
   ): ICborType<
     TaggedDataItem<T>,
-    EC,
     EE | OverflowError,
-    DC,
-    DE | DecodingError
+    DE | DecodingError,
+    EC,
+    DC
   > =>
     tag == null
       ? new CborType(

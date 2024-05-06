@@ -44,4 +44,12 @@ export {
   IEncoder,
   TDecodeFunction,
   TEncodeFunction,
+  DecodeContext,
+  EncodeContext,
+  DecodeError,
+  DecodedType,
+  EncodeError,
+  EncodedType,
+  AnyDecodableType,
+  AnyEncodableType,
 } from "./types";

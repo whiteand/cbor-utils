@@ -20,10 +20,10 @@ function isNegative(v: number | bigint) {
 
 export const nint = new CborType<
   number | bigint,
-  void,
   OverflowError | TypeMismatchError,
-  void,
-  DecodingError
+  DecodingError,
+  unknown,
+  unknown
 >(
   (v, e) => {
     if (typeof v === "number") {

@@ -18,8 +18,8 @@ const INVERSE_OF_EPSILON = 1 / EPSILON;
 /**
  * rounds to the nearest value;
  * if the number falls midway, it is rounded to the nearest value with an even least significant digit
- * @param {number} num
- * @returns {number}
+ * @param num
+ * @returns
  */
 function roundTiesToEven(num: number) {
   return num + INVERSE_OF_EPSILON - INVERSE_OF_EPSILON;
@@ -35,8 +35,8 @@ const FLOAT16_EPSILON_DEVIDED_BY_EPSILON = FLOAT16_EPSILON * INVERSE_OF_EPSILON;
 
 /**
  * round a number to a half float number
- * @param {unknown} num - double float
- * @returns {number} half float number
+ * @param num - double float
+ * @returns half float number
  */
 function roundToFloat16(num: number) {
   const number = +num;
@@ -176,8 +176,8 @@ function decodeHalfFloat(
 
 export const f16 = new CborType<
   number,
-  void,
   OverflowError,
-  void,
-  TypeMismatchError
+  TypeMismatchError,
+  unknown,
+  unknown
 >(encodeF16, decodeHalfFloat);

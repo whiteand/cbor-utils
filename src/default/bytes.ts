@@ -70,8 +70,8 @@ function encodeBytes(
 
 export const bytes = new CborType<
   Uint8Array,
-  void,
   OverflowError,
-  void,
-  DecodingError
+  DecodingError,
+  unknown,
+  unknown
 >(encodeBytes, decodeBytes);

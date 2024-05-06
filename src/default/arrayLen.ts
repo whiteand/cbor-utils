@@ -12,10 +12,10 @@ import { writeTypeAndArg } from "../writeTypeAndArg";
 
 export const arrayLen = new CborType<
   number | bigint | null,
-  void,
   OverflowError,
-  void,
-  DecodingError
+  DecodingError,
+  unknown,
+  unknown
 >(
   (len, e) => writeTypeAndArg(e, ARRAY_TYPE, len),
   (d) => {

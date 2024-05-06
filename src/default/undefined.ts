@@ -10,10 +10,10 @@ import { done } from "../utils/done";
 
 export const undefinedType = new CborType<
   undefined,
-  void,
   UnexpectedValueError<undefined, undefined>,
-  void,
-  EndOfInputError | TypeMismatchError
+  EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
 >(
   function encodeUndefined(v, e) {
     if (v !== undefined) {

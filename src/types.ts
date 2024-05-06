@@ -22,43 +22,95 @@ export interface IEncoder {
   restore(pos: number): void;
 }
 
-export type TDecodeFunction<T, Ctx, Err> = (
+export type TDecodeFunction<out T, out Err, in Ctx> = (
   decoder: IDecoder,
   ctx: Ctx,
 ) => Result<T, Err>;
 
-export type TEncodeFunction<T, Ctx, Err> = (
+export type TEncodeFunction<in T, out Err, in Ctx> = (
   value: T,
   encoder: IEncoder,
   ctx: Ctx,
 ) => Result<void, Err>;
 
-export interface IDecodableType<T = any, Ctx = void, Err = any> {
+export interface IDecodableType<
+  T = any,
+  Err extends Error = Error,
+  Ctx = unknown,
+> {
   readonly [decodeTypeSymbol]: T;
   readonly [decodeCtxSymbol]: Ctx;
   readonly [decodeErrSymbol]: Err;
-  readonly [decodeSymbol]: TDecodeFunction<T, Ctx, Err>;
-}
-export interface IDecodableTypeDecoder<T = any, Ctx = void, Err = any>
-  extends IDecodableType<T, Ctx, Err> {
-  decode(d: IDecoder, ctx: Ctx): Result<T, Err>;
+  readonly [decodeSymbol]: TDecodeFunction<T, Err, Ctx>;
 }
 
-export interface IEncodableType<T = any, Ctx = any, Err = any> {
+export type AnyDecodableType = IDecodableType<any, any, any>;
+export type AnyEncodableType = IEncodableType<any, any, any>;
+
+export type DecodedType<T extends AnyDecodableType> = T extends T
+  ? T[typeof decodeTypeSymbol]
+  : never;
+export type EncodedType<T extends AnyEncodableType> = T extends T
+  ? T[typeof encodeTypeSymbol]
+  : never;
+export type DecodeError<T extends AnyDecodableType> = T extends T
+  ? T[typeof decodeErrSymbol]
+  : never;
+
+export type DecodeContext<T extends AnyDecodableType> = T extends T
+  ? T[typeof decodeCtxSymbol]
+  : never;
+
+export type EncodeError<T extends AnyEncodableType> = T extends T
+  ? T[typeof encodeErrSymbol]
+  : never;
+
+export type EncodeContext<T extends AnyEncodableType> = T extends T
+  ? T[typeof encodeCtxSymbol]
+  : never;
+
+export type CtxParam<C> = C extends unknown ? void | unknown : C;
+
+export interface IDecodableTypeDecoder<
+  T = any,
+  Err extends Error = Error,
+  Ctx = unknown,
+> extends IDecodableType<T, Err, Ctx> {
+  decode(d: IDecoder, ctx: CtxParam<Ctx>): Result<T, Err>;
+}
+
+export interface IEncodableType<
+  T = any,
+  Err extends Error = Error,
+  Ctx = unknown,
+> {
   readonly [encodeTypeSymbol]: T;
   readonly [encodeCtxSymbol]: Ctx;
   readonly [encodeErrSymbol]: Err;
-  readonly [encodeSymbol]: TEncodeFunction<T, Ctx, Err>;
+  readonly [encodeSymbol]: TEncodeFunction<T, Err, Ctx>;
 }
-export interface IEncodableTypeEncoder<T = any, Ctx = void, Err = any>
-  extends IEncodableType<T, Ctx, Err> {
-  encode(value: T, e: IEncoder, ctx: Ctx): Result<void, Err>;
+export interface IEncodableTypeEncoder<
+  T = any,
+  Err extends Error = Error,
+  Ctx = unknown,
+> extends IEncodableType<T, Err, Ctx> {
+  encode(value: T, e: IEncoder, ctx: CtxParam<Ctx>): Result<void, Err>;
 }
 
-export interface ICborType<T, EncodeCtx, EncodeErr, DecodeCtx, DecodeErr>
-  extends IDecodableType<T, DecodeCtx, DecodeErr>,
-    IEncodableType<T, EncodeCtx, EncodeErr> {}
+export interface ICborType<
+  T = any,
+  EncodeErr extends Error = Error,
+  DecodeErr extends Error = Error,
+  EncodeCtx = any,
+  DecodeCtx = any,
+> extends IDecodableType<T, DecodeErr, DecodeCtx>,
+    IEncodableType<T, EncodeErr, EncodeCtx> {}
 
-export interface ICborTypeCodec<T, EncodeCtx, EncodeErr, DecodeCtx, DecodeErr>
-  extends IDecodableTypeDecoder<T, DecodeCtx, DecodeErr>,
-    IEncodableTypeEncoder<T, EncodeCtx, EncodeErr> {}
+export interface ICborTypeCodec<
+  T = any,
+  EncodeErr extends Error = Error,
+  DecodeErr extends Error = Error,
+  EncodeCtx = any,
+  DecodeCtx = any,
+> extends IDecodableTypeDecoder<T, DecodeErr, DecodeCtx>,
+    IEncodableTypeEncoder<T, EncodeErr, EncodeCtx> {}

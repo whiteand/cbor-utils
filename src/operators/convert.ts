@@ -6,24 +6,12 @@ import { decodeSymbol, encodeSymbol } from "../traits";
 export function convert<T, EncodedAs>(
   toEncodedValue: (value: T) => NoInfer<EncodedAs>,
   fromEncodedValue: (value: EncodedAs) => T,
-): <EE, DE>(
-  ty: ICborType<EncodedAs, void, EE, void, DE>,
-) => CborType<T, void, EE, void, DE>;
-export function convert<T, EncodedAs>(
-  toEncodedValue: (value: T) => NoInfer<EncodedAs>,
-  fromEncodedValue: (value: EncodedAs) => T,
-): <EC, EE, DC, DE>(
-  ty: ICborType<EncodedAs, EC, EE, DC, DE>,
-) => CborType<T, EC, EE, DC, DE>;
-export function convert<T, EncodedAs>(
-  toEncodedValue: (value: T) => NoInfer<EncodedAs>,
-  fromEncodedValue: (value: EncodedAs) => T,
-): <EE, DE>(
-  ty: ICborType<EncodedAs, any, EE, any, DE>,
-) => CborType<T, any, EE, any, DE> {
-  return <EE, DE>(
-    ty: ICborType<EncodedAs, any, EE, any, DE>,
-  ): CborType<T, any, EE, any, DE> =>
+): <EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborType<EncodedAs, EE, DE, EC, DC>,
+) => CborType<T, EE, DE, EC, DC> {
+  return <EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborType<EncodedAs, EE, DE, EC, DC>,
+  ): CborType<T, EE, DE, EC, DC> =>
     new CborType(
       (value: T, e: IEncoder, ctx: any): Result<void, EE> =>
         ty[encodeSymbol](toEncodedValue(value), e, ctx),

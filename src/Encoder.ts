@@ -5,7 +5,15 @@ import {
   encodeSymbol,
   encodeTypeSymbol,
 } from "./traits";
-import { IEncodableType, IEncoder } from "./types";
+import {
+  AnyEncodableType,
+  CtxParam,
+  EncodeContext,
+  EncodeError,
+  EncodedType,
+  IEncodableType,
+  IEncoder,
+} from "./types";
 
 function nextSize(current: number, minimal: number) {
   current ||= 1;
@@ -64,39 +72,21 @@ abstract class BaseEncoder {
 }
 
 export class Encoder extends BaseEncoder implements IEncoder {
-  encode<Ty extends IEncodableType<any, void, any>>(
-    ty: Ty,
-    value: Ty[typeof encodeTypeSymbol],
-  ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]>;
-  encode<Ty extends IEncodableType<any, any, any>>(
-    ty: Ty,
-    value: Ty[typeof encodeTypeSymbol],
-    c: Ty[typeof encodeCtxSymbol],
-  ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]>;
-  encode<Ty extends IEncodableType>(
-    ty: Ty,
-    value: Ty[typeof encodeTypeSymbol],
-    c?: any,
-  ): Result<Ty[typeof encodeTypeSymbol], Ty[typeof encodeErrSymbol]> {
-    return ty[encodeSymbol](value, this, c);
+  encode<T, EE extends Error, EC>(
+    ty: IEncodableType<T, EE, EC>,
+    value: T,
+    c: CtxParam<EC>,
+  ): Result<void, EE> {
+    return ty[encodeSymbol](value, this, c as EC);
   }
 }
 
 export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
-  encode<Ty extends IEncodableType<any, void, any>>(
-    ty: Ty,
-    value: Ty[typeof encodeTypeSymbol],
-  ): Ty[typeof encodeTypeSymbol];
-  encode<Ty extends IEncodableType<any, any, any>>(
-    ty: Ty,
-    value: Ty[typeof encodeTypeSymbol],
-    c: Ty[typeof encodeCtxSymbol],
-  ): Ty[typeof encodeTypeSymbol];
-  encode<Ty extends IEncodableType>(
-    ty: Ty,
-    value: Ty[typeof encodeTypeSymbol],
-    c?: any,
-  ): Ty[typeof encodeTypeSymbol] {
-    return ty[encodeSymbol](value, this, c).unwrap();
+  encode<T, EE extends Error, EC>(
+    ty: IEncodableType<T, EE, EC>,
+    value: NoInfer<T>,
+    c: CtxParam<NoInfer<EC>>,
+  ): void {
+    return ty[encodeSymbol](value, this, c as EC).unwrap();
   }
 }

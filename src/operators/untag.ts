@@ -1,4 +1,4 @@
-import { ok } from "resultra";
+import { Result, ok } from "resultra";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
 import { flatMap } from "./flatMap";
@@ -8,25 +8,16 @@ import { TaggedDataItem } from "../default/DataItem";
 export function untag(
   tag: number | bigint,
   name: string,
-): <T, EE, DE>(
-  ty: ICborType<TaggedDataItem<T>, void, EE, void, DE>,
-) => CborType<T, void, unknown, void, TypeMismatchError | DE>;
-export function untag(
-  tag: number | bigint,
-  name: string,
-): <T, EC, EE, DC, DE>(
-  ty: ICborType<TaggedDataItem<T>, EC, EE, DC, DE>,
-) => CborType<T, EC, unknown, DC, TypeMismatchError | DE>;
-export function untag(
-  tag: number | bigint,
-  name: string,
-): <T, EE, DE>(
-  ty: ICborType<TaggedDataItem<T>, any, EE, any, DE>,
-) => CborType<T, any, unknown, any, TypeMismatchError | DE> {
-  return <T, EE, DE>(ty: ICborType<TaggedDataItem<T>, any, EE, any, DE>) =>
+): <T, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborType<TaggedDataItem<T>, EE, DE, EC, DC>,
+) => CborType<T, EE, TypeMismatchError | DE, EC, DC> {
+  return <T, EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborType<TaggedDataItem<T>, EE, DE, EC, DC>,
+  ) =>
     flatMap(
-      (v: T) => ok(new TaggedDataItem(tag, v)),
-      (t: TaggedDataItem<T>) => {
+      (v: T): Result<TaggedDataItem<T>, never> =>
+        ok(new TaggedDataItem(tag, v)),
+      (t: TaggedDataItem<T>): Result<T, TypeMismatchError> => {
         if (t.tag !== tag) {
           return new TypeMismatchError(
             name,

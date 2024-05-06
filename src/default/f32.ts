@@ -8,7 +8,6 @@ import { getTypeString } from "../getTypeString";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
 import { success } from "../success";
-import { getJsType } from "../utils/getJsType";
 import { done } from "../utils/done";
 
 function encodeF32(v: number, e: IEncoder) {
@@ -46,8 +45,8 @@ function decodeF32(
 
 export const f32 = new CborType<
   number,
-  void,
   OverflowError,
-  void,
-  TypeMismatchError
+  TypeMismatchError,
+  unknown,
+  unknown
 >(encodeF32, decodeF32);

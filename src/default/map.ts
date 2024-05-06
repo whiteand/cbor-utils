@@ -15,22 +15,33 @@ import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { getJsType } from "../utils/getJsType";
 import { done } from "../utils/done";
 
-export function map<K, V, KEC, KEE, KDC, KDE, VEC, VEE, VDC, VDE>(
-  kt: ICborType<K, KEC, KEE, KDC, KDE>,
-  vt: ICborType<V, VEC, VEE, VDC, VDE>,
+export function map<
+  K,
+  V,
+  KEE extends Error,
+  KDE extends Error,
+  VEE extends Error,
+  VDE extends Error,
+  KEC,
+  KDC,
+  VEC,
+  VDC,
+>(
+  kt: ICborType<K, KEE, KDE, KEC, KDC>,
+  vt: ICborType<V, VEE, VDE, VEC, VDC>,
 ): CborType<
   Map<K, V>,
-  KEC & VEC,
   KEE | VEE | OverflowError,
-  KDC & VDC,
-  KDE | VDE | InvalidCborError | EndOfInputError
+  KDE | VDE | InvalidCborError | EndOfInputError,
+  KEC & VEC,
+  KDC & VDC
 > {
   return new CborType<
     Map<K, V>,
-    KEC & VEC,
     KEE | VEE | OverflowError | TypeMismatchError,
-    KDC & VDC,
-    KDE | VDE | InvalidCborError | EndOfInputError
+    KDE | VDE | InvalidCborError | EndOfInputError,
+    KEC & VEC,
+    KDC & VDC
   >(
     (m, e, c): Result<void, KEE | VEE | OverflowError> => {
       if (!m || !(m instanceof Map)) {

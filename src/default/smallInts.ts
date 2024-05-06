@@ -1,5 +1,4 @@
 import { Result, ok } from "resultra";
-import { DecodingError } from "../DecodingError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { UnderflowError } from "../UnderflowError";
@@ -20,10 +19,10 @@ function createSmallIntType(
   size: 8 | 16 | 32,
 ): CborType<
   number,
-  void,
   OverflowError | UnderflowError,
-  void,
-  InvalidCborError | EndOfInputError | TypeMismatchError
+  InvalidCborError | EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
 > {
   const MAX_VALUE = MAX_VALUE_DICT[size];
   const tyName = `u` + size;

@@ -14,10 +14,10 @@ import { done } from "../utils/done";
 
 export const uint = new CborType<
   number | bigint,
-  void,
   OverflowError | TypeMismatchError,
-  void,
-  EndOfInputError | TypeMismatchError | InvalidCborError
+  EndOfInputError | TypeMismatchError | InvalidCborError,
+  unknown,
+  unknown
 >(
   (v, e) => {
     if (typeof v !== "number" && typeof v !== "bigint") {

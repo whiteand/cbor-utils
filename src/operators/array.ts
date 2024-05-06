@@ -7,8 +7,8 @@ import { success } from "../success";
 import { OverflowError } from "../OverflowError";
 import { DecodingError } from "../DecodingError";
 
-function decodeArrayIndefinite<T, DC, DE>(
-  ty: IDecodableType<T, DC, DE>,
+function decodeArrayIndefinite<T, DE extends Error, DC>(
+  ty: IDecodableType<T, DE, DC>,
   d: IDecoder,
   ctx: DC,
 ) {
@@ -25,8 +25,8 @@ function decodeArrayIndefinite<T, DC, DE>(
   }
   return ok(res);
 }
-function decodeArrayU32<T, DC, DE>(
-  ty: IDecodableType<T, DC, DE>,
+function decodeArrayU32<T, DE extends Error, DC>(
+  ty: IDecodableType<T, DE, DC>,
   len: number,
   d: IDecoder,
   ctx: DC,
@@ -39,8 +39,8 @@ function decodeArrayU32<T, DC, DE>(
   }
   return ok(res);
 }
-function decodeArrayU64<T, DC, DE>(
-  ty: IDecodableType<T, DC, DE>,
+function decodeArrayU64<T, DE extends Error, DC>(
+  ty: IDecodableType<T, DE, DC>,
   len: bigint,
   d: IDecoder,
   ctx: DC,
@@ -54,21 +54,15 @@ function decodeArrayU64<T, DC, DE>(
   return ok(res);
 }
 
-export function array(): <T, EE, DE>(
-  ty: ICborType<T, void, EE, void, DE>,
-) => CborType<T[], void, EE | OverflowError, void, DE | DecodingError>;
-export function array(): <T, EC, EE, DC, DE>(
-  ty: ICborType<T, EC, EE, DC, DE>,
-) => CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError>;
-export function array(): <T, EE, DE>(
-  ty: ICborType<T, any, EE, any, DE>,
-) => CborType<T[], any, EE | OverflowError, any, DE | DecodingError> {
-  return <T, EC, EE, DC, DE>(
-    ty: ICborType<T, EC, EE, DC, DE>,
-  ): CborType<T[], EC, EE | OverflowError, DC, DE | DecodingError> =>
+export function array(): <T, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborType<T, EE, DE, EC, DC>,
+) => CborType<T[], EE | OverflowError, DE | DecodingError, EC, DC> {
+  return <T, EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborType<T, EE, DE, EC, DC>,
+  ): CborType<T[], EE | OverflowError, DE | DecodingError, EC, DC> =>
     new CborType(
       (value: T[], e: IEncoder, ctx: EC): Result<void, EE | OverflowError> => {
-        const res = arrayLen[encodeSymbol](value.length, e);
+        const res = arrayLen[encodeSymbol](value.length, e, ctx);
         if (!res.ok()) {
           return res;
         }
@@ -82,7 +76,7 @@ export function array(): <T, EE, DE>(
         return success;
       },
       (d: IDecoder, ctx: DC): Result<T[], DE | DecodingError> => {
-        const lenRes = arrayLen[decodeSymbol](d);
+        const lenRes = arrayLen[decodeSymbol](d, ctx);
         if (!lenRes.ok()) return lenRes;
         const len = lenRes.value;
         switch (typeof len) {

@@ -6,19 +6,13 @@ import { success } from "../success";
 import { decodeSymbol, encodeSymbol } from "../traits";
 import { ICborType, IDecoder, IEncoder } from "../types";
 
-export function nullable(): <T, EE, DE>(
-  ty: ICborType<T, void, EE, void, DE>,
-) => CborType<T | null, void, EE, void, DE | DecodingError>;
-export function nullable(): <T, EC, EE, DC, DE>(
-  ty: ICborType<T, EC, EE, DC, DE>,
-) => CborType<T | null, EC, EE, DC, DE | DecodingError>;
-export function nullable(): <T, EE, DE>(
-  ty: ICborType<T, any, EE, any, DE>,
-) => CborType<T | null, any, EE, any, DE | DecodingError> {
-  return <T, EE, DE>(
-    ty: ICborType<T, any, EE, any, DE>,
-  ): CborType<T | null, any, EE, any, DE | DecodingError> =>
-    new CborType(
+export function nullable(): <T, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborType<T, EE, DE, EC, DC>,
+) => CborType<T | null, EE, DE | DecodingError, EC, DC> {
+  return <T, EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborType<T, EE, DE, EC, DC>,
+  ): CborType<T | null, EE, DE | DecodingError, EC, DC> =>
+    new CborType<T | null, EE, DE | DecodingError, EC, DC>(
       (value: T | null, e: IEncoder, ctx: any): Result<void, EE> => {
         if (value == null) {
           e.write(NULL_BYTE);
