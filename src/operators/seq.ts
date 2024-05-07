@@ -7,22 +7,16 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { success } from "../success";
 import { TupleVals } from "../utils/TupleVals";
 
-export type InferSeqType<TS extends ICborType[]> = {
+export type InferSeqType<TS extends readonly ICborType[]> = {
   [ind in keyof TS]: EncodedType<TS[ind]>;
 };
-type InferSeqEE<TS extends ICborType[]> = TupleVals<{
+type InferSeqEE<TS extends readonly ICborType[]> = TupleVals<{
   [ind in keyof TS]: EncodeError<TS[ind]>;
 }>;
-type InferSeqDE<TS extends ICborType[]> = TupleVals<{
+type InferSeqDE<TS extends readonly ICborType[]> = TupleVals<{
   [ind in keyof TS]: DecodeError<TS[ind]>;
 }>;
-class EE1 extends Error {}
-class EE2 extends Error {}
-class EE3 extends Error {}
-class EE4 extends Error {}
-class EE5 extends Error {}
-class EE6 extends Error {}
-type A = InferSeqDE<[ICborType<41, EE1 | EE2, EE2> | ICborType<42 , EE3>, ICborType<43 | 44, EE4>]
+
 export function seq<
   EC,
   DC,

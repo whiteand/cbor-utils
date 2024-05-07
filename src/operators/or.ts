@@ -5,18 +5,18 @@ import { decodeSymbol, encodeSymbol } from "../traits";
 import { ResultError } from "../ResultError";
 import { TupleVals } from "../utils/TupleVals";
 
-type InferOrType<TS extends ICborType[]> = TupleVals<{
+type InferOrType<TS extends readonly ICborType[]> = TupleVals<{
   [ind in keyof TS]: EncodedType<TS[ind]>;
 }>;
 
-type OrEncodeErrors<TS extends ICborType[]> = {
+type OrEncodeErrors<TS extends readonly ICborType[]> = {
   [ind in keyof TS]: EncodeError<TS[ind]>;
 };
-type OrDecodeErrors<TS extends ICborType[]> = {
+type OrDecodeErrors<TS extends readonly ICborType[]> = {
   [ind in keyof TS]: DecodeError<TS[ind]>;
 };
 
-class OrError<Errs extends Error[]> extends ResultError {
+class OrError<Errs extends readonly Error[]> extends ResultError {
   constructor(public readonly errors: Errs) {
     super(
       `failed or error: ${errors.map((e) => `"${e.message}"`).join(" & ")}`,
@@ -24,7 +24,11 @@ class OrError<Errs extends Error[]> extends ResultError {
   }
 }
 
-export function or<EC, DC, Types extends ICborType<any, any, any, EC, DC>[]>(
+export function or<
+  EC,
+  DC,
+  Types extends readonly ICborType<any, any, any, EC, DC>[],
+>(
   ...types: Types
 ): CborType<
   InferOrType<Types>,
