@@ -10,7 +10,7 @@ describe("constant", () => {
     let res = new Encoder().encode(four, 42 as 4);
     expect(res.ok()).toBe(false);
     let enc = new Encoder();
-    res = enc.encode(four, 4 as 4);
+    res = enc.encode(four, 4 as const);
     expect(res.ok()).toBe(true);
     expect(Buffer.from(enc.finish()).toString("hex")).toBe("04");
   });

@@ -54,11 +54,11 @@ export function seq<
       return success;
     },
     (d, c) => {
-      const tuple: unknown[] = new Array(n).fill(null);
+      const tuple: unknown[] = [];
       for (let i = 0; i < n; i++) {
         const res = types[i][decodeSymbol](d, c);
         if (!res.ok()) return res;
-        (tuple as any[])[i] = res.value;
+        tuple.push(res.value);
       }
       return ok(tuple as InferSeqType<TypesList>);
     },

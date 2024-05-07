@@ -171,7 +171,7 @@ export const TESTS = [
     cbor: "+QAB",
     hex: "f90001",
     roundtrip: true,
-    decoded: 5.960464477539063e-8,
+    decoded: Number.parseFloat("5.960464477539063e-8"),
   },
   {
     cbor: "+QQA",

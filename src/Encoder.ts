@@ -75,9 +75,9 @@ export class Encoder extends BaseEncoder implements IEncoder {
   encode<T, EE extends Error, EC>(
     ty: IEncodableType<T, EE, EC>,
     value: T,
-    c: CtxParam<EC>,
+    ...args: unknown extends EC ? [EC] : []
   ): Result<void, EE> {
-    return ty[encodeSymbol](value, this, c as EC);
+    return ty[encodeSymbol](value, this, (args as [EC])[0]);
   }
 }
 
@@ -85,8 +85,8 @@ export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
   encode<T, EE extends Error, EC>(
     ty: IEncodableType<T, EE, EC>,
     value: NoInfer<T>,
-    c: CtxParam<NoInfer<EC>>,
+    ...args: unknown extends EC ? [EC] : []
   ): void {
-    return ty[encodeSymbol](value, this, c as EC).unwrap();
+    return ty[encodeSymbol](value, this, (args as [EC])[0]).unwrap();
   }
 }

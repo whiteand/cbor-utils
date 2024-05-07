@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest",
     "build": "tsup && tsc",
-    "lint": "npm run build && npx size-limit",
+    "lint:ox": "npx --yes oxlint@latest",
+    "lint": "npm run lint:ox && npm run build && npx size-limit",
     "prepublish": "npm run lint && npm run build",
     "prepare": "npm run build"
   },
@@ -20,19 +21,10 @@
       "limit": "7 kB"
     }
   ],
-  "files": [
-    "dist"
-  ],
-  "keywords": [
-    "cbor",
-    "encoder",
-    "decoder",
-    "format"
-  ],
+  "files": ["dist"],
+  "keywords": ["cbor", "encoder", "decoder", "format"],
   "tsup": {
-    "entry": [
-      "src/index.ts"
-    ],
+    "entry": ["src/index.ts"],
     "splitting": false,
     "sourcemap": true,
     "clean": true
