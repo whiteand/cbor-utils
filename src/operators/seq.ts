@@ -1,34 +1,28 @@
 import { ok } from "resultra";
 import { CborType } from "../base";
-import { ICborType } from "../types";
+import { DecodeError, EncodeError, EncodedType, ICborType } from "../types";
 import { decodeSymbol, encodeSymbol } from "../traits";
 import { getJsType } from "../utils/getJsType";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { success } from "../success";
+import { TupleVals } from "../utils/TupleVals";
 
-export type InferSeqType<TS> = TS extends readonly []
-  ? []
-  : TS extends readonly [infer Ty, ...infer RS]
-    ? Ty extends ICborType<infer T, any, any, any, any>
-      ? [T, ...InferSeqType<RS>]
-      : InferSeqType<RS>
-    : [];
-
-type InferSeqEE<TS> = TS extends readonly []
-  ? never
-  : TS extends readonly [infer Ty, ...infer RS]
-    ? Ty extends ICborType<any, infer T, any, any, any>
-      ? T | InferSeqEE<RS>
-      : InferSeqEE<RS>
-    : never;
-type InferSeqDE<TS> = TS extends readonly []
-  ? never
-  : TS extends readonly [infer Ty, ...infer RS]
-    ? Ty extends ICborType<any, any, infer T, any, any>
-      ? T | InferSeqDE<RS>
-      : InferSeqDE<RS>
-    : never;
-
+export type InferSeqType<TS extends ICborType[]> = {
+  [ind in keyof TS]: EncodedType<TS[ind]>;
+};
+type InferSeqEE<TS extends ICborType[]> = TupleVals<{
+  [ind in keyof TS]: EncodeError<TS[ind]>;
+}>;
+type InferSeqDE<TS extends ICborType[]> = TupleVals<{
+  [ind in keyof TS]: DecodeError<TS[ind]>;
+}>;
+class EE1 extends Error {}
+class EE2 extends Error {}
+class EE3 extends Error {}
+class EE4 extends Error {}
+class EE5 extends Error {}
+class EE6 extends Error {}
+type A = InferSeqDE<[ICborType<41, EE1 | EE2, EE2> | ICborType<42 , EE3>, ICborType<43 | 44, EE4>]
 export function seq<
   EC,
   DC,
