@@ -74,7 +74,7 @@ abstract class BaseEncoder {
 export class Encoder extends BaseEncoder implements IEncoder {
   encode<T, EE extends Error, EC>(
     ty: IEncodableType<T, EE, EC>,
-    value: T,
+    value: Readonly<T>,
     ...args: unknown extends EC ? [EC] : []
   ): Result<void, EE> {
     return ty[encodeSymbol](value, this, (args as [EC])[0]);
