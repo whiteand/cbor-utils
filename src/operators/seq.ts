@@ -8,13 +8,15 @@ import { success } from "../success";
 import { TupleVals } from "../utils/TupleVals";
 
 export type InferSeqType<TS extends readonly ICborType[]> = {
-  [ind in keyof TS]: EncodedType<TS[ind]>;
+  -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
 };
+
+type A = InferSeqType<readonly [ICborType<number, any, any, any, any>]>;
 type InferSeqEE<TS extends readonly ICborType[]> = TupleVals<{
-  [ind in keyof TS]: EncodeError<TS[ind]>;
+  -readonly [ind in keyof TS]: EncodeError<TS[ind]>;
 }>;
 type InferSeqDE<TS extends readonly ICborType[]> = TupleVals<{
-  [ind in keyof TS]: DecodeError<TS[ind]>;
+  -readonly [ind in keyof TS]: DecodeError<TS[ind]>;
 }>;
 
 export function seq<

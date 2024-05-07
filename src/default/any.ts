@@ -147,7 +147,7 @@ function encodeBigInt(b: bigint, e: IEncoder): Result<void, OverflowError> {
   return enc(nint, b, e);
 }
 function encodeAny(
-  value: DataItem,
+  value: Readonly<DataItem>,
   e: IEncoder,
 ): Result<void, OverflowError | TypeMismatchError> {
   if (typeof value === "number") {

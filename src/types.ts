@@ -28,7 +28,7 @@ export type TDecodeFunction<out T, out Err, in Ctx> = (
 ) => Result<T, Err>;
 
 export type TEncodeFunction<in T, out Err, in Ctx> = (
-  value: T,
+  value: Readonly<T>,
   encoder: IEncoder,
   ctx: Ctx,
 ) => Result<void, Err>;

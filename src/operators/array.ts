@@ -61,7 +61,11 @@ export function array(): <T, EE extends Error, DE extends Error, EC, DC>(
     ty: ICborType<T, EE, DE, EC, DC>,
   ): CborType<T[], EE | OverflowError, DE | DecodingError, EC, DC> =>
     new CborType(
-      (value: T[], e: IEncoder, ctx: EC): Result<void, EE | OverflowError> => {
+      (
+        value: readonly T[],
+        e: IEncoder,
+        ctx: EC,
+      ): Result<void, EE | OverflowError> => {
         const res = arrayLen[encodeSymbol](value.length, e, ctx);
         if (!res.ok()) {
           return res;
