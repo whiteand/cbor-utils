@@ -14,6 +14,7 @@ import { InvalidCborError } from "../InvalidCborError";
 import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { getJsType } from "../utils/getJsType";
 import { done } from "../utils/done";
+import { mapLen } from "./mapLen";
 
 export function map<
   K,
@@ -25,10 +26,10 @@ export function map<
   KEC,
   KDC,
   VEC,
-  VDC,
+  VDC
 >(
   kt: ICborType<K, KEE, KDE, KEC, KDC>,
-  vt: ICborType<V, VEE, VDE, VEC, VDC>,
+  vt: ICborType<V, VEE, VDE, VEC, VDC>
 ): CborType<
   Map<K, V>,
   KEE | VEE | OverflowError,
@@ -48,7 +49,7 @@ export function map<
         return new TypeMismatchError("Map", getJsType(m)).err();
       }
       const entries = [...m.entries()];
-      const res = writeTypeAndArg(e, MAP_TYPE, entries.length);
+      const res = mapLen.encode(entries.length, e);
       if (!res.ok()) {
         return res;
       }
@@ -65,17 +66,12 @@ export function map<
     },
     (
       d,
-      c,
+      c
     ): Result<
       Map<K, V>,
       KDE | VDE | InvalidCborError | EndOfInputError | TypeMismatchError
     > => {
-      if (done(d)) return EOI_ERR;
-      const m = d.buf[d.ptr];
-      if (getType(m) !== MAP_TYPE) {
-        return new TypeMismatchError("map", getTypeString(m)).err();
-      }
-      const lenRes = readArg(d);
+      const lenRes = mapLen.decode(d);
       if (!lenRes.ok()) {
         return lenRes;
       }
@@ -115,6 +111,6 @@ export function map<
       }
 
       return ok(res);
-    },
+    }
   );
 }

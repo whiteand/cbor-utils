@@ -20,7 +20,7 @@ function trySmall(value: number | bigint): number | null {
 export function writeTypeAndArg(
   e: IEncoder,
   ty: number,
-  value: number | bigint | null,
+  value: number | bigint | null
 ): Result<void, OverflowError> {
   const tyMask = ty << 5;
   if (value == null) {

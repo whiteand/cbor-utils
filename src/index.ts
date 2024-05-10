@@ -17,6 +17,7 @@ export { bool } from "./default/bool";
 export { bytes } from "./default/bytes";
 export { f16 } from "./default/f16";
 export { arrayLen } from "./default/arrayLen";
+export { mapLen } from "./default/mapLen";
 export { f32 } from "./default/f32";
 export { f64 } from "./default/f64";
 export { map } from "./default/map";
