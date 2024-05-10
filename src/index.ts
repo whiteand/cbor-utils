@@ -10,17 +10,18 @@ export { UnderflowError } from "./UnderflowError";
 export { UnexpectedValueError } from "./UnexpectedValueError";
 export { CborType } from "./base";
 export { decode, tryDecode } from "./decode";
+export { DataItem } from "./default/DataItem";
 export { any } from "./default/any";
+export { arrayLen } from "./default/arrayLen";
 export { u128, u64 } from "./default/bigInts";
 export { bignum } from "./default/bignum";
 export { bool } from "./default/bool";
 export { bytes } from "./default/bytes";
 export { f16 } from "./default/f16";
-export { arrayLen } from "./default/arrayLen";
-export { mapLen } from "./default/mapLen";
 export { f32 } from "./default/f32";
 export { f64 } from "./default/f64";
 export { map } from "./default/map";
+export { mapLen } from "./default/mapLen";
 export { nullType } from "./default/null";
 export { u16, u32, u8 } from "./default/smallInts";
 export { str } from "./default/str";
@@ -38,6 +39,14 @@ export { or } from "./operators/or";
 export { InferSeqType, seq } from "./operators/seq";
 export { tagged } from "./operators/tagged";
 export {
+  AnyDecodableType,
+  AnyEncodableType,
+  DecodeContext,
+  DecodeError,
+  DecodedType,
+  EncodeContext,
+  EncodeError,
+  EncodedType,
   ICborType,
   IDecodableType,
   IDecoder,
@@ -45,12 +54,4 @@ export {
   IEncoder,
   TDecodeFunction,
   TEncodeFunction,
-  DecodeContext,
-  EncodeContext,
-  DecodeError,
-  DecodedType,
-  EncodeError,
-  EncodedType,
-  AnyDecodableType,
-  AnyEncodableType,
 } from "./types";
