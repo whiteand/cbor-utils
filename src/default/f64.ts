@@ -43,6 +43,9 @@ function decodeF64(
   return ok(res);
 }
 
+/**
+ * A CBOR type that encodes 64-bit floating point numbers.
+ */
 export const f64: CborType<
   number,
   OverflowError,

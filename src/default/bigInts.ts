@@ -51,6 +51,9 @@ function createBigInt(
   );
 }
 
+/**
+ * A CBOR Type that encodes u64.
+ */
 export const u64: CborType<
   bigint,
   OverflowError | UnderflowError,
@@ -58,6 +61,15 @@ export const u64: CborType<
   unknown,
   unknown
 > = createBigInt(64);
+
+/**
+ * A CBOR Type that encodes u128.
+ *
+ * Note: it is not strictly specified as a part of specification.
+ * But it was added to allow encoding of large numbers. The
+ * specification however envisions future extension of number
+ * type to 128 bit unsigned integers.
+ */
 export const u128: CborType<
   bigint,
   OverflowError | UnderflowError,

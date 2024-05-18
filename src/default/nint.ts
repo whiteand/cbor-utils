@@ -14,10 +14,16 @@ import { UnderflowError } from "../UnderflowError";
 import { EOI_ERR } from "../EndOfInputError";
 import { done } from "../utils/done";
 
-function isNegative(v: number | bigint) {
-  return typeof v === "number";
-}
-
+/**
+ * A type that encodes and decodes negative integers
+ * in range -(2 ^ 128) (inclusively) to -1 (inclusively)
+ *
+ * Note: It allows encoding of integers that have 128 bits.
+ * Which is not strictly specified as a part of specification.
+ * But it was added to allow encoding of large numbers. The
+ * specification however envisions future extension of number
+ * type to 128 bits.
+ */
 export const nint = new CborType<
   number | bigint,
   OverflowError | TypeMismatchError,
@@ -47,7 +53,7 @@ export const nint = new CborType<
     return writeTypeAndArg(
       e,
       NEGATIVE_INT_TYPE,
-      typeof v === "bigint" ? -1n - v : -1 - v,
+      typeof v === "bigint" ? -1n - v : -1 - v
     );
   },
   (d) => {
@@ -68,5 +74,5 @@ export const nint = new CborType<
       return ok(-1n - v);
     }
     return ok(-1 - v);
-  },
+  }
 );

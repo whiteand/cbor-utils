@@ -10,7 +10,7 @@ import { DecodingError } from "../DecodingError";
 function decodeArrayIndefinite<T, DE extends Error, DC>(
   ty: IDecodableType<T, DE, DC>,
   d: IDecoder,
-  ctx: DC,
+  ctx: DC
 ) {
   const res: T[] = [];
   while (d.ptr < d.buf.length) {
@@ -29,7 +29,7 @@ function decodeArrayU32<T, DE extends Error, DC>(
   ty: IDecodableType<T, DE, DC>,
   len: number,
   d: IDecoder,
-  ctx: DC,
+  ctx: DC
 ) {
   const res: T[] = [];
   for (let i = 0; i < len; i++) {
@@ -43,7 +43,7 @@ function decodeArrayU64<T, DE extends Error, DC>(
   ty: IDecodableType<T, DE, DC>,
   len: bigint,
   d: IDecoder,
-  ctx: DC,
+  ctx: DC
 ) {
   const res: T[] = [];
   for (let i = 0n; i < len; i++) {
@@ -54,17 +54,29 @@ function decodeArrayU64<T, DE extends Error, DC>(
   return ok(res);
 }
 
+/**
+ * Example:
+ *
+ * ```ts
+ * import { array, u8 } from '@whiteand/cbor'
+ *
+ * // u8Array is a CBOR type that encodes u8[]
+ * const u8Array = u8.pipe(array())
+ * ```
+ *
+ * @returns An operator that creates an array type from a element type
+ */
 export function array(): <T, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<T, EE, DE, EC, DC>,
+  ty: ICborType<T, EE, DE, EC, DC>
 ) => CborType<T[], EE | OverflowError, DE | DecodingError, EC, DC> {
   return <T, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborType<T, EE, DE, EC, DC>,
+    ty: ICborType<T, EE, DE, EC, DC>
   ): CborType<T[], EE | OverflowError, DE | DecodingError, EC, DC> =>
     new CborType(
       (
         value: readonly T[],
         e: IEncoder,
-        ctx: EC,
+        ctx: EC
       ): Result<void, EE | OverflowError> => {
         const res = arrayLen[encodeSymbol](value.length, e, ctx);
         if (!res.ok()) {
@@ -91,6 +103,6 @@ export function array(): <T, EE extends Error, DE extends Error, EC, DC>(
           case "bigint":
             return decodeArrayU64(ty, len, d, ctx);
         }
-      },
+      }
     );
 }

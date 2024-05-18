@@ -8,6 +8,9 @@ import { done } from "../utils/done";
 import { success } from "../success";
 import { getInfo } from "../marker";
 
+/**
+ * A CBOR type that encodes booleans
+ */
 export const bool: CborType<
   boolean,
   TypeMismatchError,

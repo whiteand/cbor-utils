@@ -1,3 +1,6 @@
+/**
+ * DataItem describes all possible valid CBOR Data Items
+ */
 export type DataItem =
   | number
   | bigint

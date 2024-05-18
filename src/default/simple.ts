@@ -13,7 +13,7 @@ import { getJsType } from "../utils/getJsType";
 import { done } from "../utils/done";
 
 function decodeSpecial(
-  d: IDecoder,
+  d: IDecoder
 ): Result<
   Simple<number>,
   TypeMismatchError | EndOfInputError | InvalidCborError
@@ -41,7 +41,7 @@ function decodeSpecial(
 }
 function encodeSpecial(
   v: Simple<number>,
-  e: IEncoder,
+  e: IEncoder
 ): Result<void, TypeMismatchError> {
   if (!v || !(v instanceof Simple)) {
     return new TypeMismatchError("Simple", getJsType(v)).err();
@@ -54,6 +54,13 @@ function encodeSpecial(
   return success;
 }
 
+/**
+ * A CBOR type that encodes "Simple" values.
+ *
+ * It is a specific number that represents some simple value.
+ *
+ * You can use it to encode and decode some abstract zero sized types.
+ */
 export const simple = new CborType<
   Simple<number>,
   TypeMismatchError,

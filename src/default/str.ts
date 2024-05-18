@@ -72,6 +72,9 @@ function encodeString(
   return success;
 }
 
+/**
+ * A CBOR type that encods utf-8 strings.
+ */
 export const str: CborType<
   string,
   OverflowError | TypeMismatchError,

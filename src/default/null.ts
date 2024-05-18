@@ -8,6 +8,9 @@ import { UnexpectedValueError } from "../UnexpectedValueError";
 import { success } from "../success";
 import { done } from "../utils/done";
 
+/**
+ * A type that encodes and decodes `null`
+ */
 export const nullType: CborType<
   null,
   UnexpectedValueError<null, null>,

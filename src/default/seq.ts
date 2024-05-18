@@ -18,6 +18,24 @@ type InferSeqDE<TS extends readonly ICborType[]> = TupleVals<{
   -readonly [ind in keyof TS]: DecodeError<TS[ind]>;
 }>;
 
+/**
+ * A CBOR type that encodes and decodes data item streams.
+ *
+ * Example:
+ *
+ * ```ts
+ * import { seq, encode }
+ *
+ * const u8AfterU8 = seq([u8, u8])
+ *
+ * const bytes = encode(e => u8AfterU8.encode([1, 2], e))
+ * console.log(bytes) // new Uint8Array([0x01, 0x02])
+ * ```
+ *
+ * Warning:
+ * The `seq` produces Data Streams, not Data Items. Read terminology section in the [SPECIFICATION](https://www.rfc-editor.org/rfc/rfc8949#name-terminology)
+ *
+ */
 export function seq<
   EC,
   DC,

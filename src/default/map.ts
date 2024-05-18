@@ -10,6 +10,13 @@ import { ICborType } from "../types";
 import { getJsType } from "../utils/getJsType";
 import { mapLen } from "./mapLen";
 
+/**
+ * A function that can produce a `Map` type based on the key and value types.
+ *
+ * @param kt type of keys in the map
+ * @param vt type of values in the map
+ * @returns as CBOR type that encodes and decodes `Map<K, V>`
+ */
 export function map<
   K,
   V,

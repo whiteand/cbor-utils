@@ -12,6 +12,15 @@ import { writeTypeAndArg } from "../writeTypeAndArg";
 import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { done } from "../utils/done";
 
+/**
+ * A CBOR type that encodes and decodes unsigned integers
+ * in range 0 to 2 ^ 128 - 1 (inclusively)
+ *
+ * Note: it allows encode u128 values. Which is not strictly
+ * specified as a part of specification. But it was added
+ * to allow encoding of large numbers. The specification
+ * however envisions future extension of number type to u128.
+ */
 export const uint: CborType<
   number | bigint,
   OverflowError | TypeMismatchError,

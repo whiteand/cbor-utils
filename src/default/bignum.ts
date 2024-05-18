@@ -30,6 +30,9 @@ function bigintToBe(b: bigint) {
   return new Uint8Array(res);
 }
 
+/**
+ * A CBOR type that encodes any kind of bigint as a tagged item.
+ */
 export const bignum: CborType<
   bigint,
   TypeMismatchError | OverflowError,

@@ -74,3 +74,22 @@ const result2 = tryDecode(cborBytes, (d) => {
   };
 });
 ```
+
+## Terminology
+
+## CBOR Type
+
+A CBOR Type is an object that allows you to encode and decode values of the specified type. Example: CBOR Type of `u8` means that this object has `encode` capability that converts `u8` into a CBOR data item, also it is able to read `u8` data item from an Uint8Array.
+
+## Encoder
+
+Is an object that allows you to encode values into a growing Uint8Array.
+
+## Decoder
+
+Is an object that consists of two fields `buf: Uint8Array` and `ptr: number`.
+CBOR Types modify the decoder type to read cbor item.
+
+## Operator
+
+Is a function that takes one CBOR Type (called source type) and returns another CBOR Type (called target type). Example: `array` operator takes CBOR Type of `u8` and returns CBOR type of `array<u8>`.

@@ -174,6 +174,9 @@ function decodeHalfFloat(
   return ok(pos ? res : -res);
 }
 
+/**
+ * A CBOR type that encodes 16-bit floating point numbers.
+ */
 export const f16: CborType<
   number,
   OverflowError,

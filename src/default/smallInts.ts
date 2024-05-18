@@ -63,6 +63,9 @@ function createSmallIntType(
   );
 }
 
+/**
+ * A CBOR type that encodes unsigned integers between 0..=255
+ */
 export const u8: CborType<
   number,
   OverflowError | UnderflowError,
@@ -71,6 +74,9 @@ export const u8: CborType<
   unknown
 > = createSmallIntType(8);
 
+/**
+ * A CBOR type that encodes unsigned integers between 0..=65_535
+ */
 export const u16: CborType<
   number,
   OverflowError | UnderflowError,
@@ -79,6 +85,9 @@ export const u16: CborType<
   unknown
 > = createSmallIntType(16);
 
+/**
+ * A CBOR type that encodes unsigned integers between 0..=4_294_967_295n
+ */
 export const u32: CborType<
   number,
   OverflowError | UnderflowError,

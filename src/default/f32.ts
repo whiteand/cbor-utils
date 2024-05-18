@@ -43,6 +43,9 @@ function decodeF32(
   return ok(res);
 }
 
+/**
+ * A CBOR type that encodes 32-bit floating point numbers.
+ */
 export const f32: CborType<
   number,
   OverflowError,

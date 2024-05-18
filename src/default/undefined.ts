@@ -8,6 +8,9 @@ import { UnexpectedValueError } from "../UnexpectedValueError";
 import { success } from "../success";
 import { done } from "../utils/done";
 
+/**
+ * A type that encodes and decodes `undefined`
+ */
 export const undefinedType: CborType<
   undefined,
   UnexpectedValueError<undefined, undefined>,

@@ -68,6 +68,9 @@ function encodeBytes(
   return success;
 }
 
+/**
+ * A CBOR type that encodes Uint8Array as bytes type
+ */
 export const bytes: CborType<
   Uint8Array,
   OverflowError,
