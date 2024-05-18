@@ -2,10 +2,22 @@
 
 This library provides you with low level tools to use CBOR format
 
+## API Docs
+
+To see the full API Documentation, please visit [Docs](https://jsr.io/@whiteand/cbor/doc).
+
 ## Installation
+
+Using npm:
 
 ```sh
 npm install cbor-utils
+```
+
+Using jsr:
+
+```sh
+npx jsr add @whiteand/cbor
 ```
 
 ## Example:

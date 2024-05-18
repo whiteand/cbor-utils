@@ -194,6 +194,29 @@ function encodeAny(
   );
 }
 
+/**
+ * This instance of CBOR type allows you
+ * to encode any valid CBOR data item.
+ *
+ * Decoding example:
+ *
+ * ```ts
+ * import { any, decode } from '@whiteand/cbor'
+ * const bytes = new Uint8Array([0x83,0x01,0x82,0x02,0x03,0x82,0x04,0x05])
+ * const value = decode(bytes, d => any.decode(d)).unwrap()
+ * console.log(value)
+ * //> [ 1, [ 2, 3 ], [ 4, 5 ] ]
+ *```
+ *
+ * Encoding example:
+ *
+ * ```ts
+ * import { any, encode } from '@whiteand/cbor'
+ * const bytes = encode(e => any.encode([1, [2, 3], [4, 5]], e))
+ * console.log(bytes)
+ * //> Uint8Array(8) [0x83,0x01,0x82,0x02,0x03,0x82,0x04,0x05]
+ * ```
+ */
 export const any: CborType<
   DataItem,
   OverflowError | TypeMismatchError,
