@@ -1,6 +1,7 @@
 # CBOR Utils
 
-This library provides you with low level tools to use CBOR format
+This library provides you with low level tools to use CBOR format.
+It is inspired by `minicbor` crate in Rust and `rxjs` library in Javascript.
 
 ## API Docs
 

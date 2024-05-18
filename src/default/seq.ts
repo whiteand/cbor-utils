@@ -11,7 +11,6 @@ export type InferSeqType<TS extends readonly ICborType[]> = {
   -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
 };
 
-type A = InferSeqType<readonly [ICborType<number, any, any, any, any>]>;
 type InferSeqEE<TS extends readonly ICborType[]> = TupleVals<{
   -readonly [ind in keyof TS]: EncodeError<TS[ind]>;
 }>;
@@ -22,9 +21,9 @@ type InferSeqDE<TS extends readonly ICborType[]> = TupleVals<{
 export function seq<
   EC,
   DC,
-  const TypesList extends readonly ICborType<any, any, any, EC, DC>[],
+  const TypesList extends readonly ICborType<any, any, any, EC, DC>[]
 >(
-  types: TypesList,
+  types: TypesList
 ): CborType<
   InferSeqType<TypesList>,
   InferSeqEE<TypesList> | TypeMismatchError,
@@ -63,6 +62,6 @@ export function seq<
         tuple.push(res.value);
       }
       return ok(tuple as InferSeqType<TypesList>);
-    },
+    }
   );
 }

@@ -1,19 +1,6 @@
 import { Result } from "resultra";
-import {
-  encodeCtxSymbol,
-  encodeErrSymbol,
-  encodeSymbol,
-  encodeTypeSymbol,
-} from "./traits";
-import {
-  AnyEncodableType,
-  CtxParam,
-  EncodeContext,
-  EncodeError,
-  EncodedType,
-  IEncodableType,
-  IEncoder,
-} from "./types";
+import { encodeSymbol } from "./traits";
+import { IEncodableType, IEncoder } from "./types";
 
 function nextSize(current: number, minimal: number) {
   current ||= 1;
@@ -75,7 +62,7 @@ export class Encoder extends BaseEncoder implements IEncoder {
   encode<T, EE extends Error, EC>(
     ty: IEncodableType<T, EE, EC>,
     value: Readonly<T>,
-    ...args: unknown extends EC ? [EC] : []
+    ...args: unknown extends EC ? [] : [EC]
   ): Result<void, EE> {
     return ty[encodeSymbol](value, this, (args as [EC])[0]);
   }

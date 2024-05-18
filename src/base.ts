@@ -34,7 +34,7 @@ export class CborType<T, EE extends Error, DE extends Error, EC, DC>
   [decodeSymbol]: TDecodeFunction<T, DE, DC> = null as never;
   constructor(
     enc: TEncodeFunction<T, EE, EC>,
-    dec: TDecodeFunction<T, DE, DC>,
+    dec: TDecodeFunction<T, DE, DC>
   ) {
     super();
     this[encodeSymbol] = enc;
@@ -50,10 +50,10 @@ export class CborType<T, EE extends Error, DE extends Error, EC, DC>
 
   static from<T, EE extends Error, DE extends Error, EC, DC>(
     enc: TEncodeFunction<T, EE, EC>,
-    dec: TDecodeFunction<T, DE, DC>,
+    dec: TDecodeFunction<T, DE, DC>
   ): CborType<T, EE, DE, EC, DC>;
   static from<T, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborType<T, EE, DE, EC, DC>,
+    ty: ICborType<T, EE, DE, EC, DC>
   ): CborType<T, EE, DE, EC, DC>;
   static from(encOrTy: any, dec?: any): any {
     if (encOrTy instanceof CborType) {
@@ -64,7 +64,17 @@ export class CborType<T, EE extends Error, DE extends Error, EC, DC>
     }
     return new CborType(
       (v, e, c) => encOrTy[encodeSymbol](v, e, c),
-      (d, c) => encOrTy[decodeSymbol](d, c),
+      (d, c) => encOrTy[decodeSymbol](d, c)
+    );
+  }
+
+  convert<Target>(
+    toTarget: (source: T) => Target,
+    fromTarget: (target: Target) => T
+  ): CborType<Target, EE, DE, EC, DC> {
+    return new CborType<Target, EE, DE, EC, DC>(
+      (v, e, ctx) => this[encodeSymbol](fromTarget(v), e, ctx as EC),
+      (d, ctx) => this[decodeSymbol](d, ctx as DC).map(toTarget)
     );
   }
 }

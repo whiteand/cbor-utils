@@ -25,6 +25,7 @@ export { mapLen } from "./default/mapLen";
 export { nullType } from "./default/null";
 export { u16, u32, u8 } from "./default/smallInts";
 export { str } from "./default/str";
+export { tuple } from "./default/tuple";
 export { uint } from "./default/uint";
 export { undefinedType } from "./default/undefined";
 export { encode } from "./encode";
@@ -36,7 +37,7 @@ export { flatMap } from "./operators/flatMap";
 export { mapErrors } from "./operators/mapErrors";
 export { nullable } from "./operators/nullable";
 export { or } from "./operators/or";
-export { InferSeqType, seq } from "./operators/seq";
+export { InferSeqType, seq } from "./default/seq";
 export { tagged } from "./operators/tagged";
 export {
   AnyDecodableType,
