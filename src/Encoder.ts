@@ -33,7 +33,7 @@ abstract class BaseEncoder {
     this.offset = ptr;
   }
 
-  save() {
+  save(): number {
     return this.ptr;
   }
 

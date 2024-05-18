@@ -8,7 +8,13 @@ import { UnexpectedValueError } from "../UnexpectedValueError";
 import { success } from "../success";
 import { done } from "../utils/done";
 
-export const nullType = new CborType<
+export const nullType: CborType<
+  null,
+  UnexpectedValueError<null, null>,
+  EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
+> = new CborType<
   null,
   UnexpectedValueError<null, null>,
   EndOfInputError | TypeMismatchError,
@@ -31,5 +37,5 @@ export const nullType = new CborType<
       return ok(null);
     }
     return new TypeMismatchError("null", getTypeString(d.buf[d.ptr])).err();
-  },
+  }
 );

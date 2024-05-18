@@ -22,7 +22,7 @@ function encodeF64(v: number, e: IEncoder) {
 }
 
 function decodeF64(
-  d: IDecoder,
+  d: IDecoder
 ): Result<number, TypeMismatchError | EndOfInputError> {
   if (done(d)) return EOI_ERR;
   const m = d.buf[d.ptr];
@@ -37,16 +37,19 @@ function decodeF64(
   }
   const res = new DataView(
     d.buf.buffer,
-    d.buf.byteOffset + d.ptr + 1,
+    d.buf.byteOffset + d.ptr + 1
   ).getFloat64(0, false);
   d.ptr += 9;
   return ok(res);
 }
 
-export const f64 = new CborType<
+export const f64: CborType<
   number,
   OverflowError,
   TypeMismatchError,
   unknown,
   unknown
->(encodeF64, decodeF64);
+> = new CborType<number, OverflowError, TypeMismatchError, unknown, unknown>(
+  encodeF64,
+  decodeF64
+);

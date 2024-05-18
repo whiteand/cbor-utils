@@ -16,7 +16,7 @@ const MAX_VALUE_DICT = {
   32: MAX_U32,
 } as const;
 function createSmallIntType(
-  size: 8 | 16 | 32,
+  size: 8 | 16 | 32
 ): CborType<
   number,
   OverflowError | UnderflowError,
@@ -51,18 +51,38 @@ function createSmallIntType(
           }
           return new TypeMismatchError(
             tyName,
-            getTypeString(d.buf[start]),
+            getTypeString(d.buf[start])
           ).err();
         }
         if (arg <= MAX_VALUE && arg >= MIN_VALUE) {
           return ok(arg);
         }
         return new TypeMismatchError(tyName, getTypeString(d.buf[start])).err();
-      },
-    ),
+      }
+    )
   );
 }
 
-export const u8 = createSmallIntType(8);
-export const u16 = createSmallIntType(16);
-export const u32 = createSmallIntType(32);
+export const u8: CborType<
+  number,
+  OverflowError | UnderflowError,
+  InvalidCborError | EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
+> = createSmallIntType(8);
+
+export const u16: CborType<
+  number,
+  OverflowError | UnderflowError,
+  InvalidCborError | EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
+> = createSmallIntType(16);
+
+export const u32: CborType<
+  number,
+  OverflowError | UnderflowError,
+  InvalidCborError | EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
+> = createSmallIntType(32);

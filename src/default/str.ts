@@ -60,7 +60,7 @@ function decodeString(d: IDecoder): Result<string, DecodingError> {
 
 function encodeString(
   v: string,
-  e: IEncoder,
+  e: IEncoder
 ): Result<void, OverflowError | TypeMismatchError> {
   if (typeof v !== "string") {
     return new TypeMismatchError("string", typeof v).err();
@@ -72,7 +72,13 @@ function encodeString(
   return success;
 }
 
-export const str = new CborType<
+export const str: CborType<
+  string,
+  OverflowError | TypeMismatchError,
+  DecodingError,
+  unknown,
+  unknown
+> = new CborType<
   string,
   OverflowError | TypeMismatchError,
   DecodingError,

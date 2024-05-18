@@ -8,7 +8,13 @@ import { UnexpectedValueError } from "../UnexpectedValueError";
 import { success } from "../success";
 import { done } from "../utils/done";
 
-export const undefinedType = new CborType<
+export const undefinedType: CborType<
+  undefined,
+  UnexpectedValueError<undefined, undefined>,
+  EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
+> = new CborType<
   undefined,
   UnexpectedValueError<undefined, undefined>,
   EndOfInputError | TypeMismatchError,
@@ -32,7 +38,7 @@ export const undefinedType = new CborType<
     }
     return new TypeMismatchError(
       "undefined",
-      getTypeString(d.buf[d.ptr]),
+      getTypeString(d.buf[d.ptr])
     ).err();
-  },
+  }
 );

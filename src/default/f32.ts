@@ -22,7 +22,7 @@ function encodeF32(v: number, e: IEncoder) {
 }
 
 function decodeF32(
-  d: IDecoder,
+  d: IDecoder
 ): Result<number, TypeMismatchError | EndOfInputError> {
   if (done(d)) return EOI_ERR;
   const m = d.buf[d.ptr];
@@ -37,16 +37,19 @@ function decodeF32(
   }
   const res = new DataView(
     d.buf.buffer,
-    d.buf.byteOffset + d.ptr + 1,
+    d.buf.byteOffset + d.ptr + 1
   ).getFloat32(0, false);
   d.ptr += 5;
   return ok(res);
 }
 
-export const f32 = new CborType<
+export const f32: CborType<
   number,
   OverflowError,
   TypeMismatchError,
   unknown,
   unknown
->(encodeF32, decodeF32);
+> = new CborType<number, OverflowError, TypeMismatchError, unknown, unknown>(
+  encodeF32,
+  decodeF32
+);

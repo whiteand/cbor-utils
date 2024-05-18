@@ -55,7 +55,7 @@ function roundToFloat16(num: number) {
     return (
       sign *
       roundTiesToEven(
-        absolute / FLOAT16_EPSILON_MULTIPLIED_BY_FLOAT16_MIN_VALUE,
+        absolute / FLOAT16_EPSILON_MULTIPLIED_BY_FLOAT16_MIN_VALUE
       ) *
       FLOAT16_EPSILON_MULTIPLIED_BY_FLOAT16_MIN_VALUE
     );
@@ -79,7 +79,7 @@ function encodeF16Parts(
   sign: 1 | 0,
   exponent: number,
   significand: number,
-  e: IEncoder,
+  e: IEncoder
 ): Result<void, never> {
   const a = (sign << 7) | (exponent << 2) | ((significand >> 8) & 0b11);
   const b = significand & 0xff;
@@ -94,7 +94,7 @@ function encodeF16Parts(
 
 function encodeF16(
   value: number,
-  e: IEncoder,
+  e: IEncoder
 ): Result<void, OverflowError | UnderflowError> {
   if (Number.isNaN(value)) {
     return encodeF16Parts(0, 31, 512, e);
@@ -136,7 +136,7 @@ function encodeF16(
 }
 
 function decodeHalfFloat(
-  d: IDecoder,
+  d: IDecoder
 ): Result<number, TypeMismatchError | EndOfInputError> {
   if (done(d)) return EOI_ERR;
   const m = d.buf[d.ptr];
@@ -174,10 +174,13 @@ function decodeHalfFloat(
   return ok(pos ? res : -res);
 }
 
-export const f16 = new CborType<
+export const f16: CborType<
   number,
   OverflowError,
   TypeMismatchError,
   unknown,
   unknown
->(encodeF16, decodeHalfFloat);
+> = new CborType<number, OverflowError, TypeMismatchError, unknown, unknown>(
+  encodeF16,
+  decodeHalfFloat
+);

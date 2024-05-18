@@ -1,19 +1,13 @@
 import { Result, ok } from "resultra";
+import { EndOfInputError } from "../EndOfInputError";
+import { InvalidCborError } from "../InvalidCborError";
+import { OverflowError } from "../OverflowError";
+import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
-import { MAP_TYPE } from "../constants";
+import { success } from "../success";
 import { decodeSymbol, encodeSymbol } from "../traits";
 import { ICborType } from "../types";
-import { writeTypeAndArg } from "../writeTypeAndArg";
-import { OverflowError } from "../OverflowError";
-import { success } from "../success";
-import { getType } from "../marker";
-import { TypeMismatchError } from "../TypeMismatchError";
-import { getTypeString } from "../getTypeString";
-import { readArg } from "../readArg";
-import { InvalidCborError } from "../InvalidCborError";
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { getJsType } from "../utils/getJsType";
-import { done } from "../utils/done";
 import { mapLen } from "./mapLen";
 
 export function map<

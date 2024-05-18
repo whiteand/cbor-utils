@@ -12,7 +12,13 @@ import { writeTypeAndArg } from "../writeTypeAndArg";
 import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { done } from "../utils/done";
 
-export const uint = new CborType<
+export const uint: CborType<
+  number | bigint,
+  OverflowError | TypeMismatchError,
+  EndOfInputError | TypeMismatchError | InvalidCborError,
+  unknown,
+  unknown
+> = new CborType<
   number | bigint,
   OverflowError | TypeMismatchError,
   EndOfInputError | TypeMismatchError | InvalidCborError,
@@ -40,5 +46,5 @@ export const uint = new CborType<
       return new InvalidCborError(marker, d.ptr).err();
     }
     return ok(v);
-  },
+  }
 );

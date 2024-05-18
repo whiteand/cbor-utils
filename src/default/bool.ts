@@ -8,7 +8,13 @@ import { done } from "../utils/done";
 import { success } from "../success";
 import { getInfo } from "../marker";
 
-export const bool = new CborType<
+export const bool: CborType<
+  boolean,
+  TypeMismatchError,
+  EndOfInputError | TypeMismatchError,
+  unknown,
+  unknown
+> = new CborType<
   boolean,
   TypeMismatchError,
   EndOfInputError | TypeMismatchError,
@@ -37,8 +43,8 @@ export const bool = new CborType<
         d.ptr--;
         return new TypeMismatchError(
           "boolean",
-          getTypeString(d.buf[d.ptr]),
+          getTypeString(d.buf[d.ptr])
         ).err();
     }
-  },
+  }
 );

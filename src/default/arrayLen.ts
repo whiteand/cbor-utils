@@ -10,7 +10,13 @@ import { readArg } from "../readArg";
 import { done } from "../utils/done";
 import { writeTypeAndArg } from "../writeTypeAndArg";
 
-export const arrayLen = new CborType<
+export const arrayLen: CborType<
+  number | bigint | null,
+  OverflowError,
+  DecodingError,
+  unknown,
+  unknown
+> = new CborType<
   number | bigint | null,
   OverflowError,
   DecodingError,
@@ -26,5 +32,5 @@ export const arrayLen = new CborType<
       return new TypeMismatchError("array", getTypeString(marker)).err();
     }
     return readArg(d);
-  },
+  }
 );

@@ -17,7 +17,7 @@ import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { done } from "../utils/done";
 
 function decodeIndefiniteBytes(
-  d: IDecoder,
+  d: IDecoder
 ): Result<Uint8Array, EndOfInputError | TypeMismatchError> {
   const chunks: Uint8Array[] = [];
   let total = 0;
@@ -36,14 +36,14 @@ function decodeIndefiniteBytes(
 }
 
 function decodeBytes(
-  d: IDecoder,
+  d: IDecoder
 ): Result<Uint8Array, EndOfInputError | TypeMismatchError> {
   if (done(d)) return EOI_ERR;
   const marker = d.buf[d.ptr];
   if (getType(marker) !== BYTES_TYPE) {
     return new TypeMismatchError(
       getTypeString(BYTES_TYPE_MASK),
-      getTypeString(marker),
+      getTypeString(marker)
     ).err();
   }
   const argRes = readArg(d);
@@ -57,7 +57,7 @@ function decodeBytes(
 
 function encodeBytes(
   v: Uint8Array,
-  e: IEncoder,
+  e: IEncoder
 ): Result<void, OverflowError | TypeMismatchError> {
   if (!(v instanceof Uint8Array)) {
     return new TypeMismatchError("Uint8Array", getJsType(v)).err();
@@ -68,10 +68,13 @@ function encodeBytes(
   return success;
 }
 
-export const bytes = new CborType<
+export const bytes: CborType<
   Uint8Array,
   OverflowError,
   DecodingError,
   unknown,
   unknown
->(encodeBytes, decodeBytes);
+> = new CborType<Uint8Array, OverflowError, DecodingError, unknown, unknown>(
+  encodeBytes,
+  decodeBytes
+);

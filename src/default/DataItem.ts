@@ -14,7 +14,7 @@ export type DataItem =
 export class Simple<T extends number = number> {
   private static SIMPLES: Simple[] = [];
   private constructor(public readonly value: T) {}
-  static of(number: number) {
+  static of(number: number): Simple {
     if (!Number.isSafeInteger(number)) {
       throw new TypeError(`Impossible simple value: ${number}`);
     }
@@ -29,7 +29,7 @@ export class Simple<T extends number = number> {
     }
     return Simple.SIMPLES[number];
   }
-  toString() {
+  toString(): string {
     return `simple(${this.value})`;
   }
 }

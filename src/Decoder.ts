@@ -17,7 +17,7 @@ abstract class BaseDecoder {
     this.ptr = ptr;
   }
 
-  done() {
+  done(): boolean {
     return this.ptr >= this.buf.length;
   }
 }

@@ -9,7 +9,7 @@ import { flatMap } from "../operators/flatMap";
 import { CborType } from "../base";
 
 function createBigInt(
-  size: 64 | 128,
+  size: 64 | 128
 ): CborType<
   bigint,
   OverflowError | UnderflowError,
@@ -37,7 +37,7 @@ function createBigInt(
         arg: number | bigint,
         d,
         _,
-        start,
+        start
       ): Result<bigint, TypeMismatchError> => {
         const value = BigInt(arg);
 
@@ -46,10 +46,22 @@ function createBigInt(
         }
 
         return new TypeMismatchError(tyName, getTypeString(d.buf[start])).err();
-      },
-    ),
+      }
+    )
   );
 }
 
-export const u64 = createBigInt(64);
-export const u128 = createBigInt(128);
+export const u64: CborType<
+  bigint,
+  OverflowError | UnderflowError,
+  DecodingError,
+  unknown,
+  unknown
+> = createBigInt(64);
+export const u128: CborType<
+  bigint,
+  OverflowError | UnderflowError,
+  DecodingError,
+  unknown,
+  unknown
+> = createBigInt(128);

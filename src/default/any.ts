@@ -42,14 +42,14 @@ import { InvalidCborError } from "../InvalidCborError";
 
 function dec<T, E extends Error>(
   t: IDecodableType<T, E>,
-  d: IDecoder,
+  d: IDecoder
 ): Result<T, E> {
   return t[decodeSymbol](d, null);
 }
 function enc<T, E extends Error>(
   t: IEncodableType<T, E, unknown>,
   v: T,
-  e: IEncoder,
+  e: IEncoder
 ): Result<void, E> {
   return t[encodeSymbol](v, e, null);
 }
@@ -100,7 +100,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
           return new InvalidCborError(
             m,
             p,
-            new Error("not recognized special"),
+            new Error("not recognized special")
           ).err();
         }
       }
@@ -148,7 +148,7 @@ function encodeBigInt(b: bigint, e: IEncoder): Result<void, OverflowError> {
 }
 function encodeAny(
   value: Readonly<DataItem>,
-  e: IEncoder,
+  e: IEncoder
 ): Result<void, OverflowError | TypeMismatchError> {
   if (typeof value === "number") {
     if (Number.isInteger(value)) {
@@ -189,12 +189,18 @@ function encodeAny(
   return err(
     new TypeMismatchError(
       "valid data item",
-      Object.prototype.toString.call(value).slice("[object ".length, -1),
-    ) as never,
+      Object.prototype.toString.call(value).slice("[object ".length, -1)
+    ) as never
   );
 }
 
-export const any = new CborType<
+export const any: CborType<
+  DataItem,
+  OverflowError | TypeMismatchError,
+  DecodingError,
+  unknown,
+  unknown
+> = new CborType<
   DataItem,
   OverflowError | TypeMismatchError,
   DecodingError,
@@ -212,8 +218,8 @@ export const cborBytes = bytes.pipe(tagged(24), untag(24, "cbor-bytes"));
 export const epochTime = or(uint, f64, f32, f16).pipe(
   mapErrors(
     (_, v) => new TypeMismatchError("epoch time", String(v)),
-    (_, m) => new TypeMismatchError("epoch time", getTypeString(m)),
+    (_, m) => new TypeMismatchError("epoch time", getTypeString(m))
   ),
   tagged(),
-  untag(1, "epoch time"),
+  untag(1, "epoch time")
 );

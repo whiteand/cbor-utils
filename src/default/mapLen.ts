@@ -8,10 +8,16 @@ import { getType } from "../marker";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { getTypeString } from "../getTypeString";
 import { readArg } from "../readArg";
-import { EOI_ERR } from "../EndOfInputError";
+import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
 import { done } from "../utils/done";
 
-export const mapLen = CborType.from(
+export const mapLen: CborType<
+  number | bigint | null,
+  OverflowError,
+  EndOfInputError,
+  unknown,
+  unknown
+> = CborType.from(
   (v: bigint | number | null, e: IEncoder): Result<void, OverflowError> => {
     return writeTypeAndArg(e, MAP_TYPE, v);
   },

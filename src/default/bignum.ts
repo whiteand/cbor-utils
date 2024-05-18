@@ -5,6 +5,9 @@ import { tagged } from "../operators/tagged";
 import { TaggedDataItem } from "./DataItem";
 import { bytes } from "./bytes";
 import { UnexpectedValueError } from "../UnexpectedValueError";
+import { OverflowError } from "../OverflowError";
+import { DecodingError } from "../DecodingError";
+import { CborType } from "../base";
 
 function bigintFromBe(be: Uint8Array) {
   let res = 0n;
@@ -27,14 +30,20 @@ function bigintToBe(b: bigint) {
   return new Uint8Array(res);
 }
 
-export const bignum = bytes.pipe(
+export const bignum: CborType<
+  bigint,
+  TypeMismatchError | OverflowError,
+  DecodingError | UnexpectedValueError<string, string>,
+  unknown,
+  unknown
+> = bytes.pipe(
   tagged(),
   flatMap(
     (v: bigint): Result<TaggedDataItem<Uint8Array>, TypeMismatchError> => {
       if (typeof v !== "bigint")
         return new TypeMismatchError("bigint", typeof v).err();
       return ok(
-        new TaggedDataItem(v >= 0n ? 2 : 3, bigintToBe(v >= 0n ? v : -1n - v)),
+        new TaggedDataItem(v >= 0n ? 2 : 3, bigintToBe(v >= 0n ? v : -1n - v))
       );
     },
     (t: TaggedDataItem<Uint8Array>) => {
@@ -48,6 +57,6 @@ export const bignum = bytes.pipe(
         default:
           return new UnexpectedValueError("2 | 3", `${tag}`).err();
       }
-    },
-  ),
+    }
+  )
 );
