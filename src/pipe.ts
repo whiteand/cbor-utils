@@ -5,14 +5,14 @@ export interface IPipeable {
     this: A,
     ab: (_: A) => B,
     bc: (_: B) => C,
-    cd: (_: C) => D,
+    cd: (_: C) => D
   ): D;
   pipe<A, B, C, D, E>(
     this: A,
     ab: (_: A) => B,
     bc: (_: B) => C,
     cd: (_: C) => D,
-    de: (_: D) => E,
+    de: (_: D) => E
   ): E;
   pipe<A, B, C, D, E, F>(
     this: A,
@@ -20,7 +20,7 @@ export interface IPipeable {
     bc: (_: B) => C,
     cd: (_: C) => D,
     de: (_: D) => E,
-    ef: (_: E) => F,
+    ef: (_: E) => F
   ): F;
   pipe<A, B, C, D, E, F, G>(
     this: A,
@@ -29,7 +29,7 @@ export interface IPipeable {
     cd: (_: C) => D,
     de: (_: D) => E,
     ef: (_: E) => F,
-    fg: (_: F) => G,
+    fg: (_: F) => G
   ): G;
   pipe<A, B, C, D, E, F, G, H>(
     this: A,
@@ -39,7 +39,7 @@ export interface IPipeable {
     de: (_: D) => E,
     ef: (_: E) => F,
     fg: (_: F) => G,
-    gh: (_: G) => H,
+    gh: (_: G) => H
   ): H;
   pipe<A, B, C, D, E, F, G, H, I>(
     this: A,
@@ -50,7 +50,7 @@ export interface IPipeable {
     ef: (_: E) => F,
     fg: (_: F) => G,
     gh: (_: G) => H,
-    hi: (_: H) => I,
+    hi: (_: H) => I
   ): I;
   pipe<A, B, C, D, E, F, G, H, I, J>(
     this: A,
@@ -62,7 +62,7 @@ export interface IPipeable {
     fg: (_: F) => G,
     gh: (_: G) => H,
     hi: (_: H) => I,
-    ij: (_: I) => J,
+    ij: (_: I) => J
   ): J;
   pipe<A, B, C, D, E, F, G, H, I, J, K>(
     this: A,
@@ -75,7 +75,7 @@ export interface IPipeable {
     gh: (_: G) => H,
     hi: (_: H) => I,
     ij: (_: I) => J,
-    jk: (_: J) => K,
+    jk: (_: J) => K
   ): K;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L>(
     this: A,
@@ -89,7 +89,7 @@ export interface IPipeable {
     hi: (_: H) => I,
     ij: (_: I) => J,
     jk: (_: J) => K,
-    kl: (_: K) => L,
+    kl: (_: K) => L
   ): L;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M>(
     this: A,
@@ -104,7 +104,7 @@ export interface IPipeable {
     ij: (_: I) => J,
     jk: (_: J) => K,
     kl: (_: K) => L,
-    lm: (_: L) => M,
+    lm: (_: L) => M
   ): M;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N>(
     this: A,
@@ -120,7 +120,7 @@ export interface IPipeable {
     jk: (_: J) => K,
     kl: (_: K) => L,
     lm: (_: L) => M,
-    mn: (_: M) => N,
+    mn: (_: M) => N
   ): N;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(
     this: A,
@@ -137,7 +137,7 @@ export interface IPipeable {
     kl: (_: K) => L,
     lm: (_: L) => M,
     mn: (_: M) => N,
-    no: (_: N) => O,
+    no: (_: N) => O
   ): O;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(
     this: A,
@@ -155,7 +155,7 @@ export interface IPipeable {
     lm: (_: L) => M,
     mn: (_: M) => N,
     no: (_: N) => O,
-    op: (_: O) => P,
+    op: (_: O) => P
   ): P;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>(
     this: A,
@@ -174,7 +174,7 @@ export interface IPipeable {
     mn: (_: M) => N,
     no: (_: N) => O,
     op: (_: O) => P,
-    pq: (_: P) => Q,
+    pq: (_: P) => Q
   ): Q;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R>(
     this: A,
@@ -194,7 +194,7 @@ export interface IPipeable {
     no: (_: N) => O,
     op: (_: O) => P,
     pq: (_: P) => Q,
-    qr: (_: Q) => R,
+    qr: (_: Q) => R
   ): R;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S>(
     this: A,
@@ -215,7 +215,7 @@ export interface IPipeable {
     op: (_: O) => P,
     pq: (_: P) => Q,
     qr: (_: Q) => R,
-    rs: (_: R) => S,
+    rs: (_: R) => S
   ): S;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T>(
     this: A,
@@ -237,7 +237,7 @@ export interface IPipeable {
     pq: (_: P) => Q,
     qr: (_: Q) => R,
     rs: (_: R) => S,
-    st: (_: S) => T,
+    st: (_: S) => T
   ): T;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U>(
     this: A,
@@ -260,7 +260,7 @@ export interface IPipeable {
     qr: (_: Q) => R,
     rs: (_: R) => S,
     st: (_: S) => T,
-    tu: (_: T) => U,
+    tu: (_: T) => U
   ): U;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U>(
     this: A,
@@ -283,7 +283,7 @@ export interface IPipeable {
     qr: (_: Q) => R,
     rs: (_: R) => S,
     st: (_: S) => T,
-    tu: (_: T) => U,
+    tu: (_: T) => U
   ): U;
 }
 
@@ -303,17 +303,17 @@ export const pipeArguments = <A>(self: A, args: IArguments): unknown => {
       return args[5](args[4](args[3](args[2](args[1](args[0](self))))));
     case 7:
       return args[6](
-        args[5](args[4](args[3](args[2](args[1](args[0](self)))))),
+        args[5](args[4](args[3](args[2](args[1](args[0](self))))))
       );
     case 8:
       return args[7](
-        args[6](args[5](args[4](args[3](args[2](args[1](args[0](self))))))),
+        args[6](args[5](args[4](args[3](args[2](args[1](args[0](self)))))))
       );
     case 9:
       return args[8](
         args[7](
-          args[6](args[5](args[4](args[3](args[2](args[1](args[0](self))))))),
-        ),
+          args[6](args[5](args[4](args[3](args[2](args[1](args[0](self)))))))
+        )
       );
     default: {
       let ret = self;
@@ -326,20 +326,23 @@ export const pipeArguments = <A>(self: A, args: IArguments): unknown => {
 };
 
 export class Pipeable implements IPipeable {
+  /**
+   * Allows pass the instance through a series of functions.
+   */
   pipe<A, B>(this: A, ab: (_: A) => B): B;
   pipe<A, B, C>(this: A, ab: (_: A) => B, bc: (_: B) => C): C;
   pipe<A, B, C, D>(
     this: A,
     ab: (_: A) => B,
     bc: (_: B) => C,
-    cd: (_: C) => D,
+    cd: (_: C) => D
   ): D;
   pipe<A, B, C, D, E>(
     this: A,
     ab: (_: A) => B,
     bc: (_: B) => C,
     cd: (_: C) => D,
-    de: (_: D) => E,
+    de: (_: D) => E
   ): E;
   pipe<A, B, C, D, E, F>(
     this: A,
@@ -347,7 +350,7 @@ export class Pipeable implements IPipeable {
     bc: (_: B) => C,
     cd: (_: C) => D,
     de: (_: D) => E,
-    ef: (_: E) => F,
+    ef: (_: E) => F
   ): F;
   pipe<A, B, C, D, E, F, G>(
     this: A,
@@ -356,7 +359,7 @@ export class Pipeable implements IPipeable {
     cd: (_: C) => D,
     de: (_: D) => E,
     ef: (_: E) => F,
-    fg: (_: F) => G,
+    fg: (_: F) => G
   ): G;
   pipe<A, B, C, D, E, F, G, H>(
     this: A,
@@ -366,7 +369,7 @@ export class Pipeable implements IPipeable {
     de: (_: D) => E,
     ef: (_: E) => F,
     fg: (_: F) => G,
-    gh: (_: G) => H,
+    gh: (_: G) => H
   ): H;
   pipe<A, B, C, D, E, F, G, H, I>(
     this: A,
@@ -377,7 +380,7 @@ export class Pipeable implements IPipeable {
     ef: (_: E) => F,
     fg: (_: F) => G,
     gh: (_: G) => H,
-    hi: (_: H) => I,
+    hi: (_: H) => I
   ): I;
   pipe<A, B, C, D, E, F, G, H, I, J>(
     this: A,
@@ -389,7 +392,7 @@ export class Pipeable implements IPipeable {
     fg: (_: F) => G,
     gh: (_: G) => H,
     hi: (_: H) => I,
-    ij: (_: I) => J,
+    ij: (_: I) => J
   ): J;
   pipe<A, B, C, D, E, F, G, H, I, J, K>(
     this: A,
@@ -402,7 +405,7 @@ export class Pipeable implements IPipeable {
     gh: (_: G) => H,
     hi: (_: H) => I,
     ij: (_: I) => J,
-    jk: (_: J) => K,
+    jk: (_: J) => K
   ): K;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L>(
     this: A,
@@ -416,7 +419,7 @@ export class Pipeable implements IPipeable {
     hi: (_: H) => I,
     ij: (_: I) => J,
     jk: (_: J) => K,
-    kl: (_: K) => L,
+    kl: (_: K) => L
   ): L;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M>(
     this: A,
@@ -431,7 +434,7 @@ export class Pipeable implements IPipeable {
     ij: (_: I) => J,
     jk: (_: J) => K,
     kl: (_: K) => L,
-    lm: (_: L) => M,
+    lm: (_: L) => M
   ): M;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N>(
     this: A,
@@ -447,7 +450,7 @@ export class Pipeable implements IPipeable {
     jk: (_: J) => K,
     kl: (_: K) => L,
     lm: (_: L) => M,
-    mn: (_: M) => N,
+    mn: (_: M) => N
   ): N;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(
     this: A,
@@ -464,7 +467,7 @@ export class Pipeable implements IPipeable {
     kl: (_: K) => L,
     lm: (_: L) => M,
     mn: (_: M) => N,
-    no: (_: N) => O,
+    no: (_: N) => O
   ): O;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(
     this: A,
@@ -482,7 +485,7 @@ export class Pipeable implements IPipeable {
     lm: (_: L) => M,
     mn: (_: M) => N,
     no: (_: N) => O,
-    op: (_: O) => P,
+    op: (_: O) => P
   ): P;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>(
     this: A,
@@ -501,7 +504,7 @@ export class Pipeable implements IPipeable {
     mn: (_: M) => N,
     no: (_: N) => O,
     op: (_: O) => P,
-    pq: (_: P) => Q,
+    pq: (_: P) => Q
   ): Q;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R>(
     this: A,
@@ -521,7 +524,7 @@ export class Pipeable implements IPipeable {
     no: (_: N) => O,
     op: (_: O) => P,
     pq: (_: P) => Q,
-    qr: (_: Q) => R,
+    qr: (_: Q) => R
   ): R;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S>(
     this: A,
@@ -542,7 +545,7 @@ export class Pipeable implements IPipeable {
     op: (_: O) => P,
     pq: (_: P) => Q,
     qr: (_: Q) => R,
-    rs: (_: R) => S,
+    rs: (_: R) => S
   ): S;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T>(
     this: A,
@@ -564,7 +567,7 @@ export class Pipeable implements IPipeable {
     pq: (_: P) => Q,
     qr: (_: Q) => R,
     rs: (_: R) => S,
-    st: (_: S) => T,
+    st: (_: S) => T
   ): T;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U>(
     this: A,
@@ -587,7 +590,7 @@ export class Pipeable implements IPipeable {
     qr: (_: Q) => R,
     rs: (_: R) => S,
     st: (_: S) => T,
-    tu: (_: T) => U,
+    tu: (_: T) => U
   ): U;
   pipe<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U>(
     this: A,
@@ -610,7 +613,7 @@ export class Pipeable implements IPipeable {
     qr: (_: Q) => R,
     rs: (_: R) => S,
     st: (_: S) => T,
-    tu: (_: T) => U,
+    tu: (_: T) => U
   ): U;
   pipe(
     ab: unknown,
@@ -632,7 +635,7 @@ export class Pipeable implements IPipeable {
     qr?: unknown,
     rs?: unknown,
     st?: unknown,
-    tu?: unknown,
+    tu?: unknown
   ): any {
     return pipeArguments(this, arguments);
   }
