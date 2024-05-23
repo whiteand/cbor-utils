@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import fs from 'node:fs/promises'
-import path from 'path'
+import path from 'node:path'
 
-const rootDir = path.resolve(import.meta.dirname, '../../')
+const rootDir = process.cwd();
 
 function rel(from, to) {
   const res = path.relative(from, to)

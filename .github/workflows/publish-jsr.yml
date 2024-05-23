@@ -14,7 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
       - name: Install deps
-        run: npm ci
+        run: bun install
       - name: Publish package
-        run: npx jsr publish
+        run: bun run publish:jsr

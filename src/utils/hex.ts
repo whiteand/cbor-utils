@@ -10,5 +10,5 @@ export function fromHex(hex: string): number[] {
 }
 
 export function hex(arg0: Uint8Array): any {
-  return Buffer.from(arg0).toString("hex");
+  return [...arg0].map((e) => e.toString(16).padStart(2, "0")).join("");
 }
