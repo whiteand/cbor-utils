@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { fromHex } from "../utils/hex";
 import { any } from "./any";
 import { Decoder } from "../Decoder";
+import { skip } from "../skip";
 
 export const TESTS = [
   {
@@ -476,7 +477,7 @@ export const TESTS = [
         c: "C",
         d: "D",
         e: "E",
-      }),
+      })
     ),
   },
   {
@@ -568,5 +569,11 @@ describe("any", () => {
       return;
     }
     expect(value).toStrictEqual(t.decoded);
+  });
+  const SKIP_TESTS = TESTS;
+  test.each(SKIP_TESTS)("decodes skips $hex", (t) => {
+    const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
+    skip(d).unwrap();
+    expect(d.ptr).toBe(d.buf.length);
   });
 });

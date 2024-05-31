@@ -1,5 +1,6 @@
 import {
   ARRAY_TYPE_MASK,
+  BREAK_BYTE,
   BYTES_TYPE_MASK,
   MAP_TYPE_MASK,
   NEGATIVE_INT_TYPE_MASK,
@@ -43,8 +44,9 @@ const TYPE_TABLE = [
   [SPECIAL_TYPE_MASK | 24, simple],
   [SPECIAL_TYPE_MASK | 25, "f16"],
   [SPECIAL_TYPE_MASK | 26, "f32"],
+  [SPECIAL_TYPE_MASK | 27, "f64"],
   [SPECIAL_TYPE_MASK | 28, reserved],
-  [SPECIAL_TYPE_MASK | 31, "break"],
+  [BREAK_BYTE, "break"],
 ] as const;
 
 function slow(marker: number) {

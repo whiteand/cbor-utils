@@ -22,11 +22,29 @@ abstract class BaseDecoder {
   }
 }
 
+/**
+ * Decoder class is just a pair of bytes, that contain CBOR
+ * and a pointer to the current position in the bytes.
+ *
+ * Cbor Types mutate this instance during encoding and decoding.
+ */
 export class Decoder extends BaseDecoder {
+  /**
+   * @param bytes Bytes that contain CBOR
+   * @param ptr A pointer to the current position in the bytes
+   */
   constructor(bytes: Uint8Array, ptr: number = 0) {
     super(bytes, ptr);
   }
 
+  /**
+   * Calls CborType decode method
+   * with itself and optional context
+   *
+   * @param ty
+   * @param args
+   * @returns
+   */
   decode<T, DE extends Error, DC>(
     ty: IDecodableType<T, DE, DC>,
     ...args: unknown extends DC ? [] : [DC]

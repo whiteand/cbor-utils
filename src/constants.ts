@@ -17,3 +17,5 @@ export const STRING_TYPE_MASK = STRING_TYPE << 5;
 export const ARRAY_TYPE_MASK = ARRAY_TYPE << 5;
 
 export const NULL_BYTE = SPECIAL_TYPE_MASK | 22;
+
+export const BREAK_BYTE = SPECIAL_TYPE_MASK | 31;

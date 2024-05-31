@@ -23,6 +23,7 @@ export { f64 } from "./default/f64";
 export { map } from "./default/map";
 export { mapLen } from "./default/mapLen";
 export { nullType } from "./default/null";
+export { InferSeqType, seq } from "./default/seq";
 export { u16, u32, u8 } from "./default/smallInts";
 export { str } from "./default/str";
 export { tuple } from "./default/tuple";
@@ -37,8 +38,8 @@ export { flatMap } from "./operators/flatMap";
 export { mapErrors } from "./operators/mapErrors";
 export { nullable } from "./operators/nullable";
 export { or } from "./operators/or";
-export { InferSeqType, seq } from "./default/seq";
 export { tagged } from "./operators/tagged";
+export { skip } from "./skip";
 export {
   AnyDecodableType,
   AnyEncodableType,

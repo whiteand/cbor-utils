@@ -3,7 +3,7 @@ import { DecodingError } from "../DecodingError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
-import { STRING_TYPE } from "../constants";
+import { BREAK_BYTE, STRING_TYPE } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
@@ -21,7 +21,7 @@ function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
   let total = 0;
   while (!done(d)) {
     const m = d.buf[d.ptr];
-    if (m === 0xff) {
+    if (m === BREAK_BYTE) {
       d.ptr++;
       break;
     }

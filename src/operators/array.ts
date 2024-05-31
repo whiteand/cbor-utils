@@ -6,6 +6,7 @@ import { arrayLen } from "../default/arrayLen";
 import { success } from "../success";
 import { OverflowError } from "../OverflowError";
 import { DecodingError } from "../DecodingError";
+import { BREAK_BYTE } from "../constants";
 
 function decodeArrayIndefinite<T, DE extends Error, DC>(
   ty: IDecodableType<T, DE, DC>,
@@ -15,7 +16,7 @@ function decodeArrayIndefinite<T, DE extends Error, DC>(
   const res: T[] = [];
   while (d.ptr < d.buf.length) {
     const m = d.buf[d.ptr];
-    if (m === 0xff) {
+    if (m === BREAK_BYTE) {
       d.ptr++;
       break;
     }

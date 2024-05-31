@@ -9,6 +9,7 @@ import { decodeSymbol, encodeSymbol } from "../traits";
 import { ICborType } from "../types";
 import { getJsType } from "../utils/getJsType";
 import { mapLen } from "./mapLen";
+import { BREAK_BYTE } from "../constants";
 
 /**
  * A function that can produce a `Map` type based on the key and value types.
@@ -81,7 +82,7 @@ export function map<
       if (len == null) {
         while (d.ptr < d.buf.length) {
           const m = d.buf[d.ptr];
-          if (m === 0xff) {
+          if (m === BREAK_BYTE) {
             d.ptr++;
             break;
           }

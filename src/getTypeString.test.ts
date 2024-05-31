@@ -42,6 +42,7 @@ const TYPE_TABLE: Array<[number, TypeString]> = [
   [SPECIAL_TYPE_MASK | 24, "simple"],
   [SPECIAL_TYPE_MASK | 25, "f16"],
   [SPECIAL_TYPE_MASK | 26, "f32"],
+  [SPECIAL_TYPE_MASK | 27, "f64"],
   [SPECIAL_TYPE_MASK | 28, "reserved"],
   [SPECIAL_TYPE_MASK | 31, "break"],
 ] as const;

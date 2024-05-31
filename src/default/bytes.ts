@@ -3,7 +3,7 @@ import { DecodingError } from "../DecodingError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
-import { BYTES_TYPE, BYTES_TYPE_MASK } from "../constants";
+import { BREAK_BYTE, BYTES_TYPE, BYTES_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
@@ -23,7 +23,7 @@ function decodeIndefiniteBytes(
   let total = 0;
   while (d.ptr < d.buf.length) {
     const m = d.buf[d.ptr];
-    if (m === 0xff) {
+    if (m === BREAK_BYTE) {
       d.ptr++;
       break;
     }
