@@ -7,6 +7,7 @@ import {
   DecodeError,
   DecodedType,
   IDecodableType,
+  IDecoder,
 } from "./types";
 
 abstract class BaseDecoder {
@@ -50,6 +51,18 @@ export class Decoder extends BaseDecoder {
     ...args: unknown extends DC ? [] : [DC]
   ): Result<T, DE> {
     return ty[decodeSymbol](this, (args as [DC])[0]);
+  }
+
+  /**
+   * @param b bytes or other decoder
+   * @param ptr optional ptr to start decoding from
+   * @returns new decoder instance that will start decoding from ptr
+   */
+  static from(b: Uint8Array | IDecoder, ptr?: number) {
+    if (b instanceof Uint8Array) {
+      return new Decoder(b, ptr);
+    }
+    return new Decoder(b.buf, ptr ?? b.ptr);
   }
 }
 

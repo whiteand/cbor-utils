@@ -24,19 +24,19 @@ export interface IEncoder {
 
 export type TDecodeFunction<out T, out Err, in Ctx> = (
   decoder: IDecoder,
-  ctx: Ctx,
+  ctx: Ctx
 ) => Result<T, Err>;
 
 export type TEncodeFunction<in T, out Err, in Ctx> = (
   value: T,
   encoder: IEncoder,
-  ctx: Ctx,
+  ctx: Ctx
 ) => Result<void, Err>;
 
 export interface IDecodableType<
   T = any,
   Err extends Error = Error,
-  Ctx = unknown,
+  Ctx = unknown
 > {
   readonly [decodeTypeSymbol]: T;
   readonly [decodeCtxSymbol]: Ctx;
@@ -74,15 +74,18 @@ export type CtxParam<C> = C extends unknown ? void : C;
 export interface IDecodableTypeDecoder<
   T = any,
   Err extends Error = Error,
-  Ctx = unknown,
+  Ctx = unknown
 > extends IDecodableType<T, Err, Ctx> {
-  decode(d: IDecoder, ctx: CtxParam<Ctx>): Result<T, Err>;
+  decode(
+    d: IDecoder,
+    ...args: unknown extends Ctx ? [] : [Ctx]
+  ): Result<T, Err>;
 }
 
 export interface IEncodableType<
   T = any,
   Err extends Error = Error,
-  Ctx = unknown,
+  Ctx = unknown
 > {
   readonly [encodeTypeSymbol]: T;
   readonly [encodeCtxSymbol]: Ctx;
@@ -92,9 +95,13 @@ export interface IEncodableType<
 export interface IEncodableTypeEncoder<
   T = any,
   Err extends Error = Error,
-  Ctx = unknown,
+  Ctx = unknown
 > extends IEncodableType<T, Err, Ctx> {
-  encode(value: T, e: IEncoder, ctx: CtxParam<Ctx>): Result<void, Err>;
+  encode(
+    value: T,
+    e: IEncoder,
+    ...args: unknown extends Ctx ? [] : [Ctx]
+  ): Result<void, Err>;
 }
 
 export interface ICborType<
@@ -102,7 +109,7 @@ export interface ICborType<
   EncodeErr extends Error = Error,
   DecodeErr extends Error = Error,
   EncodeCtx = any,
-  DecodeCtx = any,
+  DecodeCtx = any
 > extends IDecodableType<T, DecodeErr, DecodeCtx>,
     IEncodableType<T, EncodeErr, EncodeCtx> {}
 
@@ -111,6 +118,6 @@ export interface ICborTypeCodec<
   EncodeErr extends Error = Error,
   DecodeErr extends Error = Error,
   EncodeCtx = any,
-  DecodeCtx = any,
+  DecodeCtx = any
 > extends IDecodableTypeDecoder<T, DecodeErr, DecodeCtx>,
     IEncodableTypeEncoder<T, EncodeErr, EncodeCtx> {}

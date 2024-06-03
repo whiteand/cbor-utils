@@ -128,8 +128,8 @@ export class CborType<T, EE extends Error, DE extends Error, EC, DC>
    * @param ctx Possible additional context for decoding.
    * @returns Result of decoding.
    */
-  decode(d: IDecoder, ctx: CtxParam<DC>): Result<T, DE> {
-    return this[decodeSymbol](d, ctx as DC);
+  decode(d: IDecoder, ...args: unknown extends DC ? [] : [DC]): Result<T, DE> {
+    return this[decodeSymbol](d, (args as [DC])[0]);
   }
   /**
    * @param value Value to encode.
@@ -137,8 +137,12 @@ export class CborType<T, EE extends Error, DE extends Error, EC, DC>
    * @param ctx Possible additional context for encoding.
    * @returns Result of encoding.
    */
-  encode(value: T, e: IEncoder, ctx: CtxParam<EC>): Result<void, EE> {
-    return this[encodeSymbol](value, e, ctx as EC);
+  encode(
+    value: T,
+    e: IEncoder,
+    ...args: unknown extends EC ? [] : [EC]
+  ): Result<void, EE> {
+    return this[encodeSymbol](value, e, (args as [EC])[0]);
   }
 
   /**
