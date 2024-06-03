@@ -1,6 +1,6 @@
 {
   "name": "cbor-utils",
-  "version": "0.10.32",
+  "version": "0.10.33",
   "description": "CBOR encoder and decoder classes. Analogue to minicbor from Rust",
   "main": "dist/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "7.2 kB"
+      "limit": "7.25 kB"
     }
   ],
   "files": [

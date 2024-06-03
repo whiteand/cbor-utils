@@ -58,7 +58,7 @@ export class Decoder extends BaseDecoder {
    * @param ptr optional ptr to start decoding from
    * @returns new decoder instance that will start decoding from ptr
    */
-  static from(b: Uint8Array | IDecoder, ptr?: number) {
+  static from(b: Uint8Array | IDecoder, ptr?: number): Decoder {
     if (b instanceof Uint8Array) {
       return new Decoder(b, ptr);
     }
