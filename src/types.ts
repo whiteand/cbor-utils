@@ -78,7 +78,7 @@ export interface IDecodableTypeDecoder<
 > extends IDecodableType<T, Err, Ctx> {
   decode(
     d: IDecoder,
-    ...args: unknown extends Ctx ? [] : [Ctx]
+    ...args: unknown extends Ctx ? [] | [Ctx] : [Ctx]
   ): Result<T, Err>;
 }
 
@@ -100,7 +100,7 @@ export interface IEncodableTypeEncoder<
   encode(
     value: T,
     e: IEncoder,
-    ...args: unknown extends Ctx ? [] : [Ctx]
+    ...args: unknown extends Ctx ? [] | [Ctx] : [Ctx]
   ): Result<void, Err>;
 }
 

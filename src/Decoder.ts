@@ -48,7 +48,7 @@ export class Decoder extends BaseDecoder {
    */
   decode<T, DE extends Error, DC>(
     ty: IDecodableType<T, DE, DC>,
-    ...args: unknown extends DC ? [] : [DC]
+    ...args: unknown extends DC ? [] | [DC] : [DC]
   ): Result<T, DE> {
     return ty[decodeSymbol](this, (args as [DC])[0]);
   }
@@ -73,7 +73,7 @@ export class ThrowOnFailDecoder extends BaseDecoder {
 
   decode<T, DE extends Error, DC>(
     ty: IDecodableType<T, DE, DC>,
-    ...args: unknown extends DC ? [] : [DC]
+    ...args: unknown extends DC ? [] | [DC] : [DC]
   ): T {
     return ty[decodeSymbol](this, (args as [DC])[0]).unwrap();
   }
