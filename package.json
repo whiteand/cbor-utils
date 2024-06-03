@@ -1,6 +1,6 @@
 {
   "name": "cbor-utils",
-  "version": "0.10.33",
+  "version": "0.10.34",
   "description": "CBOR encoder and decoder classes. Analogue to minicbor from Rust",
   "main": "dist/index.js",
   "scripts": {
@@ -11,7 +11,8 @@
     "prepublish": "npm run lint && npm run build",
     "prepare": "npm run build",
     "build:jsr-json": "bun ./scripts/build-jsr-json > ./jsr.json",
-    "publish:jsr": "npm run build:jsr-json && npm run prepublish && bunx jsr publish"
+    "publish:jsr": "npm run build:jsr-json && npm run prepublish && bunx jsr publish",
+    "publish:all": "npm run publish:jsr && npm publish"
   },
   "repository": {
     "type": "git",

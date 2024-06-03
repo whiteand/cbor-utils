@@ -27,7 +27,7 @@ export function decode<T, E extends Error, C>(
   cb:
     | ((e: Decoder) => Result<T, E>)
     | ((e: Decoder, ctx: C) => Result<T, E>)
-    | IDecodableType<T, E, unknown>,
+    | IDecodableType<T, E, C>,
   ...args: unknown extends C ? [] | [C] : [C]
 ): Result<T, E> {
   let decoder = Decoder.from(bytes);
