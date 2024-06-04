@@ -18,24 +18,29 @@ export const tryDecode: <T>(
 
 /**
  * @param bytes Bytes or Decoder
- * @param cb CborType or function that decodes something
+ * @param cb function that usess passed decoder to decode value
  * @param args optional context argument
  * @returns Result of decoded value
  */
-export function decode<T, E extends Error, C>(
-  bytes: Uint8Array | IDecoder,
-  cb:
-    | ((e: Decoder) => Result<T, E>)
-    | ((e: Decoder, ctx: C) => Result<T, E>)
-    | IDecodableType<T, E, C>,
-  ...args: unknown extends C ? [] | [C] : [C]
-): Result<T, E> {
-  let decoder = Decoder.from(bytes);
-  if (decodeSymbol in cb) {
+export const decode = Object.assign(
+  <T, E extends Error, C>(
+    bytes: Uint8Array | IDecoder,
+    cb: (d: Decoder, ctx: C) => Result<T, E>,
+    ...args: unknown extends C ? [] | [C] : [C]
+  ): Result<T, E> => {
+    let decoder = Decoder.from(bytes);
     const ctx = (args as [C])[0];
-    return cb[decodeSymbol](decoder, ctx);
+    return cb(decoder, ctx);
+  },
+  {
+    type: <T, E extends Error, C>(
+      bytes: Uint8Array | IDecoder,
+      ty: IDecodableType<T, E, C>,
+      ...args: unknown extends C ? [] | [C] : [C]
+    ): Result<T, E> => {
+      let decoder = Decoder.from(bytes);
+      const ctx = (args as [C])[0];
+      return ty[decodeSymbol](decoder, ctx);
+    },
   }
-
-  const ctx = (args as [C])[0];
-  return cb(decoder, ctx);
-}
+);
