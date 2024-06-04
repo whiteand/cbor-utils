@@ -1,18 +1,17 @@
 import { Result } from "resultra";
 import { decodeSymbol } from "./traits";
-import {
-  AnyDecodableType,
-  CtxParam,
-  DecodeContext,
-  DecodeError,
-  DecodedType,
-  IDecodableType,
-  IDecoder,
-} from "./types";
+import { IDecodableType, IDecoder } from "./types";
 
+/**
+ * Basic class which defines buffer and pointer into the buffer.
+ */
 abstract class BaseDecoder {
   buf: Uint8Array;
   ptr: number;
+  /**
+   * @param bytes bytes that should be decoded
+   * @param ptr pointer to the initial position in the bytes, where CBOR is placed
+   */
   constructor(bytes: Uint8Array, ptr: number = 0) {
     this.buf = bytes;
     this.ptr = ptr;
@@ -61,6 +60,9 @@ export class Decoder extends BaseDecoder {
   static from(b: Uint8Array | IDecoder, ptr?: number): Decoder {
     if (b instanceof Uint8Array) {
       return new Decoder(b, ptr);
+    }
+    if (b instanceof Decoder) {
+      return b;
     }
     return new Decoder(b.buf, ptr ?? b.ptr);
   }
