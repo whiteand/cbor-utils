@@ -16,13 +16,25 @@ export const tryDecode: <T>(
   return catchError(cb, new ThrowOnFailDecoder(b));
 };
 
+type TDecodeFunction = (<T, E extends Error, C>(
+  bytes: Uint8Array | IDecoder,
+  cb: (d: Decoder, ctx: C) => Result<T, E>,
+  ...args: unknown extends C ? [] | [C] : [C]
+) => Result<T, E>) & {
+  type: <T, E extends Error, C>(
+    bytes: Uint8Array | IDecoder,
+    ty: IDecodableType<T, E, C>,
+    ...args: unknown extends C ? [] | [C] : [C]
+  ) => Result<T, E>;
+};
+
 /**
  * @param bytes Bytes or Decoder
  * @param cb function that usess passed decoder to decode value
  * @param args optional context argument
  * @returns Result of decoded value
  */
-export const decode = Object.assign(
+export const decode: TDecodeFunction = Object.assign(
   <T, E extends Error, C>(
     bytes: Uint8Array | IDecoder,
     cb: (d: Decoder, ctx: C) => Result<T, E>,
