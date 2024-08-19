@@ -1,6 +1,4 @@
-import { ok, Result } from "resultra";
+import { ok } from "resultra";
+import { singleton } from "./singleton";
 
-const voidOk = Object.freeze(ok(undefined)) as Result<void, never>;
-export function getVoidOk(): Result<void, never> {
-  return voidOk;
-}
+export const getVoidOk = singleton(() => Object.freeze(ok(undefined)));

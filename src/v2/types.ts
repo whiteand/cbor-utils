@@ -12,7 +12,7 @@ export interface IEncoder {
   restore(pos: number): void;
 }
 
-export type TEncodeFunction<T, EE, EC> = (
+export type TEncodeFunction<in T, out EE, EC> = (
   value: T,
   e: IEncoder,
   ...args: unknown extends EC ? [] | [EC] : [EC]
