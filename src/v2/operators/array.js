@@ -69,18 +69,15 @@ function decodeArrayU64(
 export function array() {
   return (
     itemTy,
-  ) =>
-    CborType.builder()
+  ) => {
+    const proto = CborType.builder()
       .encode(
-        (
-          value,
-          e,
-          ctx,
-        ) => {
+        function encode(value, e, ctx) {
           const res = arrayLen.encode(value.length, e, ctx);
           if (!res.ok()) {
             return res;
           }
+          const { itemTy } = this
           for (let i = 0; i < value.length; i++) {
             const res = itemTy.encode(value[i], e, ctx);
             if (!res.ok()) {
@@ -91,18 +88,27 @@ export function array() {
           return getVoidOk();
         }
       )
-      .decode((d, ctx) => {
+      .decode(function decode(d, ctx) {
         const lenRes = arrayLen.decode(d, ctx);
         if (!lenRes.ok()) return lenRes;
         const len = lenRes.value;
         switch (typeof len) {
           case "number":
-            return decodeArrayU32(itemTy, len, d, ctx);
+            return decodeArrayU32(this.itemTy, len, d, ctx);
           case "object":
-            return decodeArrayIndefinite(itemTy, d, ctx);
+            return decodeArrayIndefinite(this.itemTy, d, ctx);
           case "bigint":
-            return decodeArrayU64(itemTy, len, d, ctx);
+            return decodeArrayU64(this.itemTy, len, d, ctx);
         }
       })
       .build();
+
+    const arrayType = {
+      itemTy,
+    }
+
+    Reflect.setPrototypeOf(arrayType, proto)
+
+    return arrayType
+  }
 }
