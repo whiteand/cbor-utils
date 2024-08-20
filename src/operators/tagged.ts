@@ -27,7 +27,7 @@ function encodeTagged<T, E extends Error, C>(
   e: IEncoder,
   ty: IEncodableType<T, E, C>,
   value: TaggedDataItem<T>,
-  ctx: C,
+  ctx: C
 ) {
   let res = writeTypeAndArg(e, TAG_TYPE, value.tag);
   if (!res.ok()) {
@@ -37,7 +37,7 @@ function encodeTagged<T, E extends Error, C>(
 }
 
 function decodeTag(
-  d: IDecoder,
+  d: IDecoder
 ): Result<
   number | bigint,
   TypeMismatchError | EndOfInputError | InvalidCborError
@@ -55,16 +55,16 @@ function decodeTag(
     return new InvalidCborError(
       marker,
       p,
-      new Error(`Tag cannot be null`),
+      new Error(`Tag cannot be null`)
     ).err();
   }
   return tagRes as OkResult<number | bigint>;
 }
 
 export function tagged(
-  tag: number | bigint,
+  tag: number | bigint
 ): <T, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<T, EE, DE, EC, DC>,
+  ty: ICborType<T, EE, DE, EC, DC>
 ) => ICborType<
   TaggedDataItem<T>,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
@@ -73,7 +73,7 @@ export function tagged(
   DC
 >;
 export function tagged(): <T, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<T, EE, DE, EC, DC>,
+  ty: ICborType<T, EE, DE, EC, DC>
 ) => ICborType<
   TaggedDataItem<T>,
   EE | OverflowError,
@@ -82,9 +82,9 @@ export function tagged(): <T, EE extends Error, DE extends Error, EC, DC>(
   DC
 >;
 export function tagged(
-  tag?: number | bigint,
+  tag?: number | bigint
 ): <T, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<T, EE, DE, EC, DC>,
+  ty: ICborType<T, EE, DE, EC, DC>
 ) => ICborType<
   TaggedDataItem<T>,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
@@ -93,7 +93,7 @@ export function tagged(
   DC
 > {
   return <T, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborType<T, EE, DE, EC, DC>,
+    ty: ICborType<T, EE, DE, EC, DC>
   ): ICborType<
     TaggedDataItem<T>,
     EE | OverflowError,
@@ -106,13 +106,13 @@ export function tagged(
           (
             value: TaggedDataItem<T>,
             e: IEncoder,
-            ctx: EC,
+            ctx: EC
           ): Result<void, EE | OverflowError> => {
             return encodeTagged(e, ty, value, ctx);
           },
           (
             d: IDecoder,
-            ctx: DC,
+            ctx: DC
           ): Result<TaggedDataItem<T>, DE | DecodingError> => {
             const tRes = decodeTag(d);
             if (!tRes.ok()) return tRes;
@@ -120,13 +120,13 @@ export function tagged(
             const value = ty[decodeSymbol](d, ctx);
             if (!value.ok()) return value;
             return ok(new TaggedDataItem(t, value.value));
-          },
+          }
         )
       : new CborType(
           (
             value: TaggedDataItem<T>,
             e: IEncoder,
-            ctx: EC,
+            ctx: EC
           ): Result<void, EE | OverflowError> => {
             if (!sameTag(value.tag, tag)) {
               return new UnexpectedValueError(tag, value.tag).err();
@@ -135,7 +135,7 @@ export function tagged(
           },
           (
             d: IDecoder,
-            ctx: DC,
+            ctx: DC
           ): Result<TaggedDataItem<T>, DE | DecodingError> => {
             const tRes = decodeTag(d);
             if (!tRes.ok()) return tRes;
@@ -146,6 +146,6 @@ export function tagged(
             const value = ty[decodeSymbol](d, ctx);
             if (!value.ok()) return value;
             return ok(new TaggedDataItem(t, value.value));
-          },
+          }
         );
 }

@@ -26,8 +26,8 @@
 - [x] u64.test.ts
 - [x] undefined.test.t
 - [x] undefined.ts
-- [ ] bignum.test.ts
-- [ ] bignum.ts
+- [x] bignum.test.ts
+- [x] bignum.ts
 - [ ] map.test.ts
 - [ ] map.ts
 - [ ] mapLen.test.ts
@@ -44,16 +44,16 @@
 
 Operators
 
+- [x] flatMap.ts
+- [x] tagged.ts
 - [ ] array.test.ts
 - [ ] array.ts
 - [ ] cast.ts
 - [ ] constant.test.ts
 - [ ] constant.ts
 - [ ] convert.ts
-- [ ] flatMap.ts
 - [ ] mapErrors.ts
 - [ ] nullable.test.ts
 - [ ] nullable.ts
 - [ ] or.ts
-- [ ] tagged.ts
 - [ ] untag.ts
