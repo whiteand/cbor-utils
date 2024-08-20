@@ -24,6 +24,8 @@
 - [x] bigInts.ts
 - [x] u128.test.ts
 - [x] u64.test.ts
+- [x] undefined.test.t
+- [x] undefined.ts
 - [ ] bignum.test.ts
 - [ ] bignum.ts
 - [ ] map.test.ts
@@ -36,8 +38,6 @@
 - [ ] simple.ts
 - [ ] str.test.ts
 - [ ] str.ts
-- [ ] undefined.test.t
-- [ ] undefined.ts
 - [ ] DataItem.ts
 - [ ] any.test.ts
 - [ ] any.ts
