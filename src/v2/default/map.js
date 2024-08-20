@@ -13,12 +13,53 @@ import { mapLen } from "./mapLen";
  * @param vt type of values in the map
  * @returns as CBOR type that encodes and decodes `Map<K, V>`
  */
-export function map(
-  kt,
-  vt
-) {
-  return CborType.builder()
-    .encode((m, e, c) => {
+export function map(kt, vt) {
+  const mapType = {
+    kt,
+    vt,
+    decodeUnknownLengthMap(d, c) {
+      const { kt, vt } = this;
+      const res = new Map();
+      while (d.ptr < d.buf.length) {
+        const m = d.buf[d.ptr];
+        if (m === BREAK_BYTE) {
+          d.ptr++;
+          break;
+        }
+        const kr = kt.decode(d, c);
+        if (!kr.ok()) return kr;
+        const k = kr.value;
+
+        const vr = vt.decode(d, c);
+        if (!vr.ok()) return vr;
+        const v = vr.value;
+
+        res.set(k, v);
+      }
+      return ok(res);
+    },
+    decodeKnownLengthMap(d, c, n) {
+      const { kt, vt } = this;
+      const res = new Map();
+      for (let i = 0; i < n; i++) {
+        const kr = kt.decode(d, c);
+        if (!kr.ok()) return kr;
+        const k = kr.value;
+
+        const vr = vt.decode(d, c);
+        if (!vr.ok()) return vr;
+        const v = vr.value;
+
+        res.set(k, v);
+      }
+
+      return ok(res);
+    },
+  };
+
+  const proto = CborType.builder()
+    .encode(function encode(m, e, c) {
+      const { kt, vt } = this;
       if (!m || !(m instanceof Map)) {
         return new TypeMismatchError("Map", getJsType(m)).err();
       }
@@ -38,71 +79,18 @@ export function map(
       }
       return getVoidOk();
     })
-    .decode(
-      (
-        d,
-        c
-      ) => {
-        return mapLen
-          .decode(d)
-          .andThen(
-            (
-              len
-            ) =>
-              len == null
-                ? decodeUnknownLengthMap(d, kt, vt, c)
-                : decodeKnownLengthMap(d, kt, vt, c, Number(len))
-          );
-      }
-    )
+    .decode(function decode(d, c) {
+      return mapLen
+        .decode(d)
+        .andThen((len) =>
+          len == null
+            ? this.decodeUnknownLengthMap(d, c)
+            : this.decodeKnownLengthMap(d, c, Number(len))
+        );
+    })
     .build();
-}
 
-function decodeKnownLengthMap(
-  d,
-  kt,
-  vt,
-  c,
-  n,
-) {
-  const res = new Map();
-  for (let i = 0; i < n; i++) {
-    const kr = kt.decode(d, c);
-    if (!kr.ok()) return kr;
-    const k = kr.value;
+  Reflect.setPrototypeOf(mapType, proto);
 
-    const vr = vt.decode(d, c);
-    if (!vr.ok()) return vr;
-    const v = vr.value;
-
-    res.set(k, v);
-  }
-
-  return ok(res);
-}
-
-function decodeUnknownLengthMap(
-  d,
-  kt,
-  vt,
-  c,
-) {
-  const res = new Map();
-  while (d.ptr < d.buf.length) {
-    const m = d.buf[d.ptr];
-    if (m === BREAK_BYTE) {
-      d.ptr++;
-      break;
-    }
-    const kr = kt.decode(d, c);
-    if (!kr.ok()) return kr;
-    const k = kr.value;
-
-    const vr = vt.decode(d, c);
-    if (!vr.ok()) return vr;
-    const v = vr.value;
-
-    res.set(k, v);
-  }
-  return ok(res);
+  return mapType;
 }
