@@ -66,21 +66,21 @@ function decodeArrayU64<T, DE extends Error, DC>(
  *
  * @returns An operator that creates an array type from a element type
  */
-export function array(): <T, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborTypeCodec<T, T, EE, DE, EC, DC>
+export function array(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
 ) => CborType<
-  readonly T[],
-  T[],
+  readonly ET[],
+  DT[],
   EE | OverflowError,
   DE | DecodingError,
   EC,
   DC
 > {
-  return <T, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborTypeCodec<T, T, EE, DE, EC, DC>
+  return <ET, DT, EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
   ): CborType<
-    readonly T[],
-    T[],
+    readonly ET[],
+    DT[],
     EE | OverflowError,
     DE | DecodingError,
     EC,
@@ -89,7 +89,7 @@ export function array(): <T, EE extends Error, DE extends Error, EC, DC>(
     CborType.builder()
       .encode(
         (
-          value: readonly T[],
+          value: readonly ET[],
           e: IEncoder,
           ctx: EC
         ): Result<void, EE | OverflowError> => {
@@ -107,7 +107,7 @@ export function array(): <T, EE extends Error, DE extends Error, EC, DC>(
           return getVoidOk();
         }
       )
-      .decode((d: IDecoder, ctx: DC): Result<T[], DE | DecodingError> => {
+      .decode((d: IDecoder, ctx: DC): Result<DT[], DE | DecodingError> => {
         const lenRes = arrayLen.decode(d, ctx);
         if (!lenRes.ok()) return lenRes;
         const len = lenRes.value;
