@@ -21,10 +21,10 @@
 - [x] smallInts.ts
 - [x] tuple.ts
 - [x] uint.ts
+- [x] bigInts.ts
 - [ ] DataItem.ts
 - [ ] any.test.ts
 - [ ] any.ts
-- [ ] bigInts.ts
 - [ ] bignum.test.ts
 - [ ] bignum.ts
 - [ ] map.test.ts
