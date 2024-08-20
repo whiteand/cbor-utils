@@ -1,26 +1,26 @@
-- [x] bool.test.ts
-- [x] bool.ts
-- [x] null.test.ts
-- [x] null.ts
-- [x] smallInts.ts
-- [x] uint.ts
 - [x] arrayLen.test.ts
 - [x] arrayLen.ts
+- [x] bool.test.ts
+- [x] bool.ts
+- [x] bytes.test.ts
+- [x] bytes.ts
+- [x] emptyType.test.t
+- [x] emptyType.ts
+- [x] null.test.ts
+- [x] null.ts
 - [x] readSlice.test.t
 - [x] readSlice.ts
 - [x] seq.test.ts
 - [x] seq.ts
+- [x] smallInts.ts
 - [x] tuple.ts
-- [x] bytes.test.ts
-- [x] bytes.ts
+- [x] uint.ts
 - [ ] DataItem.ts
 - [ ] any.test.ts
 - [ ] any.ts
 - [ ] bigInts.ts
 - [ ] bignum.test.ts
 - [ ] bignum.ts
-- [ ] emptyType.test.t
-- [ ] emptyType.ts
 - [ ] f16.test.ts
 - [ ] f16.ts
 - [ ] f32.test.ts
