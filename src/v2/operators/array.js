@@ -7,12 +7,12 @@ import { OverflowError } from "../OverflowError";
 import { DecodingError } from "../DecodingError";
 import { BREAK_BYTE } from "../constants";
 
-function decodeArrayIndefinite<T, DE extends Error, DC>(
-  ty: IDecodable<T, DE, DC>,
-  d: IDecoder,
-  ctx: DC
+function decodeArrayIndefinite(
+  ty,
+  d,
+  ctx,
 ) {
-  const res: T[] = [];
+  const res = [];
   while (d.ptr < d.buf.length) {
     const m = d.buf[d.ptr];
     if (m === BREAK_BYTE) {
@@ -25,13 +25,13 @@ function decodeArrayIndefinite<T, DE extends Error, DC>(
   }
   return ok(res);
 }
-function decodeArrayU32<T, DE extends Error, DC>(
-  ty: IDecodable<T, DE, DC>,
-  len: number,
-  d: IDecoder,
-  ctx: DC
+function decodeArrayU32(
+  ty,
+  len,
+  d,
+  ctx,
 ) {
-  const res: T[] = [];
+  const res = [];
   for (let i = 0; i < len; i++) {
     const item = ty.decode(d, ctx);
     if (!item.ok()) return item;
@@ -39,13 +39,13 @@ function decodeArrayU32<T, DE extends Error, DC>(
   }
   return ok(res);
 }
-function decodeArrayU64<T, DE extends Error, DC>(
-  ty: IDecodable<T, DE, DC>,
-  len: bigint,
-  d: IDecoder,
-  ctx: DC
+function decodeArrayU64(
+  ty,
+  len,
+  d,
+  ctx,
 ) {
-  const res: T[] = [];
+  const res = [];
   for (let i = 0n; i < len; i++) {
     const item = ty.decode(d, ctx);
     if (!item.ok()) return item;
@@ -66,39 +66,23 @@ function decodeArrayU64<T, DE extends Error, DC>(
  *
  * @returns An operator that creates an array type from a element type
  */
-export function array(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
-) => CborType<
-  readonly ET[],
-  DT[],
-  EE | OverflowError,
-  DE | DecodingError,
-  EC,
-  DC
-> {
-  return <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
-  ): CborType<
-    readonly ET[],
-    DT[],
-    EE | OverflowError,
-    DE | DecodingError,
-    EC,
-    DC
-  > =>
+export function array() {
+  return (
+    itemTy,
+  ) =>
     CborType.builder()
       .encode(
         (
-          value: readonly ET[],
-          e: IEncoder,
-          ctx: EC
-        ): Result<void, EE | OverflowError> => {
+          value,
+          e,
+          ctx,
+        ) => {
           const res = arrayLen.encode(value.length, e, ctx);
           if (!res.ok()) {
             return res;
           }
           for (let i = 0; i < value.length; i++) {
-            const res = ty.encode(value[i], e, ctx);
+            const res = itemTy.encode(value[i], e, ctx);
             if (!res.ok()) {
               return res;
             }
@@ -107,17 +91,17 @@ export function array(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
           return getVoidOk();
         }
       )
-      .decode((d: IDecoder, ctx: DC): Result<DT[], DE | DecodingError> => {
+      .decode((d, ctx) => {
         const lenRes = arrayLen.decode(d, ctx);
         if (!lenRes.ok()) return lenRes;
         const len = lenRes.value;
         switch (typeof len) {
           case "number":
-            return decodeArrayU32(ty, len, d, ctx);
+            return decodeArrayU32(itemTy, len, d, ctx);
           case "object":
-            return decodeArrayIndefinite(ty, d, ctx);
+            return decodeArrayIndefinite(itemTy, d, ctx);
           case "bigint":
-            return decodeArrayU64(ty, len, d, ctx);
+            return decodeArrayU64(itemTy, len, d, ctx);
         }
       })
       .build();
