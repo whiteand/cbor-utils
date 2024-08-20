@@ -36,8 +36,8 @@
 - [x] nint.ts
 - [x] simple.test.ts
 - [x] simple.ts
-- [ ] str.test.ts
-- [ ] str.ts
+- [x] str.test.ts
+- [x] str.ts
 - [ ] DataItem.ts
 - [ ] any.test.ts
 - [ ] any.ts
