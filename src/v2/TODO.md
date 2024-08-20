@@ -49,11 +49,16 @@ Operators
 - [x] array.test.ts
 - [x] array.ts
 - [x] cast.ts
-- [ ] constant.test.ts
-- [ ] constant.ts
+- [x] constant.test.ts
+- [x] constant.ts
 - [ ] convert.ts
 - [ ] mapErrors.ts
 - [ ] nullable.test.ts
 - [ ] nullable.ts
 - [ ] or.ts
 - [ ] untag.ts
+
+src:
+- [ ] skip.ts
+- [x] encode.ts
+- [x] decode.ts
