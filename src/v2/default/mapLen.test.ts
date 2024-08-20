@@ -5,7 +5,7 @@ import { Encoder } from "../Encoder";
 import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiError } from "../EndOfInputError";
 
 describe("map", () => {
   const tests: Array<{
@@ -18,7 +18,7 @@ describe("map", () => {
     { v: null, b: "bf" },
     { v: 1n << 63n, b: "bb8000000000000000" },
     { b: "f97e00", de: new TypeMismatchError("map", "f16") },
-    { b: "", de: EOI_ERR.error },
+    { b: "", de: getEoiError() },
   ];
 
   const ty = mapLen;

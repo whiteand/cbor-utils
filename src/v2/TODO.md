@@ -28,10 +28,10 @@
 - [x] undefined.ts
 - [x] bignum.test.ts
 - [x] bignum.ts
-- [ ] map.test.ts
-- [ ] map.ts
-- [ ] mapLen.test.ts
-- [ ] mapLen.ts
+- [x] map.test.ts
+- [x] map.ts
+- [x] mapLen.test.ts
+- [x] mapLen.ts
 - [ ] nint.test.ts
 - [ ] nint.ts
 - [ ] simple.test.ts

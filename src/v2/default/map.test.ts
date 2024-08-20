@@ -1,27 +1,24 @@
 import { u8 } from "./smallInts";
-import { mapLen } from "./mapLen";
+import { map } from "./map";
 import { Decoder } from "../Decoder";
 import { Encoder } from "../Encoder";
 import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiError } from "../EndOfInputError";
 
 describe("map", () => {
-  const tests: Array<{
-    v?: unknown;
-    b?: string;
-    ee?: unknown;
-    de?: unknown;
-  }> = [
-    { v: 1, b: "a1" },
-    { v: null, b: "bf" },
-    { v: 1n << 63n, b: "bb8000000000000000" },
+  const tests = [
+    { v: new Map(), b: "a0" },
+    { v: new Map([[1, 2]]), b: "a10102" },
+    { v: new Map([["1", 2]]), ee: new TypeMismatchError("number", "string") },
+    { v: 1n, ee: new TypeMismatchError("Map", "BigInt") },
     { b: "f97e00", de: new TypeMismatchError("map", "f16") },
-    { b: "", de: EOI_ERR.error },
+    { b: "a1616101", de: new TypeMismatchError("uint", "string") },
+    { b: "", de: getEoiError() },
   ];
 
-  const ty = mapLen;
+  const ty = map(u8, u8);
 
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de == null))(
     "correctly decodes $b => $v",

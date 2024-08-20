@@ -4,18 +4,14 @@ import { MAX_U128, MAX_U16, MAX_U32, MAX_U64, MAX_U8 } from "./limits";
 import { IEncoder } from "./types";
 import { getVoidOk } from "./getVoidOk";
 
-function trySmall(value: number | bigint): number | null {
-  if (typeof value === "bigint") {
-    if (value > BigInt(MAX_U32)) {
-      return null;
-    }
-    return Number(value);
-  }
-  if (value > MAX_U32) {
-    return null;
-  }
-  return value;
-}
+const trySmallNumber = (value: number): number | null =>
+  value > MAX_U32 ? null : value;
+
+const trySmallBigInt = (value: bigint): number | null =>
+  value > BigInt(MAX_U32) ? null : Number(value);
+
+const trySmall = (value: number | bigint): number | null =>
+  typeof value === "bigint" ? trySmallBigInt(value) : trySmallNumber(value);
 
 export function writeTypeAndArg(
   e: IEncoder,
@@ -27,11 +23,12 @@ export function writeTypeAndArg(
     e.write(tyMask | 31);
     return getVoidOk();
   }
+
   const smallInt = trySmall(value);
-  if (smallInt != null) {
-    return encodeSmallInt(e, tyMask, smallInt);
-  }
-  return encodeBigInt(e, tyMask, value);
+
+  return smallInt == null
+    ? encodeBigInt(e, tyMask, value)
+    : encodeSmallInt(e, tyMask, smallInt);
 }
 
 function encodeBigInt(e: IEncoder, tyMask: number, value: number | bigint) {
