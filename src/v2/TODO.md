@@ -32,10 +32,10 @@
 - [x] map.ts
 - [x] mapLen.test.ts
 - [x] mapLen.ts
-- [ ] nint.test.ts
-- [ ] nint.ts
-- [ ] simple.test.ts
-- [ ] simple.ts
+- [x] nint.test.ts
+- [x] nint.ts
+- [x] simple.test.ts
+- [x] simple.ts
 - [ ] str.test.ts
 - [ ] str.ts
 - [ ] DataItem.ts
