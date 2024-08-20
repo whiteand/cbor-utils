@@ -2,6 +2,12 @@ import { Result } from "resultra";
 import { ICborTypeCodec, IDecoder } from "../types";
 import { CborType } from "../base";
 
+/**
+ *
+ * @param newEnc Function that transformes the target type value to the value that should be encoded
+ * @param newDec Function that transforms decoded value to the target type value
+ * @param nullable Defines if the new type can be encoded as null (default matches the target type nullable)
+ */
 declare function flatMap<
   OldEncodedType,
   NewEncodedType,
@@ -21,7 +27,8 @@ declare function flatMap<
     decoder: IDecoder,
     ctx: NDC,
     startPosition: number
-  ) => Result<NewDecodedType, NDE>
+  ) => Result<NewDecodedType, NDE>,
+  nullable?: boolean
 ): <EE extends Error, DE extends Error, EC extends NEC, DC extends NDC>(
   ty: ICborTypeCodec<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
 ) => CborType<

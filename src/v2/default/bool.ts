@@ -1,4 +1,4 @@
-import { ok } from "resultra";
+import { ok, Result } from "resultra";
 import { getEoiResult, EndOfInputError } from "../EndOfInputError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { SPECIAL_TYPE_MASK } from "../constants";
@@ -27,7 +27,7 @@ export const bool: CborType<
     e.write(SPECIAL_TYPE_MASK | (v ? 21 : 20));
     return getVoidOk();
   })
-  .decode((d) => {
+  .decode((d): Result<boolean, EndOfInputError | TypeMismatchError> => {
     if (done(d)) {
       return getEoiResult();
     }

@@ -1,0 +1,59 @@
+- [x] bool.test.ts
+- [x] bool.ts
+- [x] null.test.ts
+- [x] null.ts
+- [x] smallInts.ts
+- [x] uint.ts
+- [ ] DataItem.ts
+- [ ] any.test.ts
+- [ ] any.ts
+- [ ] arrayLen.test.ts
+- [ ] arrayLen.ts
+- [ ] bigInts.ts
+- [ ] bignum.test.ts
+- [ ] bignum.ts
+- [ ] bytes.test.ts
+- [ ] bytes.ts
+- [ ] emptyType.test.t
+- [ ] emptyType.ts
+- [ ] f16.test.ts
+- [ ] f16.ts
+- [ ] f32.test.ts
+- [ ] f32.ts
+- [ ] f64.test.ts
+- [ ] f64.ts
+- [ ] map.test.ts
+- [ ] map.ts
+- [ ] mapLen.test.ts
+- [ ] mapLen.ts
+- [ ] nint.test.ts
+- [ ] nint.ts
+- [ ] readSlice.test.t
+- [ ] readSlice.ts
+- [ ] seq.test.ts
+- [ ] seq.ts
+- [ ] simple.test.ts
+- [ ] simple.ts
+- [ ] str.test.ts
+- [ ] str.ts
+- [ ] tuple.ts
+- [ ] u128.test.ts
+- [ ] u64.test.ts
+- [ ] undefined.test.t
+- [ ] undefined.ts
+
+Operators
+
+- [ ] array.test.ts
+- [ ] array.ts
+- [ ] cast.ts
+- [ ] constant.test.ts
+- [ ] constant.ts
+- [ ] convert.ts
+- [ ] flatMap.ts
+- [ ] mapErrors.ts
+- [ ] nullable.test.ts
+- [ ] nullable.ts
+- [ ] or.ts
+- [ ] tagged.ts
+- [ ] untag.ts

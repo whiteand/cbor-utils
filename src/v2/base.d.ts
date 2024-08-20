@@ -31,9 +31,11 @@ declare class CborType<ET, DT, EE, DE, EC, DC>
   extends Pipeable
   implements ICborTypeCodec<ET, DT, EE, DE, EC, DC>
 {
+  public nullable: boolean;
   protected constructor(
     encode: (value: ET, e: EC) => DT,
-    decode: (value: DT, d: DC) => ET
+    decode: (value: DT, d: DC) => ET,
+    nullable: boolean
   );
 
   __inferEncodedValue: ET;

@@ -34,10 +34,9 @@ export const uint: CborType<
       v: number | bigint,
       e: IEncoder
     ): Result<void, OverflowError | TypeMismatchError> => {
-      if (typeof v !== "number" && typeof v !== "bigint") {
-        return new TypeMismatchError("number | bigint", typeof v).err();
-      }
-      return writeTypeAndArg(e, NUMBER_TYPE, v);
+      return typeof v !== "number" && typeof v !== "bigint"
+        ? new TypeMismatchError("number | bigint", typeof v).err()
+        : writeTypeAndArg(e, NUMBER_TYPE, v);
     }
   )
   .decode(
@@ -52,15 +51,9 @@ export const uint: CborType<
       if (getType(marker) !== NUMBER_TYPE) {
         return new TypeMismatchError("uint", getTypeString(marker)).err();
       }
-      const argRes = readArg(d);
-      if (!argRes.ok()) {
-        return argRes;
-      }
-      const v = argRes.value;
-      if (v == null) {
-        return new InvalidCborError(marker, d.ptr).err();
-      }
-      return ok(v);
+      return readArg(d).andThen((v) =>
+        v == null ? new InvalidCborError(marker, d.ptr).err() : ok(v)
+      );
     }
   )
   .build();

@@ -39,7 +39,9 @@ export interface IDecodable<T, DE, DC> {
 
 export interface ICborTypeCodec<ET, DT, EE, DE, EC, DC>
   extends IEncodable<ET, EE, EC>,
-    IDecodable<DT, DE, DC> {}
+    IDecodable<DT, DE, DC> {
+  nullable: boolean;
+}
 
 export type AnyDecodableType = IDecodable<any, any, any>;
 export type AnyEncodableType = IEncodable<any, any, any>;
