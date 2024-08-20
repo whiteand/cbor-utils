@@ -39,6 +39,7 @@ function decodeArrayU32(
   }
   return ok(res);
 }
+
 function decodeArrayU64(
   ty,
   len,
