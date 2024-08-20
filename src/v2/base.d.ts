@@ -56,6 +56,10 @@ declare class CborType<ET, DT, EE, DE, EC, DC>
     unknown
   >;
 
+  static from<ET, DT, EE, DE, EC, DC>(
+    ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
+  ): CborType<ET, DT, EE, DE, EC, DC>;
+
   convert<NET, NDT>(
     toNewDecodedValue: (value: DT) => NDT,
     toOldEncodedValue: (value: NET) => ET

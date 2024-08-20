@@ -41,12 +41,23 @@ CborType.builder = function () {
     return new CborBuilder()
 }
 
-CborType.prototype.convert = function convert(
-    toNewDecodedValue,
-    toOldEncodedValue
-) {
-    return createConvertedType(this, toNewDecodedValue, toOldEncodedValue)
+CborType.from = function (ty) {
+    return ty instanceof CborType
+        ? ty
+        : CborType.builder()
+            .encode((v, e, c) => ty.encode(v, e, c))
+            .decode((d, c) => ty.decode(d, c))
+            .nullable(ty.nullable)
+            .build()
 }
+
+Object.assign(CborType.prototype, {
+    convert(toNewDecodedValue,
+        toOldEncodedValue) {
+        return createConvertedType(this, toNewDecodedValue, toOldEncodedValue)
+    },
+})
+
 
 export function createConvertedType(inner, toNewDecodedValue, toOldEncodedValue) {
     function ConvertedType() { }

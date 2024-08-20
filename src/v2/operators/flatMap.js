@@ -2,13 +2,7 @@ import { CborType } from '../base'
 
 export const flatMap = (newEncode, newDecode, nullable) =>
     (inner) => {
-        const innerCborType = inner instanceof CborType
-            ? inner
-            : CborType.builder()
-                .encode((v, e, c) => inner.encode(v, e, c))
-                .decode((d, c) => inner.decode(d, c))
-                .nullable(inner.nullable)
-                .build()
+        const innerCborType = CborType.from(inner)
 
         const obj = {
             newEncode,
