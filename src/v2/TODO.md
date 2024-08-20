@@ -22,9 +22,8 @@
 - [x] tuple.ts
 - [x] uint.ts
 - [x] bigInts.ts
-- [ ] DataItem.ts
-- [ ] any.test.ts
-- [ ] any.ts
+- [x] u128.test.ts
+- [x] u64.test.ts
 - [ ] bignum.test.ts
 - [ ] bignum.ts
 - [ ] map.test.ts
@@ -37,10 +36,11 @@
 - [ ] simple.ts
 - [ ] str.test.ts
 - [ ] str.ts
-- [ ] u128.test.ts
-- [ ] u64.test.ts
 - [ ] undefined.test.t
 - [ ] undefined.ts
+- [ ] DataItem.ts
+- [ ] any.test.ts
+- [ ] any.ts
 
 Operators
 
