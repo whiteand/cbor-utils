@@ -46,8 +46,8 @@ Operators
 
 - [x] flatMap.ts
 - [x] tagged.ts
-- [ ] array.test.ts
-- [ ] array.ts
+- [x] array.test.ts
+- [x] array.ts
 - [ ] cast.ts
 - [ ] constant.test.ts
 - [ ] constant.ts
