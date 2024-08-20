@@ -48,7 +48,7 @@ Operators
 - [x] tagged.ts
 - [x] array.test.ts
 - [x] array.ts
-- [ ] cast.ts
+- [x] cast.ts
 - [ ] constant.test.ts
 - [ ] constant.ts
 - [ ] convert.ts
