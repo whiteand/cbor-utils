@@ -22,6 +22,7 @@ Object.assign(CborBuilder.prototype, {
     },
     nullable(value = true) {
         this._nullable = value;
+        return this
     },
     build() {
         return new CborType(this._encode, this._decode, this._nullable)
