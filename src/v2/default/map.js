@@ -1,14 +1,10 @@
-import { Result, ok } from "resultra";
-import { EndOfInputError } from "../EndOfInputError";
-import { InvalidCborError } from "../InvalidCborError";
-import { OverflowError } from "../OverflowError";
+import { ok } from "resultra";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
+import { BREAK_BYTE } from "../constants";
 import { getVoidOk } from "../getVoidOk";
-import { ICborTypeCodec, IDecodable, IDecoder } from "../types";
 import { getJsType } from "../utils/getJsType";
 import { mapLen } from "./mapLen";
-import { BREAK_BYTE } from "../constants";
 
 /**
  * A function that can produce a `Map` type based on the key and value types.
@@ -17,32 +13,12 @@ import { BREAK_BYTE } from "../constants";
  * @param vt type of values in the map
  * @returns as CBOR type that encodes and decodes `Map<K, V>`
  */
-export function map<
-  EK,
-  EV,
-  DK,
-  DV,
-  KEE extends Error,
-  KDE extends Error,
-  VEE extends Error,
-  VDE extends Error,
-  KEC,
-  KDC,
-  VEC,
-  VDC
->(
-  kt: ICborTypeCodec<EK, DK, KEE, KDE, KEC, KDC>,
-  vt: ICborTypeCodec<EV, DV, VEE, VDE, VEC, VDC>
-): CborType<
-  Map<EK, EV>,
-  Map<DK, DV>,
-  KEE | VEE | OverflowError,
-  KDE | VDE | InvalidCborError | EndOfInputError,
-  KEC & VEC,
-  KDC & VDC
-> {
+export function map(
+  kt,
+  vt
+) {
   return CborType.builder()
-    .encode((m, e, c): Result<void, KEE | VEE | OverflowError> => {
+    .encode((m, e, c) => {
       if (!m || !(m instanceof Map)) {
         return new TypeMismatchError("Map", getJsType(m)).err();
       }
@@ -66,19 +42,13 @@ export function map<
       (
         d,
         c
-      ): Result<
-        Map<DK, DV>,
-        KDE | VDE | InvalidCborError | EndOfInputError | TypeMismatchError
-      > => {
+      ) => {
         return mapLen
           .decode(d)
           .andThen(
             (
               len
-            ): Result<
-              Map<DK, DV>,
-              KDE | VDE | InvalidCborError | EndOfInputError | TypeMismatchError
-            > =>
+            ) =>
               len == null
                 ? decodeUnknownLengthMap(d, kt, vt, c)
                 : decodeKnownLengthMap(d, kt, vt, c, Number(len))
@@ -88,12 +58,12 @@ export function map<
     .build();
 }
 
-function decodeKnownLengthMap<K, KDE, KDC, V, VDE, VDC>(
-  d: IDecoder,
-  kt: IDecodable<K, KDE, KDC>,
-  vt: IDecodable<V, VDE, VDC>,
-  c: KDC & VDC,
-  n: number
+function decodeKnownLengthMap(
+  d,
+  kt,
+  vt,
+  c,
+  n,
 ) {
   const res = new Map();
   for (let i = 0; i < n; i++) {
@@ -111,11 +81,11 @@ function decodeKnownLengthMap<K, KDE, KDC, V, VDE, VDC>(
   return ok(res);
 }
 
-function decodeUnknownLengthMap<K, KDE, KDC, V, VDE, VDC>(
-  d: IDecoder,
-  kt: IDecodable<K, KDE, KDC>,
-  vt: IDecodable<V, VDE, VDC>,
-  c: KDC & VDC
+function decodeUnknownLengthMap(
+  d,
+  kt,
+  vt,
+  c,
 ) {
   const res = new Map();
   while (d.ptr < d.buf.length) {
