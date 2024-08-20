@@ -6,26 +6,30 @@ const getDefaultEncode = () => () => err(new NotImplementedError("encode"));
 const getDefaultDecode = () => () => err(new NotImplementedError("decode"));
 
 export function CborBuilder() {
-    this.encode = getDefaultEncode()
-    this.decode = getDefaultDecode()
+    this._encode = getDefaultEncode()
+    this._decode = getDefaultDecode()
 }
 
-CborBuilder.prototype.encode = function setEncode(encode) {
-    this.encode = encode;
-}
-CborBuilder.prototype.decode = function setEncode(decode) {
-    this.decode = decode;
-}
-CborBuilder.prototype.build = function build() {
-    return new CborType(this.encode, this.decode)
-}
+Object.assign(CborBuilder.prototype, {
+    encode(encode) {
+        this._encode = encode;
+        return this
+    },
+    decode(decode) {
+        this._decode = decode;
+        return this
+    },
+    build() {
+        return new CborType(this._encode, this._decode)
+    }
+})
 
 export function CborType(encode, decode) {
     this.encode = encode
     this.decode = decode
 }
 
-Object.setPrototypeOf(CborType.prototype, Pipeable.prototype)
+Reflect.setPrototypeOf(CborType.prototype, Pipeable.prototype)
 
 CborType.builder = function () {
     return new CborBuilder()
@@ -41,15 +45,16 @@ CborType.prototype.convert = function convert(
 export function createConvertedType(inner, toNewDecodedValue, toOldEncodedValue) {
     function ConvertedType() { }
 
-    Object.setPrototypeOf(ConvertedType, inner)
+    Reflect.setPrototypeOf(ConvertedType.prototype, inner)
 
-    ConvertedType.prototype.encode = function encode(value, encoder, ctx) {
-        return super.encode(toOldEncodedValue(value), encoder, ctx)
-    }
-
-    ConvertedType.prototype.decode = function decode(decoder, ctx) {
-        return super.decode(decoder, ctx).map(toNewDecodedValue)
-    }
+    Object.assign(ConvertedType.prototype, {
+        encode(value, encoder, ctx) {
+            return super.encode(toOldEncodedValue(value), encoder, ctx)
+        },
+        decode(decoder, ctx) {
+            return super.decode(decoder, ctx).map(toNewDecodedValue)
+        }
+    })
 
     return new ConvertedType()
 }
