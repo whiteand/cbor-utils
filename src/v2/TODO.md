@@ -6,6 +6,12 @@
 - [x] bytes.ts
 - [x] emptyType.test.t
 - [x] emptyType.ts
+- [x] f16.test.ts
+- [x] f16.ts
+- [x] f32.test.ts
+- [x] f32.ts
+- [x] f64.test.ts
+- [x] f64.ts
 - [x] null.test.ts
 - [x] null.ts
 - [x] readSlice.test.t
@@ -21,12 +27,6 @@
 - [ ] bigInts.ts
 - [ ] bignum.test.ts
 - [ ] bignum.ts
-- [ ] f16.test.ts
-- [ ] f16.ts
-- [ ] f32.test.ts
-- [ ] f32.ts
-- [ ] f64.test.ts
-- [ ] f64.ts
 - [ ] map.test.ts
 - [ ] map.ts
 - [ ] mapLen.test.ts
