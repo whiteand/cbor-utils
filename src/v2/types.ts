@@ -37,8 +37,14 @@ export interface IDecodable<T, DE, DC> {
   decode: TDecodeFunction<T, DE, DC>;
 }
 
-export interface ICborTypeCodec<ET, DT, EE, DE, EC, DC>
-  extends IEncodable<ET, EE, EC>,
+export interface ICborTypeCodec<
+  ET = any,
+  DT = any,
+  EE extends Error = Error,
+  DE extends Error = Error,
+  EC = any,
+  DC = any
+> extends IEncodable<ET, EE, EC>,
     IDecodable<DT, DE, DC> {
   nullable: boolean;
 }

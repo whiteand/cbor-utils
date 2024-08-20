@@ -9,25 +9,32 @@ import {
 } from "./types";
 import { Pipeable } from "../pipe";
 
-declare class CborTypeBuilder<ET, DT, EE, DE, EC, DC> {
-  encode<NET, NEE>(
+declare class CborTypeBuilder<
+  ET,
+  DT,
+  EE extends Error,
+  DE extends Error,
+  EC,
+  DC
+> {
+  encode<NET, NEE extends Error>(
     fn: (v: NET, e: IEncoder) => Result<void, NEE>
   ): CborTypeBuilder<NET, DT, NEE, DE, unknown, DC>;
-  encode<NET, NEE, NEC>(
-    fn: TEncodeFunction<NET, NEE, NEC>
+  encode<NET, NEE extends Error, NEC>(
+    fn: (value: NET, e: IEncoder, ctx: NEC) => Result<void, NEE>
   ): CborTypeBuilder<NET, DT, NEE, DE, NEC, DC>;
-  decode<NDT, NDE>(
+  decode<NDT, NDE extends Error>(
     fn: (d: IDecoder) => Result<NDT, NDE>
   ): CborTypeBuilder<ET, NDT, EE, NDE, EC, unknown>;
-  decode<NDT, NDE, NDC>(
-    fn: TDecodeFunction<NDT, NDE, NDC>
+  decode<NDT, NDE extends Error, NDC>(
+    fn: (d: IDecoder, ctx: NDC) => Result<NDT, NDE>
   ): CborTypeBuilder<ET, NDT, EE, NDE, EC, NDC>;
   build(): CborType<ET, DT, EE, DE, EC, DC>;
   nullable(): this;
   nullable(isNullable: boolean): this;
 }
 
-declare class CborType<ET, DT, EE, DE, EC, DC>
+declare class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
   extends Pipeable
   implements ICborTypeCodec<ET, DT, EE, DE, EC, DC>
 {
@@ -56,7 +63,7 @@ declare class CborType<ET, DT, EE, DE, EC, DC>
     unknown
   >;
 
-  static from<ET, DT, EE, DE, EC, DC>(
+  static from<ET, DT, EE extends Error, DE extends Error, EC, DC>(
     ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
   ): CborType<ET, DT, EE, DE, EC, DC>;
 

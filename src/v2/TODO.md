@@ -4,16 +4,21 @@
 - [x] null.ts
 - [x] smallInts.ts
 - [x] uint.ts
+- [x] arrayLen.test.ts
+- [x] arrayLen.ts
+- [x] readSlice.test.t
+- [x] readSlice.ts
+- [x] seq.test.ts
+- [x] seq.ts
+- [x] tuple.ts
+- [x] bytes.test.ts
+- [x] bytes.ts
 - [ ] DataItem.ts
 - [ ] any.test.ts
 - [ ] any.ts
-- [ ] arrayLen.test.ts
-- [ ] arrayLen.ts
 - [ ] bigInts.ts
 - [ ] bignum.test.ts
 - [ ] bignum.ts
-- [ ] bytes.test.ts
-- [ ] bytes.ts
 - [ ] emptyType.test.t
 - [ ] emptyType.ts
 - [ ] f16.test.ts
@@ -28,15 +33,10 @@
 - [ ] mapLen.ts
 - [ ] nint.test.ts
 - [ ] nint.ts
-- [ ] readSlice.test.t
-- [ ] readSlice.ts
-- [ ] seq.test.ts
-- [ ] seq.ts
 - [ ] simple.test.ts
 - [ ] simple.ts
 - [ ] str.test.ts
 - [ ] str.ts
-- [ ] tuple.ts
 - [ ] u128.test.ts
 - [ ] u64.test.ts
 - [ ] undefined.test.t
