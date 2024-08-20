@@ -23,6 +23,8 @@ declare class CborTypeBuilder<ET, DT, EE, DE, EC, DC> {
     fn: TDecodeFunction<NDT, NDE, NDC>
   ): CborTypeBuilder<ET, NDT, EE, NDE, EC, NDC>;
   build(): CborType<ET, DT, EE, DE, EC, DC>;
+  nullable(): this;
+  nullable(isNullable: boolean): this;
 }
 
 declare class CborType<ET, DT, EE, DE, EC, DC>

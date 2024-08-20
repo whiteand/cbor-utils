@@ -20,6 +20,7 @@ describe("base", () => {
           return ok(2);
         }
       )
+      .nullable()
       .build();
     console.log("here");
     const encoded = encode((e) => two.encode(2, e));

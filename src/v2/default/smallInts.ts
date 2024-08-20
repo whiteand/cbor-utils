@@ -15,6 +15,15 @@ const MAX_VALUE_DICT = {
   16: MAX_U16,
   32: MAX_U32,
 } as const;
+
+function getType(value: number): string {
+  return "u" + value.toString();
+}
+
+function getMaxValue(size: 8 | 16 | 32): number {
+  return MAX_VALUE_DICT[size];
+}
+
 function createSmallIntType(
   size: 8 | 16 | 32
 ): CborType<
@@ -25,40 +34,40 @@ function createSmallIntType(
   unknown,
   unknown
 > {
-  const MAX_VALUE = MAX_VALUE_DICT[size];
-  const tyName = `u` + size;
-  const MIN_VALUE = 0;
   return uint.pipe(
     flatMap(
       (value: number): Result<number, OverflowError | UnderflowError> => {
         if (typeof value !== "number") {
           return new TypeMismatchError("number", typeof value).err();
         }
-        if (value > MAX_VALUE) {
-          return new OverflowError(MAX_VALUE, value).err();
+        if (value > getMaxValue(size)) {
+          return new OverflowError(getMaxValue(size), value).err();
         }
-        if (value < MIN_VALUE) {
-          return new UnderflowError(MIN_VALUE, value).err();
+        if (value < 0) {
+          return new UnderflowError(0, value).err();
         }
         if (!Number.isInteger(value)) {
-          return new TypeMismatchError(tyName, "f64").err();
+          return new TypeMismatchError(getType(size), "f64").err();
         }
         return ok(value);
       },
       (arg, d, _, start): Result<number, TypeMismatchError> => {
         if (typeof arg === "bigint") {
-          if (arg <= BigInt(MAX_VALUE) && arg >= BigInt(MIN_VALUE)) {
+          if (arg <= BigInt(getMaxValue(size)) && arg >= BigInt(0)) {
             return ok(Number(arg));
           }
           return new TypeMismatchError(
-            tyName,
+            getType(size),
             getTypeString(d.buf[start])
           ).err();
         }
-        if (arg <= MAX_VALUE && arg >= MIN_VALUE) {
+        if (arg <= getMaxValue(size) && arg >= 0) {
           return ok(arg);
         }
-        return new TypeMismatchError(tyName, getTypeString(d.buf[start])).err();
+        return new TypeMismatchError(
+          getType(size),
+          getTypeString(d.buf[start])
+        ).err();
       }
     )
   );

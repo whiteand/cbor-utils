@@ -8,6 +8,7 @@ const getDefaultDecode = () => () => err(new NotImplementedError("decode"));
 export function CborBuilder() {
     this._encode = getDefaultEncode()
     this._decode = getDefaultDecode()
+    this._nullable = false;
 }
 
 Object.assign(CborBuilder.prototype, {
@@ -19,14 +20,18 @@ Object.assign(CborBuilder.prototype, {
         this._decode = decode;
         return this
     },
+    nullable(value = true) {
+        this._nullable = value;
+    },
     build() {
-        return new CborType(this._encode, this._decode)
+        return new CborType(this._encode, this._decode, this._nullable)
     }
 })
 
-export function CborType(encode, decode) {
+export function CborType(encode, decode, nullable) {
     this.encode = encode
     this.decode = decode
+    this.nullable = nullable
 }
 
 Reflect.setPrototypeOf(CborType.prototype, Pipeable.prototype)
