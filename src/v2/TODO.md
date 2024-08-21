@@ -51,8 +51,8 @@ Operators
 - [x] cast.ts
 - [x] constant.test.ts
 - [x] constant.ts
-- [ ] convert.ts
-- [ ] mapErrors.ts
+- [x] mapErrors.ts
+- [x] convert.ts
 - [ ] nullable.test.ts
 - [ ] nullable.ts
 - [ ] or.ts
