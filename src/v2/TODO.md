@@ -56,7 +56,7 @@ Operators
 - [x] nullable.test.ts
 - [x] nullable.ts
 - [x] or.ts
-- [ ] untag.ts
+- [x] untag.ts
 
 src:
 - [ ] skip.ts
