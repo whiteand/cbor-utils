@@ -1,11 +1,10 @@
-import { u8 } from "./smallInts";
-import { mapLen } from "./mapLen";
+import { describe, expect, it } from "vitest";
 import { Decoder } from "../Decoder";
 import { Encoder } from "../Encoder";
-import { describe, it, expect } from "vitest";
-import { fromHex, hex } from "../utils/hex";
-import { TypeMismatchError } from "../TypeMismatchError";
 import { getEoiError } from "../EndOfInputError";
+import { TypeMismatchError } from "../TypeMismatchError";
+import { fromHex, hex } from "../utils/hex";
+import { mapLen } from "./mapLen";
 
 describe("map", () => {
   const tests: Array<{

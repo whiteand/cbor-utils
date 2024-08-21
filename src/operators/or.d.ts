@@ -1,5 +1,5 @@
-import { Result, err } from "resultra";
 import { CborType } from "../base";
+import { BaseError } from "../BaseError";
 import {
   DecodeError,
   DecodedType,
@@ -7,7 +7,6 @@ import {
   EncodedType,
   ICborTypeCodec,
 } from "../types";
-import { BaseError } from "../BaseError";
 import { TupleVals } from "../utils/TupleVals";
 
 type InferEncodedOrType<

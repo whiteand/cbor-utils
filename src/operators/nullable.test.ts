@@ -9,13 +9,13 @@ describe("array", () => {
     const nullableByte = u8.pipe(nullable());
     let res = new Encoder().encode(nullableByte, 256);
     expect(res.ok()).toBe(false);
-    let enc = new Encoder();
+    const enc = new Encoder();
     res = enc.encode(nullableByte, null);
     expect(res.ok()).toBe(true);
     res = enc.encode(nullableByte, 1);
     expect(res.ok()).toBe(true);
     expect(Buffer.from(enc.finish()).toString("hex")).toMatchInlineSnapshot(
-      `"f601"`,
+      `"f601"`
     );
   });
   it("propery decodes", () => {
@@ -24,11 +24,11 @@ describe("array", () => {
     enc.encode(u32, 1024).unwrap();
     const failBytes = enc.finish();
     expect(Buffer.from(failBytes).toString("hex")).toMatchInlineSnapshot(
-      `"190400"`,
+      `"190400"`
     );
     const r = new Decoder(failBytes).decode(nullableByte);
     expect(!r.ok() && r.error).toMatchInlineSnapshot(
-      `[Error: Expected u8, but got u16]`,
+      `[Error: Expected u8, but got u16]`
     );
     const validBytes = new Uint8Array([0xf6, 0x01]);
     const d = new Decoder(validBytes);

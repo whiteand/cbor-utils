@@ -10,7 +10,7 @@ import { decode } from "./decode";
 describe("base", () => {
   it("works", () => {
     const two = CborType.builder()
-      .encode((value: 2, e) => u8.encode(2, e))
+      .encode((_: 2, e) => u8.encode(2, e))
       .decode(
         (d): Result<2, UnexpectedValueError<number, 2> | DecodingError> => {
           const res = u8.decode(d);

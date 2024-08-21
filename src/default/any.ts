@@ -1,7 +1,10 @@
 import { Result, err } from "resultra";
 import { DecodingError } from "../DecodingError";
-import { getEoiResult, EndOfInputError } from "../EndOfInputError";
+import { EndOfInputError, getEoiResult } from "../EndOfInputError";
+import { InvalidCborError } from "../InvalidCborError";
+import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
+import { UnexpectedValueError } from "../UnexpectedValueError";
 import { CborType } from "../base";
 import {
   ARRAY_TYPE,
@@ -14,22 +17,19 @@ import {
   TAG_TYPE,
 } from "../constants";
 import { getTypeString } from "../getTypeString";
+import { MAX_U128 } from "../limits";
 import { getInfo, getType } from "../marker";
 import { array } from "../operators/array";
-import { tagged } from "../operators/tagged";
+import { mapErrors } from "../operators/mapErrors";
 import { or } from "../operators/or";
-import {
-  ICborTypeCodec,
-  IDecodable,
-  IDecoder,
-  IEncodable,
-  IEncoder,
-} from "../types";
+import { tagged } from "../operators/tagged";
+import { untag } from "../operators/untag";
+import { IDecoder, IEncoder } from "../types";
 import { DataItem, Simple, TaggedDataItem } from "./DataItem";
+import { bignum } from "./bignum";
 import { bool } from "./bool";
 import { bytes } from "./bytes";
 import { f16 } from "./f16";
-import { bignum } from "./bignum";
 import { f32 } from "./f32";
 import { f64 } from "./f64";
 import { map } from "./map";
@@ -39,12 +39,6 @@ import { simple } from "./simple";
 import { str } from "./str";
 import { uint } from "./uint";
 import { undefinedType } from "./undefined";
-import { untag } from "../operators/untag";
-import { mapErrors } from "../operators/mapErrors";
-import { MAX_U128 } from "../limits";
-import { OverflowError } from "../OverflowError";
-import { InvalidCborError } from "../InvalidCborError";
-import { UnexpectedValueError } from "../UnexpectedValueError";
 
 export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
   const p = d.ptr;

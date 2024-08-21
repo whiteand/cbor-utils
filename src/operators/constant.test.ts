@@ -9,7 +9,7 @@ describe("constant", () => {
     const four = u16.pipe(constant(4));
     let res = new Encoder().encode(four, 42 as 4);
     expect(res.ok()).toBe(false);
-    let enc = new Encoder();
+    const enc = new Encoder();
     res = enc.encode(four, 4 as const);
     expect(res.ok()).toBe(true);
     expect(Buffer.from(enc.finish()).toString("hex")).toBe("04");

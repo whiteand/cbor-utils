@@ -1,11 +1,11 @@
-import { nullType } from "./null";
+import { describe, expect, it } from "vitest";
 import { Decoder } from "../Decoder";
 import { Encoder } from "../Encoder";
-import { describe, it, expect } from "vitest";
-import { fromHex, hex } from "../utils/hex";
+import { getEoiError } from "../EndOfInputError";
 import { TypeMismatchError } from "../TypeMismatchError";
-import { getEoiError, getEoiResult } from "../EndOfInputError";
 import { UnexpectedValueError } from "../UnexpectedValueError";
+import { fromHex, hex } from "../utils/hex";
+import { nullType } from "./null";
 
 describe("null", () => {
   const tests = [

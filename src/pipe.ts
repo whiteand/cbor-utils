@@ -616,26 +616,26 @@ export class Pipeable implements IPipeable {
     tu: (_: T) => U
   ): U;
   pipe(
-    ab: unknown,
-    bc?: unknown,
-    cd?: unknown,
-    de?: unknown,
-    ef?: unknown,
-    fg?: unknown,
-    gh?: unknown,
-    hi?: unknown,
-    ij?: unknown,
-    jk?: unknown,
-    kl?: unknown,
-    lm?: unknown,
-    mn?: unknown,
-    no?: unknown,
-    op?: unknown,
-    pq?: unknown,
-    qr?: unknown,
-    rs?: unknown,
-    st?: unknown,
-    tu?: unknown
+    _ab: unknown,
+    _bc?: unknown,
+    _cd?: unknown,
+    _de?: unknown,
+    _ef?: unknown,
+    _fg?: unknown,
+    _gh?: unknown,
+    _hi?: unknown,
+    _ij?: unknown,
+    _jk?: unknown,
+    _kl?: unknown,
+    _lm?: unknown,
+    _mn?: unknown,
+    _no?: unknown,
+    _op?: unknown,
+    _pq?: unknown,
+    _qr?: unknown,
+    _rs?: unknown,
+    _st?: unknown,
+    _tu?: unknown
   ): any {
     return pipeArguments(this, arguments);
   }

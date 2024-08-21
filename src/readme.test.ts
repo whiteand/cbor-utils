@@ -68,8 +68,8 @@ describe("docs", () => {
       }
     `);
     const result3 = tryDecode(cborBytes, (d) => {
-      const id = d.decode(u8);
-      const hash = d.decode(bytes);
+      const _id = d.decode(u8);
+      const _hash = d.decode(bytes);
       if (Math.random() > 0) throw new Error("42");
       return 10;
     });

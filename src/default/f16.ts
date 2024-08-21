@@ -1,15 +1,14 @@
 import { ok, Result } from "resultra";
-import { getEoiResult, EndOfInputError } from "../EndOfInputError";
+import { EndOfInputError, getEoiResult } from "../EndOfInputError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
+import { UnderflowError } from "../UnderflowError";
 import { CborType } from "../base";
 import { SPECIAL_TYPE, SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
+import { getVoidOk } from "../getVoidOk";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
-import { getVoidOk } from "../getVoidOk";
-import { hex } from "../utils/hex";
-import { UnderflowError } from "../UnderflowError";
 import { done } from "../utils/done";
 
 const EPSILON = Number.EPSILON;
@@ -149,8 +148,8 @@ function decodeHalfFloat(
     return getEoiResult();
   }
   d.ptr++;
-  let a = d.buf[d.ptr++];
-  let b = d.buf[d.ptr++];
+  const a = d.buf[d.ptr++];
+  const b = d.buf[d.ptr++];
 
   const pos = a >> 7 === 0;
   const exponent = (a & 0b1111100) >> 2;
@@ -170,7 +169,7 @@ function decodeHalfFloat(
       return ok(NaN);
     }
   }
-  let res = 2 ** (exponent - 15) * (1 + significand / 1024);
+  const res = 2 ** (exponent - 15) * (1 + significand / 1024);
   return ok(pos ? res : -res);
 }
 
