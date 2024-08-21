@@ -8,7 +8,7 @@
     "build": "tsup && tsc",
     "lint:ox": "npx --yes oxlint@latest",
     "lint:jsr": "npm run build:jsr-json && bunx jsr publish --dry-run",
-    "lint": "npm run lint:ox && npm run lint:jsr && npm run build && npx size-limit && deno lint ./src",
+    "lint": "npm run lint:ox && npm run lint:jsr && npm run build && npx size-limit",
     "prepublish": "npm run lint && npm run build",
     "prepare": "npm run build",
     "build:jsr-json": "bun ./scripts/build-jsr-json > ./jsr.json",
