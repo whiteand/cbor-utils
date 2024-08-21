@@ -7,11 +7,7 @@ import { OverflowError } from "../OverflowError";
 import { DecodingError } from "../DecodingError";
 import { BREAK_BYTE } from "../constants";
 
-function decodeArrayIndefinite(
-  ty,
-  d,
-  ctx,
-) {
+function decodeArrayIndefinite(ty, d, ctx) {
   const res = [];
   while (d.ptr < d.buf.length) {
     const m = d.buf[d.ptr];
@@ -25,12 +21,7 @@ function decodeArrayIndefinite(
   }
   return ok(res);
 }
-function decodeArrayU32(
-  ty,
-  len,
-  d,
-  ctx,
-) {
+function decodeArrayU32(ty, len, d, ctx) {
   const res = [];
   for (let i = 0; i < len; i++) {
     const item = ty.decode(d, ctx);
@@ -40,12 +31,7 @@ function decodeArrayU32(
   return ok(res);
 }
 
-function decodeArrayU64(
-  ty,
-  len,
-  d,
-  ctx,
-) {
+function decodeArrayU64(ty, len, d, ctx) {
   const res = [];
   for (let i = 0n; i < len; i++) {
     const item = ty.decode(d, ctx);
@@ -68,27 +54,23 @@ function decodeArrayU64(
  * @returns An operator that creates an array type from a element type
  */
 export function array() {
-  return (
-    itemTy,
-  ) => {
+  return (itemTy) => {
     const proto = CborType.builder()
-      .encode(
-        function encode(value, e, ctx) {
-          const res = arrayLen.encode(value.length, e, ctx);
+      .encode(function encode(value, e, ctx) {
+        const res = arrayLen.encode(value.length, e, ctx);
+        if (!res.ok()) {
+          return res;
+        }
+        const { itemTy } = this;
+        for (let i = 0; i < value.length; i++) {
+          const res = itemTy.encode(value[i], e, ctx);
           if (!res.ok()) {
             return res;
           }
-          const { itemTy } = this
-          for (let i = 0; i < value.length; i++) {
-            const res = itemTy.encode(value[i], e, ctx);
-            if (!res.ok()) {
-              return res;
-            }
-          }
-
-          return getVoidOk();
         }
-      )
+
+        return getVoidOk();
+      })
       .decode(function decode(d, ctx) {
         const lenRes = arrayLen.decode(d, ctx);
         if (!lenRes.ok()) return lenRes;
@@ -104,12 +86,10 @@ export function array() {
       })
       .build();
 
-    const arrayType = {
-      itemTy,
-    }
+    const arrayType = Object.create(proto);
 
-    Reflect.setPrototypeOf(arrayType, proto)
+    arrayType.itemTy = itemTy;
 
-    return arrayType
-  }
+    return arrayType;
+  };
 }

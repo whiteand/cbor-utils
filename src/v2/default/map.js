@@ -14,7 +14,42 @@ import { mapLen } from "./mapLen";
  * @returns as CBOR type that encodes and decodes `Map<K, V>`
  */
 export function map(kt, vt) {
-  const mapType = {
+  const proto = CborType.builder()
+    .encode(function encode(m, e, c) {
+      const { kt, vt } = this;
+      if (!m || !(m instanceof Map)) {
+        return new TypeMismatchError("Map", getJsType(m)).err();
+      }
+      const entries = [...m.entries()];
+      const res = mapLen.encode(entries.length, e);
+      if (!res.ok()) {
+        return res;
+      }
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        const k = entry[0];
+        const v = entry[1];
+        const kr = kt.encode(k, e, c);
+        if (!kr.ok()) return kr;
+        const vr = vt.encode(v, e, c);
+        if (!vr.ok()) return vr;
+      }
+      return getVoidOk();
+    })
+    .decode(function decode(d, c) {
+      return mapLen
+        .decode(d)
+        .andThen((len) =>
+          len == null
+            ? this.decodeUnknownLengthMap(d, c)
+            : this.decodeKnownLengthMap(d, c, Number(len))
+        );
+    })
+    .build();
+
+  const mapType = Object.create(proto);
+
+  Object.assign(mapType, {
     kt,
     vt,
     decodeUnknownLengthMap(d, c) {
@@ -55,42 +90,7 @@ export function map(kt, vt) {
 
       return ok(res);
     },
-  };
-
-  const proto = CborType.builder()
-    .encode(function encode(m, e, c) {
-      const { kt, vt } = this;
-      if (!m || !(m instanceof Map)) {
-        return new TypeMismatchError("Map", getJsType(m)).err();
-      }
-      const entries = [...m.entries()];
-      const res = mapLen.encode(entries.length, e);
-      if (!res.ok()) {
-        return res;
-      }
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i];
-        const k = entry[0];
-        const v = entry[1];
-        const kr = kt.encode(k, e, c);
-        if (!kr.ok()) return kr;
-        const vr = vt.encode(v, e, c);
-        if (!vr.ok()) return vr;
-      }
-      return getVoidOk();
-    })
-    .decode(function decode(d, c) {
-      return mapLen
-        .decode(d)
-        .andThen((len) =>
-          len == null
-            ? this.decodeUnknownLengthMap(d, c)
-            : this.decodeKnownLengthMap(d, c, Number(len))
-        );
-    })
-    .build();
-
-  Reflect.setPrototypeOf(mapType, proto);
+  });
 
   return mapType;
 }
