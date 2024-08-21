@@ -59,6 +59,6 @@ Operators
 - [x] untag.ts
 
 src:
-- [ ] skip.ts
+- [x] skip.ts
 - [x] encode.ts
 - [x] decode.ts
