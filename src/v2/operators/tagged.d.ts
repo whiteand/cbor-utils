@@ -8,21 +8,21 @@ import { UnexpectedValueError } from "../UnexpectedValueError";
 
 declare function tagged(
   tag: number | bigint
-): <T, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborTypeCodec<T, T, EE, DE, EC, DC>
+): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
 ) => ICborTypeCodec<
-  TaggedDataItem<T>,
-  TaggedDataItem<T>,
+  TaggedDataItem<ET>,
+  TaggedDataItem<DT>,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
   DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
   EC,
   DC
 >;
-declare function tagged(): <T, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborTypeCodec<T, T, EE, DE, EC, DC>
+declare function tagged(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
 ) => ICborTypeCodec<
-  TaggedDataItem<T>,
-  TaggedDataItem<T>,
+  TaggedDataItem<ET>,
+  TaggedDataItem<DT>,
   EE | OverflowError,
   DE | DecodingError,
   EC,
