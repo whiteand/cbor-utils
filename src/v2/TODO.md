@@ -38,9 +38,9 @@
 - [x] simple.ts
 - [x] str.test.ts
 - [x] str.ts
-- [ ] DataItem.ts
-- [ ] any.test.ts
-- [ ] any.ts
+- [x] DataItem.ts
+- [x] any.test.ts
+- [x] any.ts
 
 Operators
 
