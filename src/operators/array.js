@@ -1,11 +1,8 @@
-import { Result, ok } from "resultra";
-import { ICborTypeCodec, IDecodable, IDecoder, IEncoder } from "../types";
+import { ok } from "resultra";
 import { CborType } from "../base";
+import { BREAK_BYTE } from "../constants";
 import { arrayLen } from "../default/arrayLen";
 import { getVoidOk } from "../getVoidOk";
-import { OverflowError } from "../OverflowError";
-import { DecodingError } from "../DecodingError";
-import { BREAK_BYTE } from "../constants";
 
 function decodeArrayIndefinite(ty, d, ctx) {
   const res = [];

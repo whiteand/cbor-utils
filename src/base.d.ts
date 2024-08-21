@@ -7,7 +7,7 @@ import {
   TDecodeFunction,
   TEncodeFunction,
 } from "./types";
-import { Pipeable } from "../pipe";
+import { Pipeable } from "./pipe";
 
 declare class CborTypeBuilder<
   ET,

@@ -23,7 +23,7 @@ declare function flatMap<
     ctx: NEC
   ) => Result<NoInfer<OldEncodedType>, NEE>,
   newDec: (
-    value: NoInfer<OldDecodedType>,
+    value: OldDecodedType,
     decoder: IDecoder,
     ctx: NDC,
     startPosition: number

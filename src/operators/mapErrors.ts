@@ -1,6 +1,6 @@
 import { err } from "resultra";
 import { CborType } from "../base";
-import { ICborTypeCodec } from "../types";
+import { ICborTypeCodec, IDecoder, IEncoder } from "../types";
 
 export function mapErrors<
   ET,
@@ -17,11 +17,11 @@ export function mapErrors<
 ) => CborType<ET, DT, NEE, NDE, EC, DC> {
   return <EC, DC>(ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>) =>
     CborType.builder()
-      .encode((v, e, c) => {
+      .encode((v: ET, e: IEncoder, c: EC) => {
         const r = ty.encode(v, e, c);
         return r.ok() ? r : err(ee(r.error, v));
       })
-      .decode((d, c) => {
+      .decode((d: IDecoder, c: DC) => {
         const p = d.ptr;
         const m = d.buf[p];
         const r = ty.decode(d, c);

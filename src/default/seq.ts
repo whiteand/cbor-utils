@@ -5,6 +5,8 @@ import {
   EncodeError,
   EncodedType,
   ICborTypeCodec,
+  IDecoder,
+  IEncoder,
 } from "../types";
 import { getJsType } from "../utils/getJsType";
 import { TypeMismatchError } from "../TypeMismatchError";
@@ -60,7 +62,7 @@ export function seq<
   const n = types.length;
   const typeStr = `array[${n}]`;
   return CborType.builder()
-    .encode((v, e, ctx) => {
+    .encode((v: InferEncodedSeqType<TypesList>, e: IEncoder, ctx: EC) => {
       if (!v || typeof v.length != "number")
         return new TypeMismatchError(typeStr, getJsType(v)).err();
       if (v.length !== n) {
@@ -74,7 +76,7 @@ export function seq<
       }
       return getVoidOk();
     })
-    .decode((d, c) => {
+    .decode((d: IDecoder, c: DC) => {
       const tuple: unknown[] = [];
       for (let i = 0; i < n; i++) {
         const res = types[i].decode(d, c);

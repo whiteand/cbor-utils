@@ -51,7 +51,12 @@ function createSmallIntType(
         }
         return ok(value);
       },
-      (arg, d, _, start): Result<number, TypeMismatchError> => {
+      (
+        arg: number | bigint,
+        d,
+        ctx,
+        start
+      ): Result<number, TypeMismatchError> => {
         if (typeof arg === "bigint") {
           if (arg <= BigInt(getMaxValue(size)) && arg >= BigInt(0)) {
             return ok(Number(arg));
