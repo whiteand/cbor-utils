@@ -12,23 +12,20 @@ function createBigInt(
   size: 64 | 128
 ): CborType<
   bigint,
+  bigint,
   OverflowError | UnderflowError,
   DecodingError,
   unknown,
   unknown
 > {
-  const MAX_VALUE = (1n << BigInt(size)) - 1n;
-  const tyName = "u" + size;
-  const MIN_VALUE = 0n;
-
   return uint.pipe(
     flatMap(
       (value: bigint): Result<bigint, OverflowError | UnderflowError> => {
-        if (value > MAX_VALUE) {
-          return new OverflowError(MAX_VALUE, value).err();
+        if (value > getMaxValue(size)) {
+          return new OverflowError(getMaxValue(size), value).err();
         }
-        if (value < MIN_VALUE) {
-          return new UnderflowError(MIN_VALUE, value).err();
+        if (value < 0n) {
+          return new UnderflowError(0n, value).err();
         }
 
         return ok(value);
@@ -41,11 +38,14 @@ function createBigInt(
       ): Result<bigint, TypeMismatchError> => {
         const value = BigInt(arg);
 
-        if (value <= MAX_VALUE && value >= MIN_VALUE) {
+        if (value <= getMaxValue(size) && value >= 0n) {
           return ok(value);
         }
 
-        return new TypeMismatchError(tyName, getTypeString(d.buf[start])).err();
+        return new TypeMismatchError(
+          getTyName(size),
+          getTypeString(d.buf[start])
+        ).err();
       }
     )
   );
@@ -55,6 +55,7 @@ function createBigInt(
  * A CBOR Type that encodes u64.
  */
 export const u64: CborType<
+  bigint,
   bigint,
   OverflowError | UnderflowError,
   DecodingError,
@@ -72,8 +73,17 @@ export const u64: CborType<
  */
 export const u128: CborType<
   bigint,
+  bigint,
   OverflowError | UnderflowError,
   DecodingError,
   unknown,
   unknown
 > = createBigInt(128);
+
+function getTyName(size: number) {
+  return "u" + size;
+}
+
+function getMaxValue(size: number) {
+  return (1n << BigInt(size)) - 1n;
+}

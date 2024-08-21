@@ -1,23 +1,20 @@
 import { Result } from "resultra";
-import { IDecoder } from "./types";
-import { done } from "./utils/done";
-import { EOI_ERR, EndOfInputError } from "./EndOfInputError";
-import { getInfo, getType } from "./marker";
+import { EndOfInputError, getEoiResult } from "./EndOfInputError";
 import { InvalidCborError } from "./InvalidCborError";
-import { okVoid } from "./okNull";
 import {
   ARRAY_TYPE,
   BREAK_BYTE,
-  BYTES_TYPE,
   MAP_TYPE,
   NEGATIVE_INT_TYPE,
-  NUMBER_TYPE,
-  SPECIAL_TYPE,
   STRING_TYPE,
   TAG_TYPE,
 } from "./constants";
 import { getTypeString } from "./getTypeString";
+import { getVoidOk } from "./getVoidOk";
+import { getInfo, getType } from "./marker";
 import { readArg } from "./readArg";
+import { IDecoder } from "./types";
+import { done } from "./utils/done";
 
 function skipArg(
   d: IDecoder
@@ -26,18 +23,18 @@ function skipArg(
   const marker = d.buf[d.ptr++];
   const info = getInfo(marker);
   if (info < 24) {
-    return okVoid;
+    return getVoidOk();
   }
   if (info < 28) {
     const skipLen = 1 << (info - 24);
     if (d.ptr + skipLen > d.buf.length) {
-      return EOI_ERR;
+      return getEoiResult();
     }
     d.ptr += skipLen;
-    return okVoid;
+    return getVoidOk();
   }
   if (info === 31) {
-    return okVoid;
+    return getVoidOk();
   }
   return new InvalidCborError(marker, p).err();
 }
@@ -47,12 +44,12 @@ function skipKUntilNull(
   d: IDecoder
 ): Result<void, EndOfInputError | InvalidCborError> {
   while (true) {
-    if (done(d)) return EOI_ERR;
+    if (done(d)) return getEoiResult();
 
     const m = d.buf[d.ptr];
     if (m === BREAK_BYTE) {
       d.ptr++;
-      return okVoid;
+      return getVoidOk();
     }
     const res = skip(d);
     if (!res.ok()) return res;
@@ -80,7 +77,7 @@ function skipNK(
       if (!res.ok()) return res;
     }
   }
-  return okVoid;
+  return getVoidOk();
 }
 
 /**
@@ -93,7 +90,7 @@ function skipNK(
 export function skip(
   d: IDecoder
 ): Result<void, EndOfInputError | InvalidCborError> {
-  if (done(d)) return EOI_ERR;
+  if (done(d)) return getEoiResult();
   const marker = d.buf[d.ptr];
   const ty = getType(marker);
   if (ty <= NEGATIVE_INT_TYPE) {
@@ -107,10 +104,10 @@ export function skip(
     const nextPos = typeof len === "number" ? d.ptr + len : BigInt(d.ptr) + len;
     const max = typeof len === "number" ? d.buf.length : BigInt(d.buf.length);
     if (nextPos > max) {
-      return EOI_ERR;
+      return getEoiResult();
     }
     d.ptr = Number(nextPos);
-    return okVoid;
+    return getVoidOk();
   }
   if (ty <= MAP_TYPE) {
     const size = ty === ARRAY_TYPE ? 1 : 2;
@@ -127,20 +124,20 @@ export function skip(
   const info = getInfo(marker);
   if (info < 24) {
     d.ptr++;
-    return okVoid;
+    return getVoidOk();
   }
   if (info === 24) {
-    if (d.ptr + 2 > d.buf.length) return EOI_ERR;
+    if (d.ptr + 2 > d.buf.length) return getEoiResult();
     d.ptr += 2;
-    return okVoid;
+    return getVoidOk();
   }
   if (info <= 27) {
     const skipLen = (1 << (info - 24)) + 1;
     if (d.ptr + skipLen > d.buf.length) {
-      return EOI_ERR;
+      return getEoiResult();
     }
     d.ptr += skipLen;
-    return okVoid;
+    return getVoidOk();
   }
 
   throw new Error(

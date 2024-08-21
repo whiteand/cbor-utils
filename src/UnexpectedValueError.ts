@@ -1,6 +1,6 @@
-import { ResultError } from "./ResultError";
+import { BaseError } from "./BaseError";
 
-export class UnexpectedValueError<In, V> extends ResultError {
+export class UnexpectedValueError<In, V> extends BaseError {
   constructor(
     public readonly expected: V,
     public readonly actual: In,

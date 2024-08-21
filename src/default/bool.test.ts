@@ -4,7 +4,7 @@ import { Encoder } from "../Encoder";
 import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiError } from "../EndOfInputError";
 
 describe("bool", () => {
   const tests = [
@@ -12,7 +12,7 @@ describe("bool", () => {
     { v: true, b: "f5" },
     { v: 1, ee: new TypeMismatchError("boolean", "1") },
     { b: "f97e00", de: new TypeMismatchError("boolean", "f16") },
-    { b: "", de: EOI_ERR.error },
+    { b: "", de: getEoiError() },
   ];
 
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de == null))(
@@ -25,7 +25,7 @@ describe("bool", () => {
       } else {
         expect(res).toBe(v);
       }
-    },
+    }
   );
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de != null))(
     "fails to decodes $b => $de",
@@ -34,7 +34,7 @@ describe("bool", () => {
       const res = decoder.decode(bool);
       expect(res.ok()).toBe(false);
       expect(!res.ok() && res.error).toEqual(de);
-    },
+    }
   );
   it.each(tests.filter((e) => e.ee == null && "v" in e))(
     "correctly encodes $v => $b",
@@ -42,7 +42,7 @@ describe("bool", () => {
       const e = new Encoder();
       e.encode(bool, v as any).unwrap();
       expect(hex(e.finish())).toBe(b);
-    },
+    }
   );
   it.each(tests.filter((e) => "v" in e && e.ee != null))(
     "fails to encode $v => $ee",
@@ -51,6 +51,6 @@ describe("bool", () => {
       const res = e.encode(bool, v as any);
       expect(!res.ok()).toBe(true);
       expect(!res.ok() && res.error).toEqual(ee);
-    },
+    }
   );
 });

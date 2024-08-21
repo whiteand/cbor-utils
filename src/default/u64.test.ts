@@ -5,7 +5,7 @@ import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiError } from "../EndOfInputError";
 
 describe("u64", () => {
   const tests = [
@@ -14,7 +14,7 @@ describe("u64", () => {
     { v: 2n ** 64n - 1n, b: "1bffffffffffffffff" },
     { v: 2n ** 64n, ee: new OverflowError(2n ** 64n - 1n, 2n ** 64n) },
     { b: "f97e00", de: new TypeMismatchError("uint", "f16") },
-    { b: "", de: EOI_ERR.error },
+    { b: "", de: getEoiError() },
   ];
 
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de == null))(
@@ -27,7 +27,7 @@ describe("u64", () => {
       } else {
         expect(res).toBe(v);
       }
-    },
+    }
   );
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de != null))(
     "fails to decodes $b => $de",
@@ -36,7 +36,7 @@ describe("u64", () => {
       const res = decoder.decode(u64);
       expect(res.ok()).toBe(false);
       expect(!res.ok() && res.error).toEqual(de);
-    },
+    }
   );
   it.each(tests.filter((e) => e.ee == null && "v" in e))(
     "correctly encodes $v => $b",
@@ -44,7 +44,7 @@ describe("u64", () => {
       const e = new Encoder();
       e.encode(u64, v as any).unwrap();
       expect(hex(e.finish())).toBe(b);
-    },
+    }
   );
   it.each(tests.filter((e) => "v" in e && e.ee != null))(
     "fails to encode $v => $ee",
@@ -53,6 +53,6 @@ describe("u64", () => {
       const res = e.encode(u64, v as any);
       expect(!res.ok()).toBe(true);
       expect(!res.ok() && res.error).toEqual(ee);
-    },
+    }
   );
 });

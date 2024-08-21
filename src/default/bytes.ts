@@ -8,12 +8,12 @@ import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
-import { success } from "../success";
+import { getVoidOk } from "../getVoidOk";
 import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
 import { getJsType } from "../utils/getJsType";
 import { concatBytesOfLength } from "../utils/concatBytes";
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { getEoiResult, EndOfInputError } from "../EndOfInputError";
 import { done } from "../utils/done";
 
 function decodeIndefiniteBytes(
@@ -38,7 +38,7 @@ function decodeIndefiniteBytes(
 function decodeBytes(
   d: IDecoder
 ): Result<Uint8Array, EndOfInputError | TypeMismatchError> {
-  if (done(d)) return EOI_ERR;
+  if (done(d)) return getEoiResult();
   const marker = d.buf[d.ptr];
   if (getType(marker) !== BYTES_TYPE) {
     return new TypeMismatchError(
@@ -65,7 +65,7 @@ function encodeBytes(
   const res = writeTypeAndArg(e, BYTES_TYPE, v.length);
   if (!res.ok()) return res;
   e.writeSlice(v);
-  return success;
+  return getVoidOk();
 }
 
 /**
@@ -73,11 +73,9 @@ function encodeBytes(
  */
 export const bytes: CborType<
   Uint8Array,
+  Uint8Array,
   OverflowError,
   DecodingError,
   unknown,
   unknown
-> = new CborType<Uint8Array, OverflowError, DecodingError, unknown, unknown>(
-  encodeBytes,
-  decodeBytes
-);
+> = CborType.builder().encode(encodeBytes).decode(decodeBytes).build();

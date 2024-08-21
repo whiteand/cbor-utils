@@ -9,19 +9,26 @@ import { decode } from "./decode";
 
 describe("base", () => {
   it("works", () => {
-    const two = CborType.from(
-      (value: 2, e) => u8.encode(2, e),
-      (d): Result<2, UnexpectedValueError<number, 2> | DecodingError> => {
-        const res = u8.decode(d);
-        if (!res.ok()) return res;
-        if (res.value !== 2)
-          return new UnexpectedValueError(2, res.value).err();
-        return ok(2);
-      }
-    );
+    const two = CborType.builder()
+      .encode((value: 2, e) => u8.encode(2, e))
+      .decode(
+        (d): Result<2, UnexpectedValueError<number, 2> | DecodingError> => {
+          const res = u8.decode(d);
+          if (!res.ok()) return res;
+          if (res.value !== 2)
+            return new UnexpectedValueError(2, res.value).err();
+          return ok(2);
+        }
+      )
+      .nullable()
+      .build();
+    console.log("here");
     const encoded = encode((e) => two.encode(2, e));
+    console.log("here 2");
     expect(encoded).toEqual(new Uint8Array([2]));
+    console.log("here 3");
     const decoded = decode(encoded, (d) => two.decode(d)).unwrap();
+    console.log("here 4");
     expect(decoded).toBe(2);
   });
 });

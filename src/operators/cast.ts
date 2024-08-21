@@ -1,5 +1,5 @@
 import { CborType } from "../base";
-import { ICborType } from "../types";
+import { ICborTypeCodec } from "../types";
 
 /**
  *
@@ -13,15 +13,15 @@ import { ICborType } from "../types";
  *
  * @returns an operator that casts a type to a more specific type
  */
-export function cast<From, To extends From>(): <
+export function cast<FromE, ToE extends FromE, FromD = FromE, ToD = ToE>(): <
   EE extends Error,
   DE extends Error,
   EC,
   DC
 >(
-  ty: ICborType<From, EE, DE, EC, DC>
-) => CborType<To, EE, DE, EC, DC> {
+  ty: ICborTypeCodec<FromE, FromD, EE, DE, EC, DC>
+) => CborType<ToE, ToD, EE, DE, EC, DC> {
   return <EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborType<From, EE, DE, EC, DC>
-  ) => CborType.from(ty as unknown as CborType<To, EE, DE, EC, DC>);
+    ty: ICborTypeCodec<FromE, FromD, EE, DE, EC, DC>
+  ) => CborType.from(ty as unknown as CborType<ToE, ToD, EE, DE, EC, DC>);
 }

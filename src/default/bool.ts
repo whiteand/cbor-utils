@@ -1,11 +1,11 @@
-import { ok } from "resultra";
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { ok, Result } from "resultra";
+import { getEoiResult, EndOfInputError } from "../EndOfInputError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { CborType } from "../base";
 import { done } from "../utils/done";
-import { success } from "../success";
+import { getVoidOk } from "../getVoidOk";
 import { getInfo } from "../marker";
 
 /**
@@ -13,28 +13,23 @@ import { getInfo } from "../marker";
  */
 export const bool: CborType<
   boolean,
-  TypeMismatchError,
-  EndOfInputError | TypeMismatchError,
-  unknown,
-  unknown
-> = new CborType<
   boolean,
   TypeMismatchError,
   EndOfInputError | TypeMismatchError,
   unknown,
   unknown
->(
-  (v, e) => {
+> = CborType.builder()
+  .encode((v: boolean, e) => {
     if (typeof v !== "boolean") {
       return new TypeMismatchError("boolean", String(v)).err();
     }
 
     e.write(SPECIAL_TYPE_MASK | (v ? 21 : 20));
-    return success;
-  },
-  (d) => {
+    return getVoidOk();
+  })
+  .decode((d): Result<boolean, EndOfInputError | TypeMismatchError> => {
     if (done(d)) {
-      return EOI_ERR;
+      return getEoiResult();
     }
     const m = d.buf[d.ptr++];
     switch (getInfo(m)) {
@@ -49,5 +44,5 @@ export const bool: CborType<
           getTypeString(d.buf[d.ptr])
         ).err();
     }
-  }
-);
+  })
+  .build();

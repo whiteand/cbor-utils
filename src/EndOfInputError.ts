@@ -1,10 +1,11 @@
-import { ResultError } from "./ResultError";
+import { BaseError } from "./BaseError";
+import { singleton } from "./singleton";
 
-export class EndOfInputError extends ResultError {
+export class EndOfInputError extends BaseError {
   constructor() {
     super("End of input");
   }
 }
 
-export const EOI = new EndOfInputError();
-export const EOI_ERR = EOI.err();
+export const getEoiError = singleton(() => new EndOfInputError());
+export const getEoiResult = singleton(() => getEoiError().err());

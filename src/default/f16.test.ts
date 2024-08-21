@@ -35,17 +35,17 @@ describe("f16", () => {
   it("fails to encode too large numbers", () => {
     const e = new Encoder();
     expect(() =>
-      e.encode(f16, 65505).unwrap(),
+      e.encode(f16, 65505).unwrap()
     ).toThrowErrorMatchingInlineSnapshot(
-      `[Error: Expected value to be <= 65504, but got 65505]`,
+      `[Error: Expected value to be <= 65504, but got 65505]`
     );
   });
   it("fails to encode too much negative numbers", () => {
     const e = new Encoder();
     expect(() =>
-      e.encode(f16, -65505).unwrap(),
+      e.encode(f16, -65505).unwrap()
     ).toThrowErrorMatchingInlineSnapshot(
-      `[Error: Expected value to be >= -65504, but got -65505]`,
+      `[Error: Expected value to be >= -65504, but got -65505]`
     );
   });
   it("rounds small positive numbers to 0", () => {

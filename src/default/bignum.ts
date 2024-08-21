@@ -35,6 +35,7 @@ function bigintToBe(b: bigint) {
  */
 export const bignum: CborType<
   bigint,
+  bigint,
   TypeMismatchError | OverflowError,
   DecodingError | UnexpectedValueError<string, string>,
   unknown,
@@ -42,13 +43,15 @@ export const bignum: CborType<
 > = bytes.pipe(
   tagged(),
   flatMap(
-    (v: bigint): Result<TaggedDataItem<Uint8Array>, TypeMismatchError> => {
-      if (typeof v !== "bigint")
-        return new TypeMismatchError("bigint", typeof v).err();
-      return ok(
-        new TaggedDataItem(v >= 0n ? 2 : 3, bigintToBe(v >= 0n ? v : -1n - v))
-      );
-    },
+    (v: bigint): Result<TaggedDataItem<Uint8Array>, TypeMismatchError> =>
+      typeof v !== "bigint"
+        ? new TypeMismatchError("bigint", typeof v).err()
+        : ok(
+            new TaggedDataItem(
+              v >= 0n ? 2 : 3,
+              bigintToBe(v >= 0n ? v : -1n - v)
+            )
+          ),
     (t: TaggedDataItem<Uint8Array>) => {
       const tag = Number(t.tag);
 

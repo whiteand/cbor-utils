@@ -1,6 +1,6 @@
 import { Result, err } from "resultra";
 import { DecodingError } from "../DecodingError";
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { getEoiResult, EndOfInputError } from "../EndOfInputError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
 import {
@@ -18,8 +18,7 @@ import { getInfo, getType } from "../marker";
 import { array } from "../operators/array";
 import { tagged } from "../operators/tagged";
 import { or } from "../operators/or";
-import { decodeSymbol, encodeSymbol } from "../traits";
-import { IDecodableType, IDecoder, IEncodableType, IEncoder } from "../types";
+import { IDecodable, IDecoder, IEncodable, IEncoder } from "../types";
 import { DataItem, Simple, TaggedDataItem } from "./DataItem";
 import { bool } from "./bool";
 import { bytes } from "./bytes";
@@ -40,62 +39,48 @@ import { MAX_U128 } from "../limits";
 import { OverflowError } from "../OverflowError";
 import { InvalidCborError } from "../InvalidCborError";
 
-function dec<T, E extends Error>(
-  t: IDecodableType<T, E>,
-  d: IDecoder
-): Result<T, E> {
-  return t[decodeSymbol](d, null);
-}
-function enc<T, E extends Error>(
-  t: IEncodableType<T, E, unknown>,
-  v: T,
-  e: IEncoder
-): Result<void, E> {
-  return t[encodeSymbol](v, e, null);
-}
-
 export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
   const p = d.ptr;
   if (p >= d.buf.length) {
-    return EOI_ERR;
+    return getEoiResult();
   }
   const m = d.buf[p];
   const t = getType(m);
   switch (t) {
     case NUMBER_TYPE:
-      return dec(uint, d);
+      return uint.decode(d, null);
     case ARRAY_TYPE:
-      return dec(anyArray, d);
+      return anyArray.decode(d, null);
     case STRING_TYPE:
-      return dec(str, d);
+      return str.decode(d, null);
     case MAP_TYPE:
-      return dec(anyMap, d);
+      return anyMap.decode(d, null);
     case NEGATIVE_INT_TYPE:
-      return dec(nint, d);
+      return nint.decode(d, null);
     case BYTES_TYPE:
-      return dec(bytes, d);
+      return bytes.decode(d, null);
     case SPECIAL_TYPE: {
       const info = getInfo(m);
       switch (info) {
         case 20:
         case 21:
-          return dec(bool, d);
+          return bool.decode(d, null);
         case 22:
-          return dec(nullType, d);
+          return nullType.decode(d, null);
         case 23:
-          return dec(undefinedType, d);
+          return undefinedType.decode(d, null);
         case 25: {
-          return dec(f16, d);
+          return f16.decode(d, null);
         }
         case 26: {
-          return dec(f32, d);
+          return f32.decode(d, null);
         }
         case 27: {
-          return dec(f64, d);
+          return f64.decode(d, null);
         }
         default: {
           if (info < 20 || info === 24) {
-            return dec(simple, d);
+            return simple.decode(d, null);
           }
           return new InvalidCborError(
             m,
@@ -109,26 +94,26 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
       const info = getInfo(m);
       switch (info) {
         case 0:
-          return dec(dateTimeString, d);
+          return dateTimeString.decode(d, null);
         case 1:
-          return dec(epochTime, d);
+          return epochTime.decode(d, null);
         case 2:
         case 3:
-          return dec(bignum, d);
+          return bignum.decode(d, null);
         case 24: {
-          if (d.ptr + 1 >= d.buf.length) return EOI_ERR;
+          if (d.ptr + 1 >= d.buf.length) return getEoiResult();
           const tag = d.buf[d.ptr + 1];
           switch (tag) {
             case 32:
-              return dec(uri, d);
+              return uri.decode(d, null);
             case 24:
-              return dec(cborBytes, d);
+              return cborBytes.decode(d, null);
             default:
-              return dec(taggedAny, d);
+              return taggedAny.decode(d, null);
           }
         }
         default:
-          return dec(taggedAny, d);
+          return taggedAny.decode(d, null);
       }
     }
 
@@ -139,12 +124,12 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
 
 function encodeBigInt(b: bigint, e: IEncoder): Result<void, OverflowError> {
   if (b > MAX_U128 || b < -MAX_U128 - 1n) {
-    return enc(bignum, b, e);
+    return bignum.encode(b, e, null);
   }
   if (b >= 0n) {
-    return enc(uint, b, e);
+    return uint.encode(b, e, null);
   }
-  return enc(nint, b, e);
+  return nint.encode(b, e, null);
 }
 function encodeAny(
   value: Readonly<DataItem>,
@@ -154,37 +139,37 @@ function encodeAny(
     if (Number.isInteger(value)) {
       return encodeBigInt(BigInt(value), e);
     }
-    return enc(f64, value, e);
+    return f64.encode(value, e, null);
   }
   if (typeof value === "bigint") {
     return encodeBigInt(BigInt(value), e);
   }
   if (typeof value === "string") {
-    return enc(str, value, e);
+    return str.encode(value, e, null);
   }
   if (typeof value === "boolean") {
-    return enc(bool, value, e);
+    return bool.encode(value, e, null);
   }
   if (value === null) {
-    return enc(nullType, value, e);
+    return nullType.encode(value, e, null);
   }
   if (value === undefined) {
-    return enc(undefinedType, value, e);
+    return undefinedType.encode(value, e, null);
   }
   if (value instanceof Uint8Array) {
-    return enc(bytes, value, e);
+    return bytes.encode(value, e, null);
   }
   if (Array.isArray(value)) {
-    return enc(anyArray, value, e);
+    return anyArray.encode(value, e, null);
   }
   if (value instanceof Map) {
-    return enc(anyMap, value, e);
+    return anyMap.encode(value, e, null);
   }
   if (value instanceof Simple) {
-    return enc(simple, value, e);
+    return simple.encode(value, e, null);
   }
   if (value instanceof TaggedDataItem) {
-    return enc(taggedAny, value, e);
+    return taggedAny.encode(value, e, null);
   }
   return err(
     new TypeMismatchError(
@@ -218,18 +203,13 @@ function encodeAny(
  * ```
  */
 export const any: CborType<
+  Readonly<DataItem>,
   DataItem,
   OverflowError | TypeMismatchError,
   DecodingError,
   unknown,
   unknown
-> = new CborType<
-  DataItem,
-  OverflowError | TypeMismatchError,
-  DecodingError,
-  unknown,
-  unknown
->(encodeAny, decodeAny);
+> = CborType.builder().encode(encodeAny).decode(decodeAny).nullable().build();
 
 export const anyArray = any.pipe(array());
 export const taggedAny = any.pipe(tagged());

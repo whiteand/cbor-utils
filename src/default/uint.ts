@@ -1,5 +1,5 @@
-import { ok } from "resultra";
-import { DecodingError } from "../DecodingError";
+import { ok, Result } from "resultra";
+import { EndOfInputError, getEoiResult } from "../EndOfInputError";
 import { InvalidCborError } from "../InvalidCborError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
@@ -8,9 +8,9 @@ import { NUMBER_TYPE } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
-import { writeTypeAndArg } from "../writeTypeAndArg";
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { IDecoder, IEncoder } from "../types";
 import { done } from "../utils/done";
+import { writeTypeAndArg } from "../writeTypeAndArg";
 
 /**
  * A CBOR type that encodes and decodes unsigned integers
@@ -23,37 +23,37 @@ import { done } from "../utils/done";
  */
 export const uint: CborType<
   number | bigint,
-  OverflowError | TypeMismatchError,
-  EndOfInputError | TypeMismatchError | InvalidCborError,
-  unknown,
-  unknown
-> = new CborType<
   number | bigint,
   OverflowError | TypeMismatchError,
   EndOfInputError | TypeMismatchError | InvalidCborError,
   unknown,
   unknown
->(
-  (v, e) => {
-    if (typeof v !== "number" && typeof v !== "bigint") {
-      return new TypeMismatchError("number | bigint", typeof v).err();
+> = CborType.builder()
+  .encode(
+    (
+      v: number | bigint,
+      e: IEncoder
+    ): Result<void, OverflowError | TypeMismatchError> => {
+      return typeof v !== "number" && typeof v !== "bigint"
+        ? new TypeMismatchError("number | bigint", typeof v).err()
+        : writeTypeAndArg(e, NUMBER_TYPE, v);
     }
-    return writeTypeAndArg(e, NUMBER_TYPE, v);
-  },
-  (d) => {
-    if (done(d)) return EOI_ERR;
-    const marker = d.buf[d.ptr];
-    if (getType(marker) !== NUMBER_TYPE) {
-      return new TypeMismatchError("uint", getTypeString(marker)).err();
+  )
+  .decode(
+    (
+      d: IDecoder
+    ): Result<
+      number | bigint,
+      EndOfInputError | TypeMismatchError | InvalidCborError
+    > => {
+      if (done(d)) return getEoiResult();
+      const marker = d.buf[d.ptr];
+      if (getType(marker) !== NUMBER_TYPE) {
+        return new TypeMismatchError("uint", getTypeString(marker)).err();
+      }
+      return readArg(d).andThen((v) =>
+        v == null ? new InvalidCborError(marker, d.ptr).err() : ok(v)
+      );
     }
-    const argRes = readArg(d);
-    if (!argRes.ok()) {
-      return argRes;
-    }
-    const v = argRes.value;
-    if (v == null) {
-      return new InvalidCborError(marker, d.ptr).err();
-    }
-    return ok(v);
-  }
-);
+  )
+  .build();

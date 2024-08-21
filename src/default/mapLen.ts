@@ -8,7 +8,7 @@ import { getType } from "../marker";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { getTypeString } from "../getTypeString";
 import { readArg } from "../readArg";
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { getEoiResult, EndOfInputError } from "../EndOfInputError";
 import { done } from "../utils/done";
 
 /**
@@ -94,20 +94,21 @@ import { done } from "../utils/done";
  */
 export const mapLen: CborType<
   number | bigint | null,
+  number | bigint | null,
   OverflowError,
   EndOfInputError,
   unknown,
   unknown
-> = CborType.from(
-  (v: bigint | number | null, e: IEncoder): Result<void, OverflowError> => {
-    return writeTypeAndArg(e, MAP_TYPE, v);
-  },
-  (d: IDecoder) => {
-    if (done(d)) return EOI_ERR;
+> = CborType.builder()
+  .encode(
+    (v: bigint | number | null, e: IEncoder): Result<void, OverflowError> =>
+      writeTypeAndArg(e, MAP_TYPE, v)
+  )
+  .decode((d: IDecoder) => {
+    if (done(d)) return getEoiResult();
     const m = d.buf[d.ptr];
-    if (getType(m) !== MAP_TYPE) {
-      return new TypeMismatchError("map", getTypeString(m)).err();
-    }
-    return readArg(d);
-  }
-);
+    return getType(m) !== MAP_TYPE
+      ? new TypeMismatchError("map", getTypeString(m)).err()
+      : readArg(d);
+  })
+  .build();

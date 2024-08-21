@@ -1,11 +1,11 @@
 import { ok } from "resultra";
 import { CborType } from "../base";
-import { success } from "../success";
+import { getVoidOk } from "../getVoidOk";
 
 /**
  * A CBOR type that does nothing on encode and decodes `null`
  */
-export const emptyType = new CborType<null, never, never, unknown, unknown>(
-  () => success,
-  () => ok(null)
-);
+export const emptyType = CborType.builder()
+  .encode(getVoidOk)
+  .decode(() => ok(null))
+  .build();

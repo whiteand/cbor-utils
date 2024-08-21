@@ -8,12 +8,12 @@ import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
-import { success } from "../success";
+import { getVoidOk } from "../getVoidOk";
 import { readSlice } from "./readSlice";
 import { IDecoder, IEncoder } from "../types";
 import { fromUtf8, utf8 } from "../utils/utf8";
 import { InvalidCborError } from "../InvalidCborError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiResult } from "../EndOfInputError";
 import { done } from "../utils/done";
 
 function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
@@ -34,7 +34,7 @@ function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
 }
 
 function decodeString(d: IDecoder): Result<string, DecodingError> {
-  if (done(d)) return EOI_ERR;
+  if (done(d)) return getEoiResult();
   const p = d.ptr;
   const marker = d.buf[p];
   if (getType(marker) !== STRING_TYPE) {
@@ -69,7 +69,7 @@ function encodeString(
   const res = writeTypeAndArg(e, STRING_TYPE, bytes.length);
   if (!res.ok()) return res;
   e.writeSlice(bytes);
-  return success;
+  return getVoidOk();
 }
 
 /**
@@ -77,14 +77,9 @@ function encodeString(
  */
 export const str: CborType<
   string,
-  OverflowError | TypeMismatchError,
-  DecodingError,
-  unknown,
-  unknown
-> = new CborType<
   string,
   OverflowError | TypeMismatchError,
   DecodingError,
   unknown,
   unknown
->(encodeString, decodeString);
+> = CborType.builder().encode(encodeString).decode(decodeString).build();

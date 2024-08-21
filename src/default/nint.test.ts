@@ -4,7 +4,7 @@ import { Encoder } from "../Encoder";
 import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiError } from "../EndOfInputError";
 import { OverflowError } from "../OverflowError";
 import { UnderflowError } from "../UnderflowError";
 
@@ -26,7 +26,7 @@ describe("nint", () => {
     { v: Infinity, ee: new TypeMismatchError("negative-int", "f64") },
     { v: -Infinity, ee: new TypeMismatchError("negative-int", "f64") },
     { b: "f97e00", de: new TypeMismatchError("negative-int", "f16") },
-    { b: "", de: EOI_ERR.error },
+    { b: "", de: getEoiError() },
   ];
 
   const ty = nint;
@@ -41,7 +41,7 @@ describe("nint", () => {
       } else {
         expect(res).toEqual(v);
       }
-    },
+    }
   );
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de != null))(
     "fails to decodes $b => $de",
@@ -50,7 +50,7 @@ describe("nint", () => {
       const res = decoder.decode(ty);
       expect(res.ok()).toBe(false);
       expect(!res.ok() && res.error).toEqual(de);
-    },
+    }
   );
   it.each(tests.filter((e) => e.ee == null && "v" in e))(
     "correctly encodes $v => $b",
@@ -58,7 +58,7 @@ describe("nint", () => {
       const e = new Encoder();
       e.encode(ty, v as any).unwrap();
       expect(hex(e.finish())).toBe(b);
-    },
+    }
   );
   it.each(tests.filter((e) => "v" in e && e.ee != null))(
     "fails to encode $v => $ee",
@@ -67,6 +67,6 @@ describe("nint", () => {
       const res = e.encode(ty, v as any);
       expect(!res.ok()).toBe(true);
       expect(!res.ok() && res.error).toEqual(ee);
-    },
+    }
   );
 });

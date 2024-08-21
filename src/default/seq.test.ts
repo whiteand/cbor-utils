@@ -6,7 +6,7 @@ import { Encoder } from "../Encoder";
 import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiError } from "../EndOfInputError";
 
 describe("seq", () => {
   const tests = [
@@ -14,8 +14,8 @@ describe("seq", () => {
     { v: [0, 0, 1], ee: new TypeMismatchError("array[2]", "array[3]") },
     { v: 1, ee: new TypeMismatchError("array[2]", "Number") },
     { b: "00a0", de: new TypeMismatchError("uint", "map") },
-    { b: "00", de: EOI_ERR.error },
-    { b: "", de: EOI_ERR.error },
+    { b: "00", de: getEoiError() },
+    { b: "", de: getEoiError() },
   ];
 
   const ty = seq([u8, u8]);

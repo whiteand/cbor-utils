@@ -4,19 +4,30 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { UnexpectedValueError } from "../UnexpectedValueError";
 import { CborType } from "../base";
 import { seq } from "./seq";
-import { decodeSymbol, encodeSymbol } from "../traits";
-import { DecodeError, EncodeError, EncodedType, ICborType } from "../types";
+import {
+  DecodeError,
+  DecodedType,
+  EncodeError,
+  EncodedType,
+  ICborTypeCodec,
+  IDecoder,
+  IEncoder,
+} from "../types";
 import { TupleVals } from "../utils/TupleVals";
 import { arrayLen } from "./arrayLen";
+import { Result } from "resultra";
 
-export type InferTupleType<TS extends readonly ICborType[]> = {
+export type InferEncodedTupleType<TS extends readonly ICborTypeCodec[]> = {
   -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
 };
+export type InferDecodedTupleType<TS extends readonly ICborTypeCodec[]> = {
+  -readonly [ind in keyof TS]: DecodedType<TS[ind]>;
+};
 
-type InferTupleEE<TS extends readonly ICborType[]> = TupleVals<{
+type InferTupleEE<TS extends readonly ICborTypeCodec[]> = TupleVals<{
   -readonly [ind in keyof TS]: EncodeError<TS[ind]>;
 }>;
-type InferTupleDE<TS extends readonly ICborType[]> = TupleVals<{
+type InferTupleDE<TS extends readonly ICborTypeCodec[]> = TupleVals<{
   -readonly [ind in keyof TS]: DecodeError<TS[ind]>;
 }>;
 
@@ -42,11 +53,12 @@ type InferLen<TS extends readonly any[]> = TS["length"];
 export function tuple<
   const EC,
   const DC,
-  const Types extends readonly ICborType<any, any, any, EC, DC>[]
+  const Types extends readonly ICborTypeCodec[]
 >(
   types: Types
 ): CborType<
-  InferTupleType<Types>,
+  InferEncodedTupleType<Types>,
+  InferDecodedTupleType<Types>,
   InferTupleEE<Types> | TypeMismatchError,
   InferTupleDE<Types> | EndOfInputError | TypeMismatchError | InvalidCborError,
   EC,
@@ -54,32 +66,41 @@ export function tuple<
 > {
   const n = types.length as InferLen<Types>;
   const s = seq<EC, DC, Types>(types);
-  return new CborType<
-    InferTupleType<Types>,
-    InferTupleEE<Types> | TypeMismatchError,
-    | InferTupleDE<Types>
-    | EndOfInputError
-    | TypeMismatchError
-    | InvalidCborError,
-    EC,
-    DC
-  >(
-    (v, e, ctx) => {
-      const res = arrayLen.encode(n, e);
-      if (!res.ok()) return res;
-      return s[encodeSymbol](v, e, ctx);
-    },
-    (d, ctx) => {
-      const actualN = arrayLen.decode(d);
-      if (!actualN.ok()) return actualN;
-      if (actualN.value !== n) {
-        return new UnexpectedValueError(
-          n,
-          actualN.value,
-          "tuple length mismatch"
-        ).err();
+
+  return CborType.builder()
+    .encode(
+      (
+        v: InferEncodedTupleType<Types>,
+        e: IEncoder,
+        ctx: EC
+      ): Result<void, InferTupleEE<Types> | TypeMismatchError> =>
+        arrayLen.encode(n, e).andThen(() => s.encode(v, e, ctx)) as Result<
+          void,
+          InferTupleEE<Types> | TypeMismatchError
+        >
+    )
+    .decode(
+      (
+        d: IDecoder,
+        ctx: DC
+      ): Result<
+        InferDecodedTupleType<Types>,
+        | InferTupleDE<Types>
+        | EndOfInputError
+        | TypeMismatchError
+        | InvalidCborError
+      > => {
+        const actualN = arrayLen.decode(d);
+        if (!actualN.ok()) return actualN;
+        if (actualN.value !== n) {
+          return new UnexpectedValueError(
+            n,
+            actualN.value,
+            "tuple length mismatch"
+          ).err();
+        }
+        return s.decode(d, ctx);
       }
-      return s[decodeSymbol](d, ctx);
-    }
-  );
+    )
+    .build();
 }

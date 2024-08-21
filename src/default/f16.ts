@@ -1,5 +1,5 @@
 import { ok, Result } from "resultra";
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { getEoiResult, EndOfInputError } from "../EndOfInputError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
@@ -7,7 +7,7 @@ import { SPECIAL_TYPE, SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
-import { success } from "../success";
+import { getVoidOk } from "../getVoidOk";
 import { hex } from "../utils/hex";
 import { UnderflowError } from "../UnderflowError";
 import { done } from "../utils/done";
@@ -86,7 +86,7 @@ function encodeF16Parts(
   e.write(SPECIAL_TYPE_MASK | 25)
     .write(a)
     .write(b);
-  return success;
+  return getVoidOk();
 }
 
 // f97e00
@@ -138,7 +138,7 @@ function encodeF16(
 function decodeHalfFloat(
   d: IDecoder
 ): Result<number, TypeMismatchError | EndOfInputError> {
-  if (done(d)) return EOI_ERR;
+  if (done(d)) return getEoiResult();
   const m = d.buf[d.ptr];
   const t = getType(m);
   if (t !== SPECIAL_TYPE || getInfo(m) !== 25) {
@@ -146,7 +146,7 @@ function decodeHalfFloat(
   }
 
   if (d.ptr + 2 >= d.buf.length) {
-    return EOI_ERR;
+    return getEoiResult();
   }
   d.ptr++;
   let a = d.buf[d.ptr++];
@@ -179,11 +179,9 @@ function decodeHalfFloat(
  */
 export const f16: CborType<
   number,
+  number,
   OverflowError,
   TypeMismatchError,
   unknown,
   unknown
-> = new CborType<number, OverflowError, TypeMismatchError, unknown, unknown>(
-  encodeF16,
-  decodeHalfFloat
-);
+> = CborType.builder().encode(encodeF16).decode(decodeHalfFloat).build();

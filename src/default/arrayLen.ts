@@ -1,4 +1,5 @@
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { Result } from "resultra";
+import { getEoiResult, EndOfInputError } from "../EndOfInputError";
 import { InvalidCborError } from "../InvalidCborError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
@@ -79,25 +80,29 @@ import { writeTypeAndArg } from "../writeTypeAndArg";
  */
 export const arrayLen: CborType<
   number | bigint | null,
-  OverflowError,
-  EndOfInputError | TypeMismatchError | InvalidCborError,
-  unknown,
-  unknown
-> = new CborType<
   number | bigint | null,
   OverflowError,
   EndOfInputError | TypeMismatchError | InvalidCborError,
   unknown,
   unknown
->(
-  (len, e) => writeTypeAndArg(e, ARRAY_TYPE, len),
-  (d) => {
-    if (done(d)) return EOI_ERR;
-    const marker = d.buf[d.ptr];
-    const t = getType(marker);
-    if (t !== ARRAY_TYPE) {
-      return new TypeMismatchError("array", getTypeString(marker)).err();
+> = CborType.builder()
+  .encode((len: number | bigint | null, e) =>
+    writeTypeAndArg(e, ARRAY_TYPE, len)
+  )
+  .decode(
+    (
+      d
+    ): Result<
+      number | bigint | null,
+      EndOfInputError | TypeMismatchError | InvalidCborError
+    > => {
+      if (done(d)) return getEoiResult();
+      const marker = d.buf[d.ptr];
+      const t = getType(marker);
+      if (t !== ARRAY_TYPE) {
+        return new TypeMismatchError("array", getTypeString(marker)).err();
+      }
+      return readArg(d);
     }
-    return readArg(d);
-  }
-);
+  )
+  .build();

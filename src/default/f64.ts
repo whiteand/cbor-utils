@@ -1,13 +1,13 @@
 import { ok, Result } from "resultra";
-import { EOI_ERR, EndOfInputError } from "../EndOfInputError";
+import { EndOfInputError, getEoiResult } from "../EndOfInputError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
 import { SPECIAL_TYPE, SPECIAL_TYPE_MASK } from "../constants";
 import { getTypeString } from "../getTypeString";
+import { getVoidOk } from "../getVoidOk";
 import { getInfo, getType } from "../marker";
 import { IDecoder, IEncoder } from "../types";
-import { success } from "../success";
 import { done } from "../utils/done";
 
 function encodeF64(v: number, e: IEncoder) {
@@ -18,13 +18,13 @@ function encodeF64(v: number, e: IEncoder) {
   const bs = new Uint8Array(8);
   new DataView(bs.buffer, 0).setFloat64(0, v, false);
   e.writeSlice(bs);
-  return success;
+  return getVoidOk();
 }
 
 function decodeF64(
   d: IDecoder
 ): Result<number, TypeMismatchError | EndOfInputError> {
-  if (done(d)) return EOI_ERR;
+  if (done(d)) return getEoiResult();
   const m = d.buf[d.ptr];
   const t = getType(m);
 
@@ -33,7 +33,7 @@ function decodeF64(
   }
 
   if (d.ptr + 8 >= d.buf.length) {
-    return EOI_ERR;
+    return getEoiResult();
   }
   const res = new DataView(
     d.buf.buffer,
@@ -48,11 +48,9 @@ function decodeF64(
  */
 export const f64: CborType<
   number,
+  number,
   OverflowError,
   TypeMismatchError,
   unknown,
   unknown
-> = new CborType<number, OverflowError, TypeMismatchError, unknown, unknown>(
-  encodeF64,
-  decodeF64
-);
+> = CborType.builder().encode(encodeF64).decode(decodeF64).build();

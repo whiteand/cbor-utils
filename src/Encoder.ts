@@ -1,6 +1,5 @@
 import { Result } from "resultra";
-import { encodeSymbol } from "./traits";
-import { IEncodableType, IEncoder } from "./types";
+import { IEncodable, IEncoder } from "./types";
 
 function nextSize(current: number, minimal: number) {
   current ||= 1;
@@ -60,20 +59,20 @@ abstract class BaseEncoder {
 
 export class Encoder extends BaseEncoder implements IEncoder {
   encode<T, EE extends Error, EC>(
-    ty: IEncodableType<T, EE, EC>,
+    ty: IEncodable<T, EE, EC>,
     value: Readonly<T>,
     ...args: unknown extends EC ? [] | [EC] : [EC]
   ): Result<void, EE> {
-    return ty[encodeSymbol](value, this, (args as [EC])[0]);
+    return ty.encode(value, this, (args as [EC])[0]);
   }
 }
 
 export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
   encode<T, EE extends Error, EC>(
-    ty: IEncodableType<T, EE, EC>,
+    ty: IEncodable<T, EE, EC>,
     value: NoInfer<T>,
     ...args: unknown extends EC ? [] | [EC] : [EC]
   ): void {
-    return ty[encodeSymbol](value, this, (args as [EC])[0]).unwrap();
+    return ty.encode(value, this, (args as [EC])[0]).unwrap();
   }
 }

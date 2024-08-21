@@ -4,7 +4,7 @@ import { Encoder } from "../Encoder";
 import { describe, it, expect } from "vitest";
 import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiError } from "../EndOfInputError";
 
 describe("bignum", () => {
   const tests = [
@@ -14,7 +14,7 @@ describe("bignum", () => {
     { v: -1n, b: "c34100" },
     { v: 1, ee: new TypeMismatchError("bigint", "number") },
     { b: "f97e00", de: new TypeMismatchError("tagged", "f16") },
-    { b: "", de: EOI_ERR.error },
+    { b: "", de: getEoiError() },
   ];
 
   const ty = bignum;
@@ -29,7 +29,7 @@ describe("bignum", () => {
       } else {
         expect(res).toBe(v);
       }
-    },
+    }
   );
   it.each(tests.filter((x) => "b" in x && x.ee == null && x.de != null))(
     "fails to decodes $b => $de",
@@ -38,7 +38,7 @@ describe("bignum", () => {
       const res = decoder.decode(ty);
       expect(res.ok()).toBe(false);
       expect(!res.ok() && res.error).toEqual(de);
-    },
+    }
   );
   it.each(tests.filter((e) => e.ee == null && "v" in e))(
     "correctly encodes $v => $b",
@@ -46,7 +46,7 @@ describe("bignum", () => {
       const e = new Encoder();
       e.encode(ty, v as any).unwrap();
       expect(hex(e.finish())).toBe(b);
-    },
+    }
   );
   it.each(tests.filter((e) => "v" in e && e.ee != null))(
     "fails to encode $v => $ee",
@@ -55,6 +55,6 @@ describe("bignum", () => {
       const res = e.encode(ty, v as any);
       expect(!res.ok()).toBe(true);
       expect(!res.ok() && res.error).toEqual(ee);
-    },
+    }
   );
 });

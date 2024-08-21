@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Decoder } from "../Decoder";
 import { Encoder } from "../Encoder";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiError } from "../EndOfInputError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { fromHex, hex } from "../utils/hex";
 import { str } from "./str";
@@ -15,7 +15,7 @@ describe("str", () => {
     },
     { v: 1, ee: new TypeMismatchError("string", "number") },
     { b: "f97e00", de: new TypeMismatchError("str", "f16") },
-    { b: "", de: EOI_ERR.error },
+    { b: "", de: getEoiError() },
   ];
 
   const ty = str;

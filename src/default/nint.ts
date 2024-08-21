@@ -1,4 +1,4 @@
-import { ok } from "resultra";
+import { ok, Result } from "resultra";
 import { DecodingError } from "../DecodingError";
 import { InvalidCborError } from "../InvalidCborError";
 import { OverflowError } from "../OverflowError";
@@ -11,7 +11,7 @@ import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
 import { MAX_U128 } from "../limits";
 import { UnderflowError } from "../UnderflowError";
-import { EOI_ERR } from "../EndOfInputError";
+import { getEoiResult } from "../EndOfInputError";
 import { done } from "../utils/done";
 
 /**
@@ -24,14 +24,15 @@ import { done } from "../utils/done";
  * specification however envisions future extension of number
  * type to 128 bits.
  */
-export const nint = new CborType<
+export const nint: CborType<
+  number | bigint,
   number | bigint,
   OverflowError | TypeMismatchError,
   DecodingError,
   unknown,
   unknown
->(
-  (v, e) => {
+> = CborType.builder()
+  .encode((v: number | bigint, e) => {
     if (typeof v === "number") {
       if (!Number.isInteger(v) || !Number.isFinite(v)) {
         return new TypeMismatchError("negative-int", "f64").err();
@@ -55,9 +56,9 @@ export const nint = new CborType<
       NEGATIVE_INT_TYPE,
       typeof v === "bigint" ? -1n - v : -1 - v
     );
-  },
-  (d) => {
-    if (done(d)) return EOI_ERR;
+  })
+  .decode((d): Result<number | bigint, DecodingError> => {
+    if (done(d)) return getEoiResult();
     const marker = d.buf[d.ptr];
     if (getType(marker) !== NEGATIVE_INT_TYPE) {
       return new TypeMismatchError("negative-int", getTypeString(marker)).err();
@@ -74,5 +75,5 @@ export const nint = new CborType<
       return ok(-1n - v);
     }
     return ok(-1 - v);
-  }
-);
+  })
+  .build();
