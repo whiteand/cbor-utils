@@ -13,7 +13,7 @@ import {
 const invalid = "invalid";
 const simple = "simple";
 const reserved = "reserved";
-const TYPE_TABLE = [
+const TYPE_TABLE: [number, TypeString][] = [
   [NUMBER_TYPE_MASK | 0, "u8"],
   [NUMBER_TYPE_MASK | 25, "u16"],
   [NUMBER_TYPE_MASK | 26, "u32"],
@@ -47,7 +47,7 @@ const TYPE_TABLE = [
   [SPECIAL_TYPE_MASK | 27, "f64"],
   [SPECIAL_TYPE_MASK | 28, reserved],
   [BREAK_BYTE, "break"],
-] as const;
+];
 
 function slow(marker: number) {
   let ptr = 0;
@@ -69,7 +69,36 @@ const generateMap = (() => {
   };
 })();
 
-export type TypeString = (typeof TYPE_TABLE)[number][1];
+export type TypeString =
+  | "u8"
+  | "u16"
+  | "u32"
+  | "u64"
+  | "u128"
+  | "n8"
+  | "n16"
+  | "n32"
+  | "n64"
+  | "n128"
+  | "bytes"
+  | "string"
+  | "array"
+  | "invalid"
+  | "simple"
+  | "reserved"
+  | "map"
+  | "strtime_tag"
+  | "epochtime_tag"
+  | "ubignum_tag"
+  | "nbignum_tag"
+  | "tag"
+  | "bool"
+  | "null"
+  | "undefined"
+  | "f16"
+  | "f32"
+  | "f64"
+  | "break";
 
 export function getTypeString(marker: number): TypeString {
   return generateMap(marker)[marker] || invalid;

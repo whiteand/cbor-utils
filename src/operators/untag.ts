@@ -8,25 +8,25 @@ import { TaggedDataItem } from "../default/DataItem";
 export function untag(
   tag: number | bigint,
   name: string
-): <T, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborTypeCodec<TaggedDataItem<T>, TaggedDataItem<T>, EE, DE, EC, DC>
-) => CborType<T, T, EE, TypeMismatchError | DE, EC, DC> {
-  return <T, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborTypeCodec<TaggedDataItem<T>, TaggedDataItem<T>, EE, DE, EC, DC>
+): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborTypeCodec<TaggedDataItem<ET>, TaggedDataItem<DT>, EE, DE, EC, DC>
+) => CborType<ET, DT, EE, TypeMismatchError | DE, EC, DC> {
+  return <ET, DT, EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborTypeCodec<TaggedDataItem<ET>, TaggedDataItem<DT>, EE, DE, EC, DC>
   ) =>
     flatMap<
-      TaggedDataItem<T>,
-      T,
-      TaggedDataItem<T>,
-      T,
+      TaggedDataItem<ET>,
+      ET,
+      TaggedDataItem<DT>,
+      DT,
       never,
       TypeMismatchError,
       unknown,
       unknown
     >(
-      (v: T): Result<TaggedDataItem<T>, never> =>
+      (v: ET): Result<TaggedDataItem<ET>, never> =>
         ok(new TaggedDataItem(tag, v)),
-      (t: TaggedDataItem<T>): Result<T, TypeMismatchError> => {
+      (t: TaggedDataItem<DT>): Result<DT, TypeMismatchError> => {
         if (t.tag !== tag) {
           return new TypeMismatchError(
             name,

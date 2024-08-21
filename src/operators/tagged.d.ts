@@ -1,17 +1,16 @@
-import { Result, ok } from "resultra";
 import { CborType } from "../base";
 import { DecodingError } from "../DecodingError";
 import { TaggedDataItem } from "../default/DataItem";
 import { OverflowError } from "../OverflowError";
-import { ICborTypeCodec, IDecoder, IEncoder } from "../types";
+import { ICborTypeCodec } from "../types";
 import { UnexpectedValueError } from "../UnexpectedValueError";
 
 declare function tagged(
   tag: number | bigint
 ): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
   ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
-) => ICborTypeCodec<
-  TaggedDataItem<ET>,
+) => CborType<
+  Readonly<TaggedDataItem<ET>>,
   TaggedDataItem<DT>,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
   DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
@@ -20,8 +19,8 @@ declare function tagged(
 >;
 declare function tagged(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
   ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
-) => ICborTypeCodec<
-  TaggedDataItem<ET>,
+) => CborType<
+  Readonly<TaggedDataItem<ET>>,
   TaggedDataItem<DT>,
   EE | OverflowError,
   DE | DecodingError,
@@ -33,8 +32,8 @@ declare function tagged(
   tag?: number | bigint
 ): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
   ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
-) => ICborTypeCodec<
-  TaggedDataItem<ET>,
+) => CborType<
+  Readonly<TaggedDataItem<ET>>,
   TaggedDataItem<DT>,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
   DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>,

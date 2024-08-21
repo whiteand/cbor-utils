@@ -18,7 +18,13 @@ import { getInfo, getType } from "../marker";
 import { array } from "../operators/array";
 import { tagged } from "../operators/tagged";
 import { or } from "../operators/or";
-import { IDecodable, IDecoder, IEncodable, IEncoder } from "../types";
+import {
+  ICborTypeCodec,
+  IDecodable,
+  IDecoder,
+  IEncodable,
+  IEncoder,
+} from "../types";
 import { DataItem, Simple, TaggedDataItem } from "./DataItem";
 import { bool } from "./bool";
 import { bytes } from "./bytes";
@@ -38,6 +44,7 @@ import { mapErrors } from "../operators/mapErrors";
 import { MAX_U128 } from "../limits";
 import { OverflowError } from "../OverflowError";
 import { InvalidCborError } from "../InvalidCborError";
+import { UnexpectedValueError } from "../UnexpectedValueError";
 
 export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
   const p = d.ptr;
@@ -211,14 +218,69 @@ export const any: CborType<
   unknown
 > = CborType.builder().encode(encodeAny).decode(decodeAny).nullable().build();
 
-export const anyArray = any.pipe(array());
-export const taggedAny = any.pipe(tagged());
-export const anyMap = map(any, any);
-export const uri = str.pipe(tagged(32), untag(32, "uri"));
-export const dateTimeString = str.pipe(tagged(0), untag(0, "datetime string"));
-export const cborBytes = bytes.pipe(tagged(24), untag(24, "cbor-bytes"));
+export const anyArray: CborType<
+  readonly Readonly<DataItem>[],
+  DataItem[],
+  OverflowError | TypeMismatchError,
+  DecodingError,
+  unknown,
+  unknown
+> = any.pipe(array());
+export const taggedAny: CborType<
+  TaggedDataItem<Readonly<DataItem>>,
+  TaggedDataItem<DataItem>,
+  OverflowError | TypeMismatchError,
+  DecodingError,
+  unknown,
+  unknown
+> = any.pipe(tagged());
+export const anyMap: CborType<
+  Map<Readonly<DataItem>, Readonly<DataItem>>,
+  Map<DataItem, DataItem>,
+  OverflowError | TypeMismatchError,
+  DecodingError,
+  unknown,
+  unknown
+> = map(any, any);
+export const uri: CborType<
+  string,
+  string,
+  | TypeMismatchError
+  | OverflowError
+  | UnexpectedValueError<number | bigint, number | bigint>,
+  DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
+  unknown,
+  unknown
+> = str.pipe(tagged(32), untag(32, "uri"));
 
-export const epochTime = or(uint, f64, f32, f16).pipe(
+export const dateTimeString: CborType<
+  string,
+  string,
+  | OverflowError
+  | TypeMismatchError
+  | UnexpectedValueError<number | bigint, number | bigint>,
+  DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
+  unknown,
+  unknown
+> = str.pipe(tagged(0), untag(0, "datetime string"));
+
+export const cborBytes: CborType<
+  Uint8Array,
+  Uint8Array,
+  OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
+  DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
+  unknown,
+  unknown
+> = bytes.pipe(tagged(24), untag(24, "cbor-bytes"));
+
+export const epochTime: CborType<
+  number | bigint,
+  number | bigint,
+  OverflowError | TypeMismatchError,
+  DecodingError,
+  unknown,
+  unknown
+> = or(uint, f64, f32, f16).pipe(
   mapErrors(
     (_, v) => new TypeMismatchError("epoch time", String(v)),
     (_, m) => new TypeMismatchError("epoch time", getTypeString(m))

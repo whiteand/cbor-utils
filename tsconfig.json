@@ -5,7 +5,8 @@
         "declarationDir": "dist",
         "emitDeclarationOnly": true,
         "strict": true,
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "isolatedDeclarations": true
     },
     "include": [
         "src/index.ts"

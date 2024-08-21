@@ -1,3 +1,4 @@
+import type { Result } from "resultra";
 import { BaseError } from "./BaseError";
 import { singleton } from "./singleton";
 
@@ -7,5 +8,9 @@ export class EndOfInputError extends BaseError {
   }
 }
 
-export const getEoiError = singleton(() => new EndOfInputError());
-export const getEoiResult = singleton(() => getEoiError().err());
+export const getEoiError: () => EndOfInputError = singleton(
+  () => new EndOfInputError()
+);
+export const getEoiResult: () => Result<never, EndOfInputError> = singleton(
+  () => getEoiError().err()
+);

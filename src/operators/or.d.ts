@@ -2,6 +2,7 @@ import { Result, err } from "resultra";
 import { CborType } from "../base";
 import {
   DecodeError,
+  DecodedType,
   EncodeError,
   EncodedType,
   ICborTypeCodec,
@@ -9,17 +10,26 @@ import {
 import { BaseError } from "../BaseError";
 import { TupleVals } from "../utils/TupleVals";
 
-type InferEncodedOrType<TS extends readonly ICborTypeCodec[]> = TupleVals<{
-  [ind in keyof TS]: EncodedType<TS[ind]>;
-}>;
-type InferDecodedOrType<TS extends readonly ICborTypeCodec[]> = TupleVals<{
+type InferEncodedOrType<
+  TS extends readonly ICborTypeCodec<any, any, Error, Error, any, any>[]
+> = TupleVals<{
   [ind in keyof TS]: EncodedType<TS[ind]>;
 }>;
 
-type OrEncodeErrors<TS extends readonly ICborTypeCodec[]> = {
+type InferDecodedOrType<
+  TS extends readonly ICborTypeCodec<any, any, Error, Error, any, any>[]
+> = TupleVals<{
+  [ind in keyof TS]: DecodedType<TS[ind]>;
+}>;
+
+type OrEncodeErrors<
+  TS extends readonly ICborTypeCodec<any, any, Error, Error, any, any>[]
+> = {
   [ind in keyof TS]: EncodeError<TS[ind]>;
 };
-type OrDecodeErrors<TS extends readonly ICborTypeCodec[]> = {
+type OrDecodeErrors<
+  TS extends readonly ICborTypeCodec<any, any, Error, Error, any, any>[]
+> = {
   [ind in keyof TS]: DecodeError<TS[ind]>;
 };
 
@@ -31,7 +41,7 @@ declare class OrError<Errs extends readonly Error[]> extends BaseError {
 declare function or<
   EC,
   DC,
-  Types extends readonly ICborTypeCodec<any, any, any, any, EC, DC>[]
+  const Types extends readonly ICborTypeCodec<any, any, any, any, EC, DC>[]
 >(
   ...types: Types
 ): CborType<

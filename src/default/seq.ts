@@ -1,29 +1,30 @@
-import { ok } from "resultra";
+import { ok, Result } from "resultra";
+import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
+import { getVoidOk } from "../getVoidOk";
 import {
+  AnyCborTypeCodec,
   DecodeError,
+  DecodedType,
   EncodeError,
   EncodedType,
-  ICborTypeCodec,
   IDecoder,
   IEncoder,
 } from "../types";
-import { getJsType } from "../utils/getJsType";
-import { TypeMismatchError } from "../TypeMismatchError";
-import { getVoidOk } from "../getVoidOk";
 import { TupleVals } from "../utils/TupleVals";
+import { getJsType } from "../utils/getJsType";
 
-export type InferEncodedSeqType<TS extends readonly ICborTypeCodec[]> = {
+export type InferEncodedSeqType<TS extends readonly AnyCborTypeCodec[]> = {
   -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
 };
-export type InferDecodedSeqType<TS extends readonly ICborTypeCodec[]> = {
-  -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
+export type InferDecodedSeqType<TS extends readonly AnyCborTypeCodec[]> = {
+  -readonly [ind in keyof TS]: DecodedType<TS[ind]>;
 };
 
-type InferSeqEE<TS extends readonly ICborTypeCodec[]> = TupleVals<{
+type InferSeqEE<TS extends readonly AnyCborTypeCodec[]> = TupleVals<{
   -readonly [ind in keyof TS]: EncodeError<TS[ind]>;
 }>;
-type InferSeqDE<TS extends readonly ICborTypeCodec[]> = TupleVals<{
+type InferSeqDE<TS extends readonly AnyCborTypeCodec[]> = TupleVals<{
   -readonly [ind in keyof TS]: DecodeError<TS[ind]>;
 }>;
 
@@ -48,7 +49,7 @@ type InferSeqDE<TS extends readonly ICborTypeCodec[]> = TupleVals<{
 export function seq<
   EC,
   DC,
-  const TypesList extends readonly ICborTypeCodec<any, any, any, any, EC, DC>[]
+  const TypesList extends readonly AnyCborTypeCodec[]
 >(
   types: TypesList
 ): CborType<
@@ -62,28 +63,39 @@ export function seq<
   const n = types.length;
   const typeStr = `array[${n}]`;
   return CborType.builder()
-    .encode((v: InferEncodedSeqType<TypesList>, e: IEncoder, ctx: EC) => {
-      if (!v || typeof v.length != "number")
-        return new TypeMismatchError(typeStr, getJsType(v)).err();
-      if (v.length !== n) {
-        return new TypeMismatchError(typeStr, `array[${v.length}]`).err();
+    .encode(
+      (
+        v: InferEncodedSeqType<TypesList>,
+        e: IEncoder,
+        ctx: EC
+      ): Result<void, InferSeqEE<TypesList> | TypeMismatchError> => {
+        if (!v || typeof v.length != "number")
+          return new TypeMismatchError(typeStr, getJsType(v)).err();
+        if (v.length !== n) {
+          return new TypeMismatchError(typeStr, `array[${v.length}]`).err();
+        }
+        for (let i = 0; i < n; i++) {
+          const item = v[i];
+          const itemTy = types[i];
+          const res = itemTy.encode(item, e, ctx);
+          if (!res.ok()) return res as Result<never, InferSeqEE<TypesList>>;
+        }
+        return getVoidOk();
       }
-      for (let i = 0; i < n; i++) {
-        const item = v[i];
-        const itemTy = types[i];
-        const res = itemTy.encode(item, e, ctx);
-        if (!res.ok()) return res as InferSeqEE<TypesList>;
+    )
+    .decode(
+      (
+        d: IDecoder,
+        c: DC
+      ): Result<InferDecodedSeqType<TypesList>, InferSeqDE<TypesList>> => {
+        const tuple: unknown[] = [];
+        for (let i = 0; i < n; i++) {
+          const res = types[i].decode(d, c);
+          if (!res.ok()) return res as Result<never, InferSeqDE<TypesList>>;
+          tuple.push(res.value);
+        }
+        return ok(tuple as InferEncodedSeqType<TypesList>);
       }
-      return getVoidOk();
-    })
-    .decode((d: IDecoder, c: DC) => {
-      const tuple: unknown[] = [];
-      for (let i = 0; i < n; i++) {
-        const res = types[i].decode(d, c);
-        if (!res.ok()) return res;
-        tuple.push(res.value);
-      }
-      return ok(tuple as InferEncodedSeqType<TypesList>);
-    })
+    )
     .build();
 }

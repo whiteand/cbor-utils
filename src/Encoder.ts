@@ -23,7 +23,7 @@ abstract class BaseEncoder {
     return this.ptr;
   }
 
-  restore(value: number) {
+  restore(value: number): void {
     if (this.buf.length > value) {
       this.ptr = value;
     } else {
