@@ -53,8 +53,8 @@ Operators
 - [x] constant.ts
 - [x] mapErrors.ts
 - [x] convert.ts
-- [ ] nullable.test.ts
-- [ ] nullable.ts
+- [x] nullable.test.ts
+- [x] nullable.ts
 - [ ] or.ts
 - [ ] untag.ts
 
