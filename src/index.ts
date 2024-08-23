@@ -46,7 +46,7 @@ export {
   EncodeContext,
   EncodeError,
   EncodedType,
-  ICborTypeCodec,
+  ICborType,
   IDecodable,
   IDecoder,
   IEncodable,

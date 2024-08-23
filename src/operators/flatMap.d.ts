@@ -1,5 +1,5 @@
 import { Result } from "resultra";
-import { ICborTypeCodec, IDecoder } from "../types";
+import { ICborType, IDecoder } from "../types";
 import { CborType } from "../base";
 
 /**
@@ -30,7 +30,7 @@ declare function flatMap<
   ) => Result<NewDecodedType, NDE>,
   nullable?: boolean
 ): <EE extends Error, DE extends Error, EC extends NEC, DC extends NDC>(
-  ty: ICborTypeCodec<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
+  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
 ) => CborType<
   NewEncodedType,
   NewDecodedType,

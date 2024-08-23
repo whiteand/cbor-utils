@@ -1,5 +1,5 @@
 import { CborType } from "../base";
-import { ICborTypeCodec } from "../types";
+import { ICborType } from "../types";
 import { UnexpectedValueError } from "../UnexpectedValueError";
 
 /**
@@ -19,7 +19,7 @@ declare function constant<In, const V extends In>(
   expectedValue: V,
   isEqual?: (exp: NoInfer<V>, b: NoInfer<In>) => boolean
 ): <EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborTypeCodec<In, In, EE, DE, EC, DC>
+  ty: ICborType<In, In, EE, DE, EC, DC>
 ) => CborType<
   V,
   V,

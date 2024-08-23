@@ -2,7 +2,7 @@ import { EndOfInputError } from "../EndOfInputError";
 import { InvalidCborError } from "../InvalidCborError";
 import { OverflowError } from "../OverflowError";
 import { CborType } from "../base";
-import { ICborTypeCodec } from "../types";
+import { ICborType } from "../types";
 
 /**
  * A function that can produce a `Map` type based on the key and value types.
@@ -25,8 +25,8 @@ declare function map<
   VEC,
   VDC
 >(
-  kt: ICborTypeCodec<EK, DK, KEE, KDE, KEC, KDC>,
-  vt: ICborTypeCodec<EV, DV, VEE, VDE, VEC, VDC>
+  kt: ICborType<EK, DK, KEE, KDE, KEC, KDC>,
+  vt: ICborType<EV, DV, VEE, VDE, VEC, VDC>
 ): CborType<
   Map<EK, EV>,
   Map<DK, DV>,

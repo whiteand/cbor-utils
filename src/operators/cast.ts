@@ -1,5 +1,5 @@
 import { CborType } from "../base";
-import { ICborTypeCodec } from "../types";
+import { ICborType } from "../types";
 
 /**
  *
@@ -19,9 +19,9 @@ export function cast<FromE, ToE extends FromE, FromD = FromE, ToD = ToE>(): <
   EC,
   DC
 >(
-  ty: ICborTypeCodec<FromE, FromD, EE, DE, EC, DC>
+  ty: ICborType<FromE, FromD, EE, DE, EC, DC>
 ) => CborType<ToE, ToD, EE, DE, EC, DC> {
   return <EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborTypeCodec<FromE, FromD, EE, DE, EC, DC>
+    ty: ICborType<FromE, FromD, EE, DE, EC, DC>
   ) => CborType.from(ty as unknown as CborType<ToE, ToD, EE, DE, EC, DC>);
 }

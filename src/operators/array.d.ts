@@ -1,7 +1,7 @@
 import { CborType } from "../base";
 import { DecodingError } from "../DecodingError";
 import { OverflowError } from "../OverflowError";
-import { ICborTypeCodec } from "../types";
+import { ICborType } from "../types";
 
 /**
  * Example:
@@ -16,7 +16,7 @@ import { ICborTypeCodec } from "../types";
  * @returns An operator that creates an array type from a element type
  */
 declare function array(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
+  ty: ICborType<ET, DT, EE, DE, EC, DC>
 ) => CborType<
   readonly ET[],
   DT[],

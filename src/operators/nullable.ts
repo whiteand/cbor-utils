@@ -3,7 +3,7 @@ import { DecodingError } from "../DecodingError";
 import { CborType } from "../base";
 import { NULL_BYTE } from "../constants";
 import { getVoidOk } from "../getVoidOk";
-import { ICborTypeCodec, IDecoder, IEncoder } from "../types";
+import { ICborType, IDecoder, IEncoder } from "../types";
 
 export function nullable(): <
   ET,
@@ -13,10 +13,10 @@ export function nullable(): <
   EC,
   DC
 >(
-  ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
+  ty: ICborType<ET, DT, EE, DE, EC, DC>
 ) => CborType<ET | null, DT | null, EE, DE | DecodingError, EC, DC> {
   return <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
+    ty: ICborType<ET, DT, EE, DE, EC, DC>
   ): CborType<ET | null, DT | null, EE, DE | DecodingError, EC, DC> =>
     CborType.builder()
       .encode((value: ET | null, e: IEncoder, ctx: any): Result<void, EE> => {

@@ -1,7 +1,7 @@
 import { Result } from "resultra";
 import { NotImplementedError } from "./errors";
 import {
-  ICborTypeCodec,
+  ICborType,
   IDecoder,
   IEncoder,
   TDecodeFunction,
@@ -36,7 +36,7 @@ declare class CborTypeBuilder<
 
 declare class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
   extends Pipeable
-  implements ICborTypeCodec<ET, DT, EE, DE, EC, DC>
+  implements ICborType<ET, DT, EE, DE, EC, DC>
 {
   public nullable: boolean;
   protected constructor(
@@ -64,7 +64,7 @@ declare class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
   >;
 
   static from<ET, DT, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborTypeCodec<ET, DT, EE, DE, EC, DC>
+    ty: ICborType<ET, DT, EE, DE, EC, DC>
   ): CborType<ET, DT, EE, DE, EC, DC>;
 
   convert<NET, NDT>(

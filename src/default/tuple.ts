@@ -9,7 +9,7 @@ import {
   DecodedType,
   EncodeError,
   EncodedType,
-  ICborTypeCodec,
+  ICborType,
   IDecoder,
   IEncoder,
 } from "../types";
@@ -18,23 +18,23 @@ import { arrayLen } from "./arrayLen";
 import { Result } from "resultra";
 
 export type InferEncodedTupleType<
-  TS extends readonly ICborTypeCodec<any, any, Error, Error, any, any>[]
+  TS extends readonly ICborType<any, any, Error, Error, any, any>[]
 > = {
   -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
 };
 export type InferDecodedTupleType<
-  TS extends readonly ICborTypeCodec<any, any, Error, Error, any, any>[]
+  TS extends readonly ICborType<any, any, Error, Error, any, any>[]
 > = {
   -readonly [ind in keyof TS]: DecodedType<TS[ind]>;
 };
 
 type InferTupleEE<
-  TS extends readonly ICborTypeCodec<any, any, Error, Error, any, any>[]
+  TS extends readonly ICborType<any, any, Error, Error, any, any>[]
 > = TupleVals<{
   -readonly [ind in keyof TS]: EncodeError<TS[ind]>;
 }>;
 type InferTupleDE<
-  TS extends readonly ICborTypeCodec<any, any, Error, Error, any, any>[]
+  TS extends readonly ICborType<any, any, Error, Error, any, any>[]
 > = TupleVals<{
   -readonly [ind in keyof TS]: DecodeError<TS[ind]>;
 }>;
@@ -61,14 +61,7 @@ type InferLen<TS extends readonly any[]> = TS["length"];
 export function tuple<
   const EC,
   const DC,
-  const Types extends readonly ICborTypeCodec<
-    any,
-    any,
-    Error,
-    Error,
-    any,
-    any
-  >[]
+  const Types extends readonly ICborType<any, any, Error, Error, any, any>[]
 >(
   types: Types
 ): CborType<
