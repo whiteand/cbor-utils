@@ -22,13 +22,9 @@ describe("base", () => {
       )
       .nullable()
       .build();
-    console.log("here");
     const encoded = encode((e) => two.encode(2, e));
-    console.log("here 2");
     expect(encoded).toEqual(new Uint8Array([2]));
-    console.log("here 3");
     const decoded = decode(encoded, (d) => two.decode(d)).unwrap();
-    console.log("here 4");
     expect(decoded).toBe(2);
   });
 });

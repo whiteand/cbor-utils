@@ -51,17 +51,9 @@ CborType.from = function (ty) {
         .build();
 };
 
-Object.assign(CborType.prototype, {
-  convert(toNewDecodedValue, toOldEncodedValue) {
-    return createConvertedType(this, toNewDecodedValue, toOldEncodedValue);
-  },
-});
+CborType.prototype.convert = createConvertedType;
 
-export function createConvertedType(
-  inner,
-  toNewDecodedValue,
-  toOldEncodedValue
-) {
+function createConvertedType(toNewDecodedValue, toOldEncodedValue) {
   const obj = {
     encode(value, encoder, ctx) {
       return super.encode(toOldEncodedValue(value), encoder, ctx);
@@ -71,7 +63,7 @@ export function createConvertedType(
     },
   };
 
-  Reflect.setPrototypeOf(obj, inner);
+  Reflect.setPrototypeOf(obj, this);
 
   return obj;
 }
