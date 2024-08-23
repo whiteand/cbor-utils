@@ -1,7 +1,6 @@
 import { CborType } from "../base";
 
 export const flatMap = (newEncode, newDecode, nullable) => (ty) => {
-  const sourceType = CborType.from(ty);
   const proto = CborType.builder()
     .encode(function encode(value, e, ctx) {
       const innerValueRes = this.newEncode(value, ctx);
@@ -20,13 +19,13 @@ export const flatMap = (newEncode, newDecode, nullable) => (ty) => {
         ? this.newDecode(inner.value, d, ctx, startPosition)
         : inner;
     })
-    .nullable(nullable ?? sourceType.nullable)
+    .nullable(nullable ?? ty.nullable)
     .build();
 
   const obj = {
     newEncode,
     newDecode,
-    sourceType,
+    sourceType: ty,
   };
 
   Reflect.setPrototypeOf(obj, proto);
