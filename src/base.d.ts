@@ -2,7 +2,9 @@ import { Result } from "resultra";
 import { NotImplementedError } from "./errors";
 import {
   ICborType,
+  IDecodable,
   IDecoder,
+  IEncodable,
   IEncoder,
   TDecodeFunction,
   TEncodeFunction,
@@ -40,8 +42,8 @@ declare class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
 {
   public nullable: boolean;
   protected constructor(
-    encode: (value: ET, e: EC) => DT,
-    decode: (value: DT, d: DC) => ET,
+    encode: TEncodeFunction<ET, EE, EC>,
+    decode: TDecodeFunction<DT, DE, DC>,
     nullable: boolean
   );
 
