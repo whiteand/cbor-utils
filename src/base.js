@@ -62,18 +62,16 @@ export function createConvertedType(
   toNewDecodedValue,
   toOldEncodedValue
 ) {
-  function ConvertedType() {}
-
-  Reflect.setPrototypeOf(ConvertedType.prototype, inner);
-
-  Object.assign(ConvertedType.prototype, {
+  const obj = {
     encode(value, encoder, ctx) {
       return super.encode(toOldEncodedValue(value), encoder, ctx);
     },
     decode(decoder, ctx) {
       return super.decode(decoder, ctx).map(toNewDecodedValue);
     },
-  });
+  };
 
-  return new ConvertedType();
+  Reflect.setPrototypeOf(obj, inner);
+
+  return obj;
 }

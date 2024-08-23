@@ -42,8 +42,8 @@ declare class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
 {
   public nullable: boolean;
   protected constructor(
-    encode: TEncodeFunction<ET, EE, EC>,
-    decode: TDecodeFunction<DT, DE, DC>,
+    encode: (value: ET, e: IEncoder, ctx: EC) => Result<void, EE>,
+    decode: (d: IDecoder, ctx: DC) => Result<DT, DE>,
     nullable: boolean
   );
 
@@ -69,8 +69,8 @@ declare class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
     ty: ICborType<ET, DT, EE, DE, EC, DC>
   ): CborType<ET, DT, EE, DE, EC, DC>;
 
-  convert<NET, NDT>(
-    toNewDecodedValue: (value: DT) => NDT,
-    toOldEncodedValue: (value: NET) => ET
-  ): CborType<NET, NDT, EE, DE, EC, DC>;
+  convert<T>(
+    toNewDecodedValue: (value: DT) => T,
+    toOldEncodedValue: (value: NoInfer<T>) => ET
+  ): CborType<T, T, EE, DE, EC, DC>;
 }
