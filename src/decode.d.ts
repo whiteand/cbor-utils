@@ -17,7 +17,7 @@ type TDecodeFunction = (<T, E extends Error, C>(
   cb: (d: Decoder, ctx: C) => Result<T, E>,
   ...args: unknown extends C ? [] | [C] : [C]
 ) => Result<T, E>) & {
-  type: <T, E extends Error, C>(
+  type: <const T, const E extends Error, const C>(
     bytes: Uint8Array | IDecoder,
     ty: IDecodable<T, E, C>,
     ...args: unknown extends C ? [] | [C] : [C]

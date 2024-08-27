@@ -1,5 +1,5 @@
 import { u8 } from "./default/smallInts";
-import { describe, expect, vi } from "vitest";
+import { describe, expect } from "vitest";
 import { encode } from "./encode";
 import { decode } from "./decode";
 
