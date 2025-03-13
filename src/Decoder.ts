@@ -4,16 +4,21 @@ import { IDecodable, IDecoder } from "./types";
 /**
  * Basic class which defines buffer and pointer into the buffer.
  */
-declare abstract class BaseDecoder {
+class BaseDecoder {
   buf: Uint8Array;
   ptr: number;
   /**
    * @param bytes bytes that should be decoded
    * @param ptr pointer to the initial position in the bytes, where CBOR is placed
    */
-  constructor(bytes: Uint8Array, ptr?: number);
+  constructor(bytes: Uint8Array, ptr = 0) {
+    this.buf = bytes;
+    this.ptr = ptr;
+  }
 
-  done(): boolean;
+  done(): boolean {
+    return this.ptr >= this.buf.length;
+  }
 }
 
 /**
@@ -22,12 +27,14 @@ declare abstract class BaseDecoder {
  *
  * Cbor Types mutate this instance during encoding and decoding.
  */
-declare class Decoder extends BaseDecoder {
+export class Decoder extends BaseDecoder {
   /**
    * @param bytes Bytes that contain CBOR
    * @param ptr A pointer to the current position in the bytes
    */
-  constructor(bytes: Uint8Array, ptr?: number);
+  constructor(bytes: Uint8Array, ptr = 0) {
+    super(bytes, ptr);
+  }
 
   /**
    * Calls CborType decode method
@@ -41,20 +48,36 @@ declare class Decoder extends BaseDecoder {
     ty: IDecodable<T, DE, DC>,
     ...args: unknown extends DC ? [] | [DC] : [DC]
   ): Result<T, DE>;
+  decode(ty: any, ctx: unknown) {
+    return ty.decode(this, ctx);
+  }
 
   /**
    * @param b bytes or other decoder
    * @param ptr optional ptr to start decoding from
    * @returns new decoder instance that will start decoding from ptr
    */
-  static from(b: Uint8Array | IDecoder, ptr?: number): Decoder;
+  static from(b: Uint8Array | IDecoder, ptr = 0): Decoder {
+    if (b instanceof Uint8Array) {
+      return new Decoder(b, ptr);
+    }
+    if (b instanceof Decoder) {
+      return b;
+    }
+    return new Decoder(b.buf, ptr ?? b.ptr);
+  }
 }
 
 export class ThrowOnFailDecoder extends BaseDecoder {
-  constructor(bytes: Uint8Array, ptr?: number);
+  constructor(bytes: Uint8Array, ptr = 0) {
+    super(bytes, ptr);
+  }
 
   decode<T, DE extends Error, DC>(
     ty: IDecodable<T, DE, DC>,
     ...args: unknown extends DC ? [] | [DC] : [DC]
   ): T;
+  decode(ty: any, ctx: unknown) {
+    return ty.decode(this, ctx).unwrap();
+  }
 }
