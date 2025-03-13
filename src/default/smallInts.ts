@@ -9,6 +9,7 @@ import { CborType } from "../base";
 import { InvalidCborError } from "../InvalidCborError";
 import { EndOfInputError } from "../EndOfInputError";
 import { MAX_U16, MAX_U32, MAX_U8 } from "../limits";
+import { IDecoder } from "../types";
 
 const MAX_VALUE_DICT = {
   8: MAX_U8,
@@ -53,9 +54,9 @@ function createSmallIntType(
       },
       (
         arg: number | bigint,
-        d,
-        _,
-        start
+        d: IDecoder,
+        _: unknown,
+        start: number
       ): Result<number, TypeMismatchError> => {
         if (typeof arg === "bigint") {
           if (arg <= BigInt(getMaxValue(size)) && arg >= BigInt(0)) {

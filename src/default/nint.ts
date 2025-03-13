@@ -13,6 +13,7 @@ import { MAX_U128 } from "../limits";
 import { UnderflowError } from "../UnderflowError";
 import { getEoiResult } from "../EndOfInputError";
 import { done } from "../utils/done";
+import { IDecoder, IEncoder } from "../types";
 
 /**
  * A type that encodes and decodes negative integers
@@ -32,7 +33,7 @@ export const nint: CborType<
   unknown,
   unknown
 > = CborType.builder()
-  .encode((v: number | bigint, e) => {
+  .encode((v: number | bigint, e: IEncoder) => {
     if (typeof v === "number") {
       if (!Number.isInteger(v) || !Number.isFinite(v)) {
         return new TypeMismatchError("negative-int", "f64").err();
@@ -57,7 +58,7 @@ export const nint: CborType<
       typeof v === "bigint" ? -1n - v : -1 - v
     );
   })
-  .decode((d): Result<number | bigint, DecodingError> => {
+  .decode((d: IDecoder): Result<number | bigint, DecodingError> => {
     if (done(d)) return getEoiResult();
     const marker = d.buf[d.ptr];
     if (getType(marker) !== NEGATIVE_INT_TYPE) {

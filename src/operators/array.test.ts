@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Buffer } from 'node:buffer'
 import { u8 } from "../default/smallInts";
 import { Encoder } from "../Encoder";
 import { Decoder } from "../Decoder";

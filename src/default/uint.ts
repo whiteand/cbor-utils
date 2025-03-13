@@ -51,7 +51,7 @@ export const uint: CborType<
       if (getType(marker) !== NUMBER_TYPE) {
         return new TypeMismatchError("uint", getTypeString(marker)).err();
       }
-      return readArg(d).andThen((v) =>
+      return readArg(d).andThen((v: number | bigint | null) =>
         v == null ? new InvalidCborError(marker, d.ptr).err() : ok(v)
       );
     }

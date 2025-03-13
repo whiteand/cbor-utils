@@ -42,7 +42,7 @@ describe("u64", () => {
     "correctly encodes $v => $b",
     ({ v, b }) => {
       const e = new Encoder();
-      e.encode(u64, v as any).unwrap();
+      e.encode(u64, v as NotImportant).unwrap();
       expect(hex(e.finish())).toBe(b);
     }
   );
@@ -50,7 +50,7 @@ describe("u64", () => {
     "fails to encode $v => $ee",
     ({ v, ee }) => {
       const e = new Encoder();
-      const res = e.encode(u64, v as any);
+      const res = e.encode(u64, v as NotImportant);
       expect(!res.ok()).toBe(true);
       expect(!res.ok() && res.error).toEqual(ee);
     }

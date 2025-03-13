@@ -1,6 +1,6 @@
 import { Result } from "resultra";
 import { CborType } from "../base";
-import { ICborType, IDecoder, IEncoder } from "../types";
+import { ICborType, IDecoder, IEncoder, NotImportant } from "../types";
 
 type TFlatMap = <OldEncodedType, NewEncodedType, OldDecodedType, NewDecodedType, NEE extends Error, NDE extends Error, NEC, NDC>(
   newEnc: (value: NewEncodedType, ctx: NEC) => Result<NoInfer<OldEncodedType>, NEE>,
@@ -10,9 +10,9 @@ export const flatMap: TFlatMap = (newEncode, newDecode, nullable) => (ty) => {
 
   
   interface IObj {
-    newEncode(value: any, ctx: any): Result<any, any>;
-    newDecode(value: any, d: any, ctx: any, startPosition: number): Result<any, any>;
-    sourceType: ICborType<any, any, any, any, any, any>;
+    newEncode(value: NotImportant, ctx: NotImportant): Result<NotImportant, NotImportant>;
+    newDecode(value: NotImportant, d: NotImportant, ctx: NotImportant, startPosition: number): Result<NotImportant, NotImportant>;
+    sourceType: ICborType<NotImportant, NotImportant, NotImportant, NotImportant, NotImportant, NotImportant>;
   }
   
   const proto = CborType.builder()
@@ -44,5 +44,5 @@ export const flatMap: TFlatMap = (newEncode, newDecode, nullable) => (ty) => {
 
   Reflect.setPrototypeOf(obj, proto);
 
-  return obj as any
+  return obj as NotImportant
 };

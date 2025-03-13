@@ -1,6 +1,7 @@
 import assert from "node:assert";
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import process from 'node:process'
 
 const rootDir = process.cwd();
 

@@ -9,6 +9,6 @@ export function fromHex(hex: string): number[] {
   return bytes;
 }
 
-export function hex(arg0: Uint8Array): any {
+export function hex(arg0: Uint8Array): string {
   return [...arg0].map((e) => e.toString(16).padStart(2, "0")).join("");
 }

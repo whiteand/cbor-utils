@@ -7,6 +7,7 @@ import { DecodingError } from "../DecodingError";
 import { uint } from "./uint";
 import { flatMap } from "../operators/flatMap";
 import { CborType } from "../base";
+import { IDecoder } from "../types";
 
 function createBigInt(
   size: 64 | 128
@@ -32,9 +33,9 @@ function createBigInt(
       },
       (
         arg: number | bigint,
-        d,
-        _,
-        start
+        d: IDecoder,
+        _: unknown,
+        start: number
       ): Result<bigint, TypeMismatchError> => {
         const value = BigInt(arg);
 

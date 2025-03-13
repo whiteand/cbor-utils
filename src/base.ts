@@ -1,7 +1,7 @@
 import { err, Result } from "resultra";
 import { NotImplementedError } from "./errors";
 import { Pipeable } from "./pipe";
-import { ICborType, IDecoder, IEncoder, TDecodeFunction, TEncodeFunction } from "./types";
+import { ICborType, IDecoder, IEncoder, NotImportant, TDecodeFunction, TEncodeFunction } from "./types";
 
 const getDefaultEncode = () => () => err(new NotImplementedError("encode"));
 const getDefaultDecode = () => () => err(new NotImplementedError("decode"));
@@ -29,9 +29,9 @@ DC
   encode<NET, NEE extends Error, NEC>(
     fn: (value: NET, e: IEncoder, ctx: NEC) => Result<void, NEE>
   ): CborBuilder<NET, DT, NEE, DE, NEC, DC>;
-  encode(encode: any) {
+  encode(encode: NotImportant) {
     this._encode = encode;
-    return this as CborBuilder<any, DT, any, DE, any, DC>;
+    return this as CborBuilder<NotImportant, DT, NotImportant, DE, NotImportant, DC>;
   }
   
   decode<NDT, NDE extends Error>(
@@ -40,9 +40,9 @@ DC
   decode<NDT, NDE extends Error, NDC>(
     fn: (d: IDecoder, ctx: NDC) => Result<NDT, NDE>
   ): CborBuilder<ET, NDT, EE, NDE, EC, NDC>;
-  decode(decode: any) {
+  decode(decode: NotImportant) {
     this._decode = decode;
-    return this as CborBuilder<ET, any, EE, any, EC, any>;
+    return this as CborBuilder<ET, NotImportant, EE, NotImportant, EC, NotImportant>;
   }
 
   nullable(value = true): this {

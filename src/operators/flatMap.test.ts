@@ -13,6 +13,7 @@ import { InvalidCborError } from "../InvalidCborError";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { UnderflowError } from "../UnderflowError";
+import { ThrowOnFailEncoder } from "../Encoder";
 
 class InvalidEnumIndexError extends Error {
   constructor(
@@ -66,7 +67,7 @@ function indexOnlyEnumCbor<const T extends Readonly<Record<string, number>>>(
           ? err(new InvalidEnumValueError(String(value), validValues))
           : ok(ind);
       },
-      (index): Result<keyof T, InvalidEnumIndexError> => {
+      (index: number): Result<keyof T, InvalidEnumIndexError> => {
         const status = indexToValue[index as keyof typeof indexToValue];
         return status == null
           ? err(new InvalidEnumIndexError(index, validIndices))
@@ -82,7 +83,7 @@ describe("flatMap", () => {
       mchain: 0,
     });
 
-    const e = encode((e) => ty.encode("mchain", e).unwrap());
+    const e = encode((e: ThrowOnFailEncoder) => ty.encode("mchain", e).unwrap());
     expect(e).toEqual(new Uint8Array([0x00]));
   });
 });

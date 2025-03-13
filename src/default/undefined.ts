@@ -7,6 +7,7 @@ import { CborType } from "../base";
 import { UnexpectedValueError } from "../UnexpectedValueError";
 import { getVoidOk } from "../getVoidOk";
 import { done } from "../utils/done";
+import { IDecoder, IEncoder } from "../types";
 
 /**
  * A type that encodes and decodes `undefined`
@@ -19,14 +20,14 @@ export const undefinedType: CborType<
   unknown,
   unknown
 > = CborType.builder()
-  .encode(function encodeUndefined(v: undefined, e) {
+  .encode(function encodeUndefined(v: undefined, e: IEncoder) {
     if (v !== undefined) {
       return new UnexpectedValueError(undefined, v).err();
     }
     e.write(SPECIAL_TYPE_MASK | 23);
     return getVoidOk();
   })
-  .decode(function decodeUndefined(d) {
+  .decode(function decodeUndefined(d: IDecoder) {
     if (done(d)) {
       return getEoiResult();
     }

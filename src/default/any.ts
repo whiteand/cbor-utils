@@ -63,7 +63,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
     case SPECIAL_TYPE: {
       const info = getInfo(m);
       switch (info) {
-        case 20:
+        case 20: /* falls through */
         case 21:
           return bool.decode(d, null);
         case 22:
@@ -90,6 +90,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
           ).err();
         }
       }
+      break;
     }
     case TAG_TYPE: {
       const info = getInfo(m);
@@ -98,7 +99,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
           return dateTimeString.decode(d, null);
         case 1:
           return epochTime.decode(d, null);
-        case 2:
+        case 2: /* falls through */
         case 3:
           return bignum.decode(d, null);
         case 24: {
@@ -116,6 +117,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
         default:
           return taggedAny.decode(d, null);
       }
+      break;
     }
 
     default:
@@ -124,7 +126,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
 }
 
 function encodeBigInt(b: bigint, e: IEncoder): Result<void, OverflowError> {
-  if (b > MAX_U128 || b < -MAX_U128 - 1n) {
+  if (b > MAX_U128 || b < (-(MAX_U128 + 1n))) {
     return bignum.encode(b, e, null);
   }
   if (b >= 0n) {
@@ -276,8 +278,8 @@ export const epochTime: CborType<
   unknown
 > = or(uint, f64, f32, f16).pipe(
   mapErrors(
-    (_, v) => new TypeMismatchError("epoch time", String(v)),
-    (_, m) => new TypeMismatchError("epoch time", getTypeString(m))
+    (_, v: number | bigint) => new TypeMismatchError("epoch time", String(v)),
+    (_, m: number) => new TypeMismatchError("epoch time", getTypeString(m))
   ),
   tagged(),
   untag(1, "epoch time")

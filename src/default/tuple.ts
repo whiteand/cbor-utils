@@ -12,34 +12,35 @@ import {
   ICborType,
   IDecoder,
   IEncoder,
+  NotImportant,
 } from "../types";
 import { TupleVals } from "../utils/TupleVals";
 import { arrayLen } from "./arrayLen";
 import { Result } from "resultra";
 
 export type InferEncodedTupleType<
-  TS extends readonly ICborType<any, any, Error, Error, any, any>[]
+  TS extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
 > = {
   -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
 };
 export type InferDecodedTupleType<
-  TS extends readonly ICborType<any, any, Error, Error, any, any>[]
+  TS extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
 > = {
   -readonly [ind in keyof TS]: DecodedType<TS[ind]>;
 };
 
 type InferTupleEE<
-  TS extends readonly ICborType<any, any, Error, Error, any, any>[]
+  TS extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
 > = TupleVals<{
   -readonly [ind in keyof TS]: EncodeError<TS[ind]>;
 }>;
 type InferTupleDE<
-  TS extends readonly ICborType<any, any, Error, Error, any, any>[]
+  TS extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
 > = TupleVals<{
   -readonly [ind in keyof TS]: DecodeError<TS[ind]>;
 }>;
 
-type InferLen<TS extends readonly any[]> = TS["length"];
+type InferLen<TS extends readonly NotImportant[]> = TS["length"];
 
 /**
  * Type constructor that creates a tuple type from a list of element types.
@@ -61,7 +62,7 @@ type InferLen<TS extends readonly any[]> = TS["length"];
 export function tuple<
   const EC,
   const DC,
-  const Types extends readonly ICborType<any, any, Error, Error, any, any>[]
+  const Types extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
 >(
   types: Types
 ): CborType<

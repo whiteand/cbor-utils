@@ -6,13 +6,14 @@ import { Result, ok } from "resultra";
 import { DecodingError } from "./DecodingError";
 import { encode } from "./encode";
 import { decode } from "./decode";
+import { IDecoder, IEncoder } from "./types";
 
 describe("base", () => {
   it("works", () => {
     const two = CborType.builder()
-      .encode((_: 2, e) => u8.encode(2, e))
+      .encode((_: 2, e: IEncoder) => u8.encode(2, e))
       .decode(
-        (d): Result<2, UnexpectedValueError<number, 2> | DecodingError> => {
+        (d: IDecoder): Result<2, UnexpectedValueError<number, 2> | DecodingError> => {
           const res = u8.decode(d);
           if (!res.ok()) return res;
           if (res.value !== 2)
@@ -22,9 +23,9 @@ describe("base", () => {
       )
       .nullable()
       .build();
-    const encoded = encode((e) => two.encode(2, e));
+    const encoded = encode((e: IEncoder) => two.encode(2, e));
     expect(encoded).toEqual(new Uint8Array([2]));
-    const decoded = decode(encoded, (d) => two.decode(d)).unwrap();
+    const decoded = decode(encoded, (d: IDecoder) => two.decode(d)).unwrap();
     expect(decoded).toBe(2);
   });
 });

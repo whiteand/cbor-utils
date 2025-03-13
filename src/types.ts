@@ -38,8 +38,8 @@ export interface IDecodable<T, DE, DC> {
 }
 
 export interface ICborType<
-  ET = any,
-  DT = any,
+  ET = NotImportant,
+  DT = NotImportant,
   EE extends Error = Error,
   DE extends Error = Error,
   EC = unknown,
@@ -48,10 +48,10 @@ export interface ICborType<
     IDecodable<DT, DE, DC> {
   nullable: boolean;
 }
-export type AnyCborTypeCodec = ICborType<any, any, Error, Error, any, any>;
+export type AnyCborTypeCodec = ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>;
 
-export type AnyDecodableType = IDecodable<any, any, any>;
-export type AnyEncodableType = IEncodable<any, any, any>;
+export type AnyDecodableType = IDecodable<NotImportant, NotImportant, NotImportant>;
+export type AnyEncodableType = IEncodable<NotImportant, NotImportant, NotImportant>;
 
 export type DecodedType<T extends AnyDecodableType> = T extends T
   ? T["__inferDecodedValue"]
@@ -76,3 +76,8 @@ export type EncodeContext<T extends AnyEncodableType> = T extends T
   : never;
 
 export type CtxParam<C> = C extends unknown ? void : C;
+
+export type Assume<T, U> = T extends U ? T : U
+
+// deno-lint-ignore no-explicit-any
+export type NotImportant = any

@@ -1,7 +1,7 @@
 import { catchError } from "resultra/utils";
 import { Decoder, ThrowOnFailDecoder } from "./Decoder";
 import { Result } from "resultra";
-import { IDecodable, IDecoder } from "./types";
+import { IDecodable, IDecoder, NotImportant } from "./types";
 
 type TDecodeFunction = (<T, E extends Error, C>(
   bytes: Uint8Array | IDecoder,
@@ -37,11 +37,11 @@ export const decode: TDecodeFunction = ((
   bytes,
   cb,
   ctx
-) => cb(Decoder.from(bytes), ctx as any)) as TDecodeFunction
+) => cb(Decoder.from(bytes), ctx as NotImportant)) as TDecodeFunction
 
 decode.type = ((
   bytes,
   ty,
   ctx,
-) => ty.decode(Decoder.from(bytes), ctx as any)) as TDecodeFunction['type']
+) => ty.decode(Decoder.from(bytes), ctx as NotImportant)) as TDecodeFunction['type']
 

@@ -7,6 +7,7 @@ import { CborType } from "../base";
 import { done } from "../utils/done";
 import { getVoidOk } from "../getVoidOk";
 import { getInfo } from "../marker";
+import { IDecoder, IEncoder } from "../types";
 
 /**
  * A CBOR type that encodes booleans
@@ -19,7 +20,7 @@ export const bool: CborType<
   unknown,
   unknown
 > = CborType.builder()
-  .encode((v: boolean, e) => {
+  .encode((v: boolean, e: IEncoder) => {
     if (typeof v !== "boolean") {
       return new TypeMismatchError("boolean", String(v)).err();
     }
@@ -27,7 +28,7 @@ export const bool: CborType<
     e.write(SPECIAL_TYPE_MASK | (v ? 21 : 20));
     return getVoidOk();
   })
-  .decode((d): Result<boolean, EndOfInputError | TypeMismatchError> => {
+  .decode((d: IDecoder): Result<boolean, EndOfInputError | TypeMismatchError> => {
     if (done(d)) {
       return getEoiResult();
     }

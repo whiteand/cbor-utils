@@ -7,6 +7,7 @@ import { CborType } from "../base";
 import { UnexpectedValueError } from "../UnexpectedValueError";
 import { getVoidOk } from "../getVoidOk";
 import { done } from "../utils/done";
+import { IDecoder, IEncoder } from "../types";
 
 /**
  * A type that encodes and decodes `null`
@@ -19,12 +20,12 @@ export const nullType: CborType<
   unknown,
   unknown
 > = CborType.builder()
-  .encode((v: null, e) =>
+  .encode((v: null, e: IEncoder) =>
     v !== null
       ? new UnexpectedValueError(null, v).err()
       : (e.write(NULL_BYTE), getVoidOk())
   )
-  .decode((d): Result<null, EndOfInputError | TypeMismatchError> => {
+  .decode((d: IDecoder): Result<null, EndOfInputError | TypeMismatchError> => {
     if (done(d)) {
       return getEoiResult();
     }

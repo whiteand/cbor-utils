@@ -1,3 +1,5 @@
+import { NotImportant } from "./types";
+
 export interface IPipeable {
   pipe<A, B>(this: A, ab: (_: A) => B): B;
   pipe<A, B, C>(this: A, ab: (_: A) => B, bc: (_: B) => C): C;
@@ -636,7 +638,7 @@ export class Pipeable implements IPipeable {
     _rs?: unknown,
     _st?: unknown,
     _tu?: unknown
-  ): any {
+  ): NotImportant {
     return pipeArguments(this, arguments);
   }
 }

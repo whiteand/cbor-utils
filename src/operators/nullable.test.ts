@@ -3,6 +3,7 @@ import { u32, u8 } from "../default/smallInts";
 import { Encoder } from "../Encoder";
 import { nullable } from "./nullable";
 import { Decoder } from "../Decoder";
+import { Buffer } from 'node:buffer'
 
 describe("array", () => {
   it("propery encodes", () => {

@@ -4,6 +4,7 @@ import { fromHex } from "../utils/hex";
 import { any } from "./any";
 import { Decoder } from "../Decoder";
 import { skip } from "../skip";
+import { NotImportant } from "../types";
 
 export const TESTS: Array<{
   cbor: string,
@@ -461,7 +462,7 @@ export const TESTS: Array<{
     cbor: "omFhAWFiggID",
     hex: "a26161016162820203",
     roundtrip: true,
-    decoded: new Map<string, any>([
+    decoded: new Map<string, NotImportant>([
       ["a", 1],
       ["b", [2, 3]],
     ]),
