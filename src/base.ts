@@ -45,7 +45,7 @@ DC
     return this as CborBuilder<ET, any, EE, any, EC, any>;
   }
 
-  nullable(value = true) {
+  nullable(value = true): this {
     this._nullable = value;
     return this;
   }
@@ -54,15 +54,14 @@ DC
   }
 }
 
-
 export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC> extends Pipeable implements ICborType<ET, DT, EE, DE, EC, DC>{
-  __inferEncodedValue: ET;
-  __inferEncodingCtx: EC;
-  __inferEncodingError: EE;
+  __inferEncodedValue!: ET;
+  __inferEncodingCtx!: EC;
+  __inferEncodingError!: EE;
   encode: TEncodeFunction<ET, EE, EC>;
-  __inferDecodedValue: DT;
-  __inferDecodingCtx: DC;
-  __inferDecodingError: DE;
+  __inferDecodedValue!: DT;
+  __inferDecodingCtx!: DC;
+  __inferDecodingError!: DE;
   decode: TDecodeFunction<DT, DE, DC>;
   public nullable: boolean;
 
@@ -77,13 +76,13 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC> extend
     this.nullable = nullable;
   }
   static builder(): CborBuilder<
-  never,
-  never,
-  NotImplementedError,
-  NotImplementedError,
-  unknown,
-  unknown
-> {
+    never,
+    never,
+    NotImplementedError,
+    NotImplementedError,
+    unknown,
+    unknown
+  > {
     return new CborBuilder();
   }
   static from<ET, DT, EE extends Error, DE extends Error, EC, DC>(
@@ -92,8 +91,8 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC> extend
     return ty instanceof CborType
       ? ty
       : CborType.builder()
-        .encode((v, e, c) => ty.encode(v, e, c))
-        .decode((d, c) => ty.decode(d, c))
+        .encode((v: ET, e: IEncoder, c: EC) => ty.encode(v, e, c))
+        .decode((d: IDecoder, c: DC) => ty.decode(d, c))
         .nullable(ty.nullable)
         .build();
   }
@@ -102,11 +101,11 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC> extend
     toOldEncodedValue: (value: NoInfer<T>) => ET
   ): CborType<T, T, EE, DE, EC, DC> {
     const obj = {
-      encode(value, encoder, ctx) {
-        return super.encode(toOldEncodedValue(value), encoder, ctx);
+      encode: (value: T, encoder: IEncoder, ctx: EC) => {
+        return this.encode(toOldEncodedValue(value), encoder, ctx);
       },
-      decode(decoder, ctx) {
-        return super.decode(decoder, ctx).map(toNewDecodedValue);
+      decode: (decoder: IDecoder, ctx: DC) => {
+        return this.decode(decoder, ctx).map(toNewDecodedValue);
       },
     };
   
