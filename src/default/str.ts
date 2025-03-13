@@ -18,7 +18,7 @@ import { done } from "../utils/done";
 
 function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
   const chunks: string[] = [];
-  let total = 0;
+  
   while (!done(d)) {
     const m = d.buf[d.ptr];
     if (m === BREAK_BYTE) {
@@ -27,7 +27,6 @@ function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
     }
     const bs = decodeString(d);
     if (!bs.ok()) return bs;
-    total += bs.value.length;
     chunks.push(bs.value);
   }
   return ok(chunks.join(""));
