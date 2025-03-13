@@ -19,6 +19,11 @@ jobs:
         run: bun install
       - name: Publish package to JSR
         run: bun run publish:jsr
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
+          token: ${{ secrets.NPM_TOKEN }}
       - name: Publish package to npm
         run: npm publish --provenance --access public
         env:
