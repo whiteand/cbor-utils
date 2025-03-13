@@ -5,7 +5,7 @@
         "declarationDir": "dist",
         "emitDeclarationOnly": true,
         "strict": true,
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "isolatedDeclarations": true
     },
     "include": [
