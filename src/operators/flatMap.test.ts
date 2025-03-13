@@ -1,12 +1,11 @@
 import { describe } from "vitest";
-import { u32, u8 } from "../default/smallInts";
+import { u32 } from "../default/smallInts";
 import { flatMap } from "./flatMap";
 import { it } from "vitest";
 import { err } from "resultra";
 import { ok } from "resultra";
 import { encode } from "../encode";
 import { expect } from "vitest";
-import { decode } from "../decode";
 import { CborType } from "../base";
 import { Result } from "resultra";
 import { EndOfInputError } from "../EndOfInputError";

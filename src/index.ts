@@ -1,4 +1,5 @@
-export { Result, err, ok } from "resultra";
+export { err, ok } from "resultra";
+export type { Result } from 'resultra'
 export { CborType } from "./base";
 export { decode, tryDecode } from "./decode";
 export { Decoder } from "./Decoder";
