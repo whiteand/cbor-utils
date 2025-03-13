@@ -287,7 +287,7 @@ export interface IPipeable {
   ): U;
 }
 
-export const pipeArguments = <A>(self: A, args: IArguments): unknown => {
+export const pipeArguments: <A>(self: A, args: IArguments) => unknown = <A>(self: A, args: IArguments): unknown => {
   switch (args.length) {
     case 1:
       return args[0](self);

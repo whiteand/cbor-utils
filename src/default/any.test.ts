@@ -5,7 +5,13 @@ import { any } from "./any";
 import { Decoder } from "../Decoder";
 import { skip } from "../skip";
 
-export const TESTS = [
+export const TESTS: Array<{
+  cbor: string,
+  hex: string,
+  roundtrip?: boolean,
+  decoded?: unknown
+  diagnostic?: string
+}> = [
   {
     cbor: "AA==",
     hex: "00",

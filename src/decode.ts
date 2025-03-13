@@ -1,10 +1,7 @@
 import { catchError } from "resultra/utils";
 import { Decoder, ThrowOnFailDecoder } from "./Decoder";
-
 import { Result } from "resultra";
 import { IDecodable, IDecoder } from "./types";
-
-
 
 type TDecodeFunction = (<T, E extends Error, C>(
   bytes: Uint8Array | IDecoder,
