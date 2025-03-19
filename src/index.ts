@@ -41,6 +41,17 @@ export { OverflowError } from "./OverflowError";
 export { TaggedDataItem } from "./default/TaggedDataItem";
 export { skip } from "./skip";
 export { TypeMismatchError } from "./TypeMismatchError";
+export { getType, getInfo } from "./marker";
+export {
+  NUMBER_TYPE,
+  NEGATIVE_INT_TYPE,
+  BYTES_TYPE,
+  STRING_TYPE,
+  ARRAY_TYPE,
+  MAP_TYPE,
+  TAG_TYPE,
+  SPECIAL_TYPE,
+} from "./constants";
 export type {
   AnyDecodableType,
   AnyEncodableType,
