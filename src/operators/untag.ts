@@ -3,8 +3,18 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
 import { flatMap } from "./flatMap";
 import { ICborType } from "../types";
-import { TaggedDataItem } from "../default/DataItem";
+import { TaggedDataItem } from "../default/TaggedDataItem";
 
+/**
+ * Unwraps decoded tagged data item
+ * if it has the specified tag.
+ *
+ * Wraps encoded value into tagged data item with the specified tag.
+ *
+ * @param tag required tag value
+ * @param name name of the type to use in error messages
+ * @returns new cbor type that wraps original into tagged data item
+ */
 export function untag(
   tag: number | bigint,
   name: string

@@ -25,7 +25,8 @@ import { or } from "../operators/or";
 import { tagged } from "../operators/tagged";
 import { untag } from "../operators/untag";
 import { IDecoder, IEncoder } from "../types";
-import { DataItem, Simple, TaggedDataItem } from "./DataItem";
+import { DataItem, Simple } from "./DataItem";
+import { TaggedDataItem } from "./TaggedDataItem";
 import { bignum } from "./bignum";
 import { bool } from "./bool";
 import { bytes } from "./bytes";
@@ -126,7 +127,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
 }
 
 function encodeBigInt(b: bigint, e: IEncoder): Result<void, OverflowError> {
-  if (b > MAX_U128 || b < (-(MAX_U128 + 1n))) {
+  if (b > MAX_U128 || b < -(MAX_U128 + 1n)) {
     return bignum.encode(b, e, null);
   }
   if (b >= 0n) {

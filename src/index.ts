@@ -1,5 +1,5 @@
 export { err, ok } from "resultra";
-export type { Result } from 'resultra'
+export type { Result } from "resultra";
 export { CborType } from "./base";
 export { decode, tryDecode } from "./decode";
 export { Decoder } from "./Decoder";
@@ -23,6 +23,7 @@ export { u16, u32, u8 } from "./default/smallInts";
 export { str } from "./default/str";
 export { tuple } from "./default/tuple";
 export { uint } from "./default/uint";
+export { untag } from "./operators/untag";
 export { undefinedType } from "./default/undefined";
 export { encode } from "./encode";
 export { Encoder, ThrowOnFailEncoder } from "./Encoder";
@@ -37,6 +38,7 @@ export { nullable } from "./operators/nullable";
 export { or } from "./operators/or";
 export { tagged } from "./operators/tagged";
 export { OverflowError } from "./OverflowError";
+export { TaggedDataItem } from "./default/TaggedDataItem";
 export { skip } from "./skip";
 export { TypeMismatchError } from "./TypeMismatchError";
 export type {

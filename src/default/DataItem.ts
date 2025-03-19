@@ -1,3 +1,5 @@
+import { TaggedDataItem } from "./TaggedDataItem";
+
 /**
  * DataItem describes all possible valid CBOR Data Items
  */
@@ -35,8 +37,4 @@ export class Simple<T extends number = number> {
   toString(): string {
     return `simple(${this.value})`;
   }
-}
-
-export class TaggedDataItem<T> {
-  constructor(public readonly tag: number | bigint, public readonly value: T) {}
 }

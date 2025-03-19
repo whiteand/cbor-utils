@@ -2,7 +2,7 @@ import { Result, ok } from "resultra";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { flatMap } from "../operators/flatMap";
 import { tagged } from "../operators/tagged";
-import { TaggedDataItem } from "./DataItem";
+import { TaggedDataItem } from "./TaggedDataItem";
 import { bytes } from "./bytes";
 import { UnexpectedValueError } from "../UnexpectedValueError";
 import { OverflowError } from "../OverflowError";

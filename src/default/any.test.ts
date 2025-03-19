@@ -1,4 +1,5 @@
-import { Simple, TaggedDataItem } from "./DataItem";
+import { Simple } from "./DataItem";
+import { TaggedDataItem } from "./TaggedDataItem";
 import { describe, expect, test } from "vitest";
 import { fromHex } from "../utils/hex";
 import { any } from "./any";
@@ -7,11 +8,11 @@ import { skip } from "../skip";
 import { NotImportant } from "../types";
 
 export const TESTS: Array<{
-  cbor: string,
-  hex: string,
-  roundtrip?: boolean,
-  decoded?: unknown
-  diagnostic?: string
+  cbor: string;
+  hex: string;
+  roundtrip?: boolean;
+  decoded?: unknown;
+  diagnostic?: string;
 }> = [
   {
     cbor: "AA==",

@@ -36,41 +36,5 @@ describe("array", () => {
     expect(d.decode(nullableByte).unwrap()).toBe(null);
     expect(d.decode(nullableByte).unwrap()).toBe(1);
   });
-  //   const validBytes = new Uint8Array(
-  //     Buffer.from(
-  //       "9f0102030405060708090a0b0c0d0e0f101112131415161718181819ff",
-  //       "hex",
-  //     ),
-  //   );
-  //   const r2 = new Decoder(validBytes).decode(four);
-  //   expect(r2.ok() && r2.value).toMatchInlineSnapshot(`
-  //     [
-  //       1,
-  //       2,
-  //       3,
-  //       4,
-  //       5,
-  //       6,
-  //       7,
-  //       8,
-  //       9,
-  //       10,
-  //       11,
-  //       12,
-  //       13,
-  //       14,
-  //       15,
-  //       16,
-  //       17,
-  //       18,
-  //       19,
-  //       20,
-  //       21,
-  //       22,
-  //       23,
-  //       24,
-  //       25,
-  //     ]
-  //   `);
-  // });
+  
 });
