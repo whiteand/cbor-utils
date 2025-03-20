@@ -2,45 +2,14 @@ import { Result } from "resultra";
 import { CborType } from "../base";
 import { ICborType, IDecoder, IEncoder, NotImportant } from "../types";
 
-type TFlatMap = <
-  OldEncodedType,
-  NewEncodedType,
-  OldDecodedType,
-  NewDecodedType,
-  NEE extends Error,
-  NDE extends Error,
-  NEC,
-  NDC
->(
-  newEnc: (
-    value: NewEncodedType,
-    ctx: NEC
-  ) => Result<NoInfer<OldEncodedType>, NEE>,
-  newDec: (
-    value: OldDecodedType,
-    decoder: IDecoder,
-    ctx: NDC,
-    startPosition: number
-  ) => Result<NewDecodedType, NDE>,
-  nullable?: boolean
-) => <EE extends Error, DE extends Error, EC extends NEC, DC extends NDC>(
-  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
-) => CborType<
-  NewEncodedType,
-  NewDecodedType,
-  NEE | EE,
-  NDE | DE,
-  NEC & EC,
-  NDC & DC
->;
-
 /**
  * Given a source type (sourceTy) that handles values of type S, creates a target type (targetTy)
  * that handles values of type T. The transformation between S and T is handled by the provided
  * encoding and decoding functions, while maintaining type safety and proper error handling.
  *
- * When encoding: T -> newEncode -> S -> sourceTy.encode -> bytes
- * When decoding: bytes -> sourceTy.decode -> S -> newDecode -> T
+ * When encoding: `T -> newEncode -> S -> sourceTy.encode -> bytes`
+ *
+ * When decoding: `bytes -> sourceTy.decode -> S -> newDecode -> T`
  *
  * @param newEncode - Function that transforms T to S before encoding.
  *                   Receives a value of type T and context, must return a Result
@@ -61,7 +30,7 @@ type TFlatMap = <
  *
  * @example
  * ```typescript
- * import { u32, array, err } from '@whiteand/cbor';
+ * import { u32, ok, err } from '@whiteand/cbor';
  *
  * // Creates a type that only accepts non-zero u32 values
  * const nonZeroU32 = u32.pipe(
@@ -75,61 +44,93 @@ type TFlatMap = <
  * )
  * ```
  */
-export const flatMap: TFlatMap = (newEncode, newDecode, nullable) => (ty) => {
-  interface IObj {
-    newEncode(
-      value: NotImportant,
-      ctx: NotImportant
-    ): Result<NotImportant, NotImportant>;
-    newDecode(
-      value: NotImportant,
-      d: NotImportant,
-      ctx: NotImportant,
-      startPosition: number
-    ): Result<NotImportant, NotImportant>;
-    sourceType: ICborType<
-      NotImportant,
-      NotImportant,
-      NotImportant,
-      NotImportant,
-      NotImportant,
-      NotImportant
-    >;
-  }
+export function flatMap<
+  OldEncodedType,
+  NewEncodedType,
+  OldDecodedType,
+  NewDecodedType,
+  NEE extends Error,
+  NDE extends Error,
+  NEC,
+  NDC
+>(
+  newEncode: (
+    value: NewEncodedType,
+    ctx: NEC
+  ) => Result<NoInfer<OldEncodedType>, NEE>,
+  newDecode: (
+    value: OldDecodedType,
+    decoder: IDecoder,
+    ctx: NDC,
+    startPosition: number
+  ) => Result<NewDecodedType, NDE>,
+  nullable?: boolean
+) {
+  return <EE extends Error, DE extends Error, EC extends NEC, DC extends NDC>(
+    ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
+  ): CborType<
+    NewEncodedType,
+    NewDecodedType,
+    NEE | EE,
+    NDE | DE,
+    NEC & EC,
+    NDC & DC
+  > => {
+    interface IObj {
+      newEncode(
+        value: NotImportant,
+        ctx: NotImportant
+      ): Result<NotImportant, NotImportant>;
+      newDecode(
+        value: NotImportant,
+        d: NotImportant,
+        ctx: NotImportant,
+        startPosition: number
+      ): Result<NotImportant, NotImportant>;
+      sourceType: ICborType<
+        NotImportant,
+        NotImportant,
+        NotImportant,
+        NotImportant,
+        NotImportant,
+        NotImportant
+      >;
+    }
 
-  const proto = CborType.builder()
-    .encode(function encode(
-      this: IObj,
-      value: unknown,
-      e: IEncoder,
-      ctx: unknown
-    ) {
-      const innerValueRes = this.newEncode(value, ctx);
-      if (!innerValueRes.ok()) {
-        return innerValueRes;
-      }
+    const proto = CborType.builder()
+      .encode(function encode(
+        this: IObj,
+        value: unknown,
+        e: IEncoder,
+        ctx: unknown
+      ) {
+        const innerValueRes = this.newEncode(value, ctx);
+        if (!innerValueRes.ok()) {
+          return innerValueRes;
+        }
 
-      const innerValue = innerValueRes.value;
+        const innerValue = innerValueRes.value;
 
-      return this.sourceType.encode(innerValue, e, ctx);
-    })
-    .decode(function decode(this: IObj, d: IDecoder, ctx: unknown) {
-      const startPosition = d.ptr;
-      const inner = this.sourceType.decode(d, ctx);
-      return inner.ok()
-        ? this.newDecode(inner.value, d, ctx, startPosition)
-        : inner;
-    })
-    .nullable(nullable ?? ty.nullable)
-    .build();
+        return this.sourceType.encode(innerValue, e, ctx);
+      })
+      .decode(function decode(this: IObj, d: IDecoder, ctx: unknown) {
+        const startPosition = d.ptr;
+        const inner = this.sourceType.decode(d, ctx);
+        return inner.ok()
+          ? this.newDecode(inner.value, d, ctx, startPosition)
+          : inner;
+      })
+      .nullable(nullable ?? ty.nullable)
+      .build();
 
-  const obj = {
-    newEncode,
-    newDecode,
-    sourceType: ty,
+    const obj = {
+      newEncode,
+      newDecode,
+      sourceType: ty,
+    };
+
+    Reflect.setPrototypeOf(obj, proto);
+
+    return obj as NotImportant;
   };
-
-  Reflect.setPrototypeOf(obj, proto);
-
-  return obj as NotImportant;
-};
+}
