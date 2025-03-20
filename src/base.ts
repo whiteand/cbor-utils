@@ -112,8 +112,10 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
     return ty instanceof CborType
       ? ty
       : CborType.builder()
-          .encode((v: ET, e: IEncoder, c: EC) => ty.encode(v, e, c))
-          .decode((d: IDecoder, c: DC) => ty.decode(d, c))
+          .encode(
+            (v: ET, e: IEncoder, c: EC): Result<void, EE> => ty.encode(v, e, c)
+          )
+          .decode((d: IDecoder, c: DC): Result<DT, DE> => ty.decode(d, c))
           .nullable(ty.nullable)
           .build();
   }
