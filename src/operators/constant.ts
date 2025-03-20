@@ -1,6 +1,7 @@
 import { ok } from "resultra";
 import { CborType } from "../base";
 import { UnexpectedValueError } from "../UnexpectedValueError";
+import { ICborType, IEncoder, NotImportant } from "../types";
 
 /**
  *
@@ -15,10 +16,32 @@ import { UnexpectedValueError } from "../UnexpectedValueError";
  * @param isEqual Function tahat compares the expected value with the actual one
  * @returns a operator that transforms a type into a constant value type
  */
-export function constant(expectedValue, isEqual = Object.is) {
-  return (ty) => {
+export function constant<In, const V extends In>(
+  expectedValue: V,
+  isEqual: (exp: NoInfer<V>, b: NoInfer<In>) => boolean = Object.is
+): <EE extends Error, DE extends Error, EC, DC>(
+  ty: ICborType<In, In, EE, DE, EC, DC>
+) => CborType<
+  V,
+  V,
+  EE | UnexpectedValueError<In, V>,
+  DE | UnexpectedValueError<In, V>,
+  EC,
+  DC
+> {
+  return <EE extends Error, DE extends Error, EC, DC>(ty) => {
+    interface IConstant {
+      expectedValue: V;
+      isEqual(exp: NoInfer<V>, b: NoInfer<In>): boolean;
+    }
+
     const proto = CborType.builder()
-      .encode(function encode(value, e, ctx) {
+      .encode(function encode(
+        this: IConstant,
+        value: V,
+        e: IEncoder,
+        ctx: NotImportant
+      ) {
         const { expectedValue } = this;
         if (!this.isEqual(value, expectedValue)) {
           return new UnexpectedValueError(expectedValue, value).err();
@@ -45,6 +68,13 @@ export function constant(expectedValue, isEqual = Object.is) {
       isEqual,
     });
 
-    return constantType;
+    return constantType as NotImportant as CborType<
+      V,
+      V,
+      EE | UnexpectedValueError<In, V>,
+      DE | UnexpectedValueError<In, V>,
+      EC,
+      DC
+    >;
   };
 }
