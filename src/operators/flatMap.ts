@@ -35,28 +35,34 @@ type TFlatMap = <
 >;
 
 /**
- * Creates a new CBOR type that transforms values during encoding and decoding.
- * This operator allows you to modify values before they are encoded and after they are decoded,
- * while maintaining type safety and proper error handling.
+ * Operator sourceTy: CborType<S> -> targetTy: CborType<T>
  *
- * @param newEncode - Function that transforms the source value before encoding.
- *                   Receives the source value and context, must return a Result
- *                   containing either the transformed value or an error.
- *                   The transformed value will be encoded using the source type.
+ * Given a source type (sourceTy) that handles values of type S, creates a target type (targetTy)
+ * that handles values of type T. The transformation between S and T is handled by the provided
+ * encoding and decoding functions, while maintaining type safety and proper error handling.
  *
- * @param newDecode - Function that transforms the decoded value.
- *                   Receives the decoded value, decoder instance, context, and start position.
- *                   Must return a Result containing either the transformed value or an error.
- *                   Called after the source type successfully decodes a value.
+ * When encoding: T -> newEncode -> S -> sourceTy.encode -> bytes
+ * When decoding: bytes -> sourceTy.decode -> S -> newDecode -> T
  *
- * @param nullable - Controls whether the resulting type allows null values.
+ * @param newEncode - Function that transforms T to S before encoding.
+ *                   Receives a value of type T and context, must return a Result
+ *                   containing either a value of type S or an error.
+ *                   The S value will be encoded using the source type.
+ *
+ * @param newDecode - Function that transforms S to T after decoding.
+ *                   Receives the decoded S value, decoder instance, context, and start position.
+ *                   Must return a Result containing either a value of type T or an error.
+ *                   Called after sourceTy successfully decodes a value.
+ *
+ * @param nullable - Controls whether targetTy allows null values.
  *                  When true, null values are accepted during encoding/decoding.
- *                  When not provided, inherits nullability from the source type.
+ *                  When not provided, inherits nullability from sourceTy.
  *
- * @returns A function that takes a source CBOR type and returns a new CBOR type
- *          with the specified transformations applied.
+ * @returns A function that takes sourceTy and returns targetTy with the
+ *          specified transformations applied.
  *
  * @example
+ * ```typescript
  * import { u32, array, err } from '@whiteand/cbor';
  *
  * // Creates a type that only accepts non-zero u32 values
@@ -69,6 +75,7 @@ type TFlatMap = <
  *     }
  *   )
  * )
+ * ```
  */
 export const flatMap: TFlatMap = (newEncode, newDecode, nullable) => (ty) => {
   interface IObj {
