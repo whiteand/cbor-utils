@@ -5,6 +5,7 @@ import { getEoiError } from "../EndOfInputError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { fromHex, hex } from "../utils/hex";
 import { str } from "./str";
+import { NotImportant } from "../types";
 
 describe("str", () => {
   const tests = [

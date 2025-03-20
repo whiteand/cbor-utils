@@ -6,6 +6,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { fromHex, hex } from "../utils/hex";
 import { seq } from "./seq";
 import { u8 } from "./smallInts";
+import { NotImportant } from "../types";
 
 describe("seq", () => {
   const tests = [

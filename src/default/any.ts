@@ -24,7 +24,7 @@ import { mapErrors } from "../operators/mapErrors";
 import { or } from "../operators/or";
 import { tagged } from "../operators/tagged";
 import { untag } from "../operators/untag";
-import { IDecoder, IEncoder } from "../types";
+import { IDecoder, IEncoder, NotImportant } from "../types";
 import { DataItem, Simple } from "./DataItem";
 import { TaggedDataItem } from "./TaggedDataItem";
 import { bignum } from "./bignum";
@@ -279,8 +279,10 @@ export const epochTime: CborType<
   unknown
 > = or(uint, f64, f32, f16).pipe(
   mapErrors(
-    (_, v: number | bigint) => new TypeMismatchError("epoch time", String(v)),
-    (_, m: number) => new TypeMismatchError("epoch time", getTypeString(m))
+    (_: NotImportant, v: number | bigint) =>
+      new TypeMismatchError("epoch time", String(v)),
+    (_: NotImportant, m: number) =>
+      new TypeMismatchError("epoch time", getTypeString(m))
   ),
   tagged(),
   untag(1, "epoch time")

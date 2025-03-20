@@ -6,6 +6,7 @@ import { fromHex, hex } from "../utils/hex";
 import { OverflowError } from "../OverflowError";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { getEoiError } from "../EndOfInputError";
+import { NotImportant } from "../types";
 
 describe("u64", () => {
   const tests = [

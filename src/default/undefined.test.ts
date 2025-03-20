@@ -6,6 +6,7 @@ import { fromHex, hex } from "../utils/hex";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { getEoiError } from "../EndOfInputError";
 import { UnexpectedValueError } from "../UnexpectedValueError";
+import { NotImportant } from "../types";
 
 describe("undefined", () => {
   const tests = [

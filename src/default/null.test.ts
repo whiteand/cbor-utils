@@ -6,6 +6,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { UnexpectedValueError } from "../UnexpectedValueError";
 import { fromHex, hex } from "../utils/hex";
 import { nullType } from "./null";
+import { NotImportant } from "../types";
 
 describe("null", () => {
   const tests = [

@@ -7,6 +7,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { getEoiError } from "../EndOfInputError";
 import { Simple } from "./DataItem";
 import { SPECIAL_TYPE_MASK } from "../constants";
+import { NotImportant } from "../types";
 
 describe("simple", () => {
   const tests: Array<{

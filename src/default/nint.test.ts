@@ -7,6 +7,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { getEoiError } from "../EndOfInputError";
 import { OverflowError } from "../OverflowError";
 import { UnderflowError } from "../UnderflowError";
+import { NotImportant } from "../types";
 
 describe("nint", () => {
   const tests = [

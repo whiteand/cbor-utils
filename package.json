@@ -11,7 +11,7 @@
     "lint:jsr": "npm run build:jsr-json && bunx jsr publish --dry-run",
     "lint:deno": "deno lint .",
     "lint": "npm run lint:ox && npm run lint:jsr && npm run build && npx size-limit",
-    "lint:local": "npm run lint && npm run lint:deno",
+    "lint:local": "deno check . && npm run lint && npm run lint:deno",
     "prepublish": "npm run lint && npm run build",
     "prepare": "npm run build",
     "build:jsr-json": "bun ./scripts/build-jsr-json > ./jsr.json",
@@ -48,7 +48,8 @@
   "author": "andrewbeletskiy",
   "license": "ISC",
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^11.1.2",
+    "@size-limit/preset-small-lib": "^11.2.0",
+    "@types/node": "^22.13.10",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"
