@@ -1,10 +1,14 @@
-import { ok } from "resultra";
+import { ok, Result } from "resultra";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
 import { BREAK_BYTE } from "../constants";
 import { getVoidOk } from "../getVoidOk";
 import { getJsType } from "../utils/getJsType";
 import { mapLen } from "./mapLen";
+import { ICborType, IDecoder, IEncoder } from "../types";
+import { OverflowError } from "../OverflowError";
+import { InvalidCborError } from "../InvalidCborError";
+import { EndOfInputError } from "../EndOfInputError";
 
 /**
  * A function that can produce a `Map` type based on the key and value types.
@@ -13,9 +17,51 @@ import { mapLen } from "./mapLen";
  * @param vt type of values in the map
  * @returns as CBOR type that encodes and decodes `Map<K, V>`
  */
-export function map(kt, vt) {
+export function map<
+  EK,
+  EV,
+  DK,
+  DV,
+  KEE extends Error,
+  KDE extends Error,
+  VEE extends Error,
+  VDE extends Error,
+  KEC,
+  KDC,
+  VEC,
+  VDC
+>(
+  kt: ICborType<EK, DK, KEE, KDE, KEC, KDC>,
+  vt: ICborType<EV, DV, VEE, VDE, VEC, VDC>
+): CborType<
+  Map<EK, EV>,
+  Map<DK, DV>,
+  KEE | VEE | OverflowError,
+  KDE | VDE | InvalidCborError | EndOfInputError,
+  KEC & VEC,
+  KDC & VDC
+> {
+  interface IMapTy {
+    kt: ICborType<EK, DK, KEE, KDE, KEC, KDC>;
+    vt: ICborType<EV, DV, VEE, VDE, VEC, VDC>;
+    decodeUnknownLengthMap(
+      d: IDecoder,
+      ctx: KDC & VDC
+    ): Result<Map<DK, DV>, KDE | VDE | InvalidCborError | EndOfInputError>;
+    decodeKnownLengthMap(
+      d: IDecoder,
+      ctx: KDC & VDC,
+      len: number
+    ): Result<Map<DK, DV>, KDE | VDE | InvalidCborError | EndOfInputError>;
+  }
+
   const proto = CborType.builder()
-    .encode(function encode(m, e, c) {
+    .encode(function encode(
+      this: IMapTy,
+      m: Map<EK, EV>,
+      e: IEncoder,
+      c: KEC & VEC
+    ): Result<void, KEE | VEE | OverflowError> {
       const { kt, vt } = this;
       if (!m || !(m instanceof Map)) {
         return new TypeMismatchError("Map", getJsType(m)).err();
@@ -36,10 +82,14 @@ export function map(kt, vt) {
       }
       return getVoidOk();
     })
-    .decode(function decode(d, c) {
+    .decode(function decode(
+      this: IMapTy,
+      d: IDecoder,
+      c: KDC & VDC
+    ): Result<Map<DK, DV>, KDE | VDE | InvalidCborError | EndOfInputError> {
       return mapLen
         .decode(d)
-        .andThen((len) =>
+        .andThen((len: number | bigint | null) =>
           len == null
             ? this.decodeUnknownLengthMap(d, c)
             : this.decodeKnownLengthMap(d, c, Number(len))
@@ -52,7 +102,7 @@ export function map(kt, vt) {
   Object.assign(mapType, {
     kt,
     vt,
-    decodeUnknownLengthMap(d, c) {
+    decodeUnknownLengthMap(d: IDecoder, c: KDC & VDC) {
       const { kt, vt } = this;
       const res = new Map();
       while (d.ptr < d.buf.length) {
@@ -73,7 +123,7 @@ export function map(kt, vt) {
       }
       return ok(res);
     },
-    decodeKnownLengthMap(d, c, n) {
+    decodeKnownLengthMap(d: IDecoder, c: KDC & VDC, n: number) {
       const { kt, vt } = this;
       const res = new Map();
       for (let i = 0; i < n; i++) {
