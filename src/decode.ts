@@ -3,6 +3,7 @@ import { Decoder, ThrowOnFailDecoder } from "./Decoder";
 import { Result } from "resultra";
 import { IDecodable, IDecoder, NotImportant } from "./types";
 
+/** A type of the decode function */
 type TDecodeFunction = (<T, E extends Error, C>(
   bytes: Uint8Array | IDecoder,
   cb: (d: Decoder, ctx: C) => Result<T, E>,
@@ -15,7 +16,6 @@ type TDecodeFunction = (<T, E extends Error, C>(
   ) => Result<T, E>;
 };
 
-
 /**
  * @param b bytes to decode from
  * @param cb callback that will be called that should throw an error if decoding fails
@@ -26,22 +26,17 @@ export const tryDecode: <T>(
   cb: (e: ThrowOnFailDecoder) => T
 ) => Result<T, unknown> = (b, cb) => catchError(cb, new ThrowOnFailDecoder(b));
 
-
 /**
  * @param bytes Bytes or Decoder
  * @param cb function that usess passed decoder to decode value
  * @param args optional context argument
  * @returns Result of decoded value
  */
-export const decode: TDecodeFunction = ((
-  bytes,
-  cb,
-  ctx
-) => cb(Decoder.from(bytes), ctx as NotImportant)) as TDecodeFunction
+export const decode: TDecodeFunction = ((bytes, cb, ctx) =>
+  cb(Decoder.from(bytes), ctx as NotImportant)) as TDecodeFunction;
 
-decode.type = ((
-  bytes,
-  ty,
-  ctx,
-) => ty.decode(Decoder.from(bytes), ctx as NotImportant)) as TDecodeFunction['type']
-
+decode.type = ((bytes, ty, ctx) =>
+  ty.decode(
+    Decoder.from(bytes),
+    ctx as NotImportant
+  )) as TDecodeFunction["type"];
