@@ -1,26 +1,34 @@
 import { err, Result } from "resultra";
 import { NotImplementedError } from "./errors";
 import { Pipeable } from "./pipe";
-import {
-  ICborType,
-  IDecoder,
-  IEncoder,
-  NotImportant,
-  TDecodeFunction,
-  TEncodeFunction,
-} from "./types";
+import { ICborType, IDecoder, IEncoder, NotImportant } from "./types";
 
 const getDefaultEncode = () => () => err(new NotImplementedError("encode"));
 const getDefaultDecode = () => () => err(new NotImplementedError("decode"));
 
 export class CborBuilder<ET, DT, EE extends Error, DE extends Error, EC, DC> {
-  private _encode: TEncodeFunction<ET, EE, EC>;
-  private _decode: TDecodeFunction<DT, DE, DC>;
+  private _encode: (
+    value: ET,
+    e: IEncoder,
+    ...args: unknown extends EC ? [] | [EC] : [EC]
+  ) => Result<void, EE>;
+
+  private _decode: (
+    d: IDecoder,
+    ...args: unknown extends DC ? [] | [DC] : [DC]
+  ) => Result<DT, DE>;
   private _nullable: boolean;
 
   constructor() {
-    this._encode = getDefaultEncode() as unknown as TEncodeFunction<ET, EE, EC>;
-    this._decode = getDefaultDecode() as unknown as TDecodeFunction<DT, DE, DC>;
+    this._encode = getDefaultEncode() as unknown as (
+      value: ET,
+      e: IEncoder,
+      ...args: unknown extends EC ? [] | [EC] : [EC]
+    ) => Result<void, EE>;
+    this._decode = getDefaultDecode() as unknown as (
+      d: IDecoder,
+      ...args: unknown extends DC ? [] | [DC] : [DC]
+    ) => Result<DT, DE>;
     this._nullable = false;
   }
   encode<NET, NEE extends Error>(
@@ -118,8 +126,15 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
     nullable: boolean
   ) {
     super();
-    this.encode = encode as TEncodeFunction<ET, EE, EC>;
-    this.decode = decode as TDecodeFunction<DT, DE, DC>;
+    this.encode = encode as (
+      value: ET,
+      e: IEncoder,
+      ...args: unknown extends EC ? [] | [EC] : [EC]
+    ) => Result<void, EE>;
+    this.decode = decode as (
+      d: IDecoder,
+      ...args: unknown extends DC ? [] | [DC] : [DC]
+    ) => Result<DT, DE>;
     this.nullable = nullable;
   }
   static builder(): CborBuilder<

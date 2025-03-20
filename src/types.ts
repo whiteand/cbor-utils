@@ -18,11 +18,26 @@ export type TEncodeFunction<in T, out EE, EC> = (
   ...args: unknown extends EC ? [] | [EC] : [EC]
 ) => Result<void, EE>;
 
+/**
+ * Interface of something that can be encoded.
+ *
+ * @typeParam T - Type of value that can be encoded
+ * @typeParam EE - Type of error that can be returned when encoding fails
+ * @typeParam EC - Type of context that can be passed during encoding
+ */
 export interface IEncodable<T, EE, EC> {
+  /** Virtual fields necessary only for type inference */
   __inferEncodedValue: T;
+  /** Virtual fields necessary only for type inference */
   __inferEncodingCtx: EC;
+  /** Virtual fields necessary only for type inference */
   __inferEncodingError: EE;
-  encode: TEncodeFunction<T, EE, EC>;
+
+  encode: (
+    value: T,
+    e: IEncoder,
+    ...args: unknown extends EC ? [] | [EC] : [EC]
+  ) => Result<void, EE>;
 }
 
 export type TDecodeFunction<T, DE, DC> = (
@@ -34,7 +49,10 @@ export interface IDecodable<T, DE, DC> {
   __inferDecodedValue: T;
   __inferDecodingCtx: DC;
   __inferDecodingError: DE;
-  decode: TDecodeFunction<T, DE, DC>;
+  decode: (
+    d: IDecoder,
+    ...args: unknown extends DC ? [] | [DC] : [DC]
+  ) => Result<T, DE>;
 }
 
 export interface ICborType<
@@ -48,10 +66,25 @@ export interface ICborType<
     IDecodable<DT, DE, DC> {
   nullable: boolean;
 }
-export type AnyCborTypeCodec = ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>;
+export type AnyCborTypeCodec = ICborType<
+  NotImportant,
+  NotImportant,
+  Error,
+  Error,
+  NotImportant,
+  NotImportant
+>;
 
-export type AnyDecodableType = IDecodable<NotImportant, NotImportant, NotImportant>;
-export type AnyEncodableType = IEncodable<NotImportant, NotImportant, NotImportant>;
+export type AnyDecodableType = IDecodable<
+  NotImportant,
+  NotImportant,
+  NotImportant
+>;
+export type AnyEncodableType = IEncodable<
+  NotImportant,
+  NotImportant,
+  NotImportant
+>;
 
 export type DecodedType<T extends AnyDecodableType> = T extends T
   ? T["__inferDecodedValue"]
@@ -77,7 +110,7 @@ export type EncodeContext<T extends AnyEncodableType> = T extends T
 
 export type CtxParam<C> = C extends unknown ? void : C;
 
-export type Assume<T, U> = T extends U ? T : U
+export type Assume<T, U> = T extends U ? T : U;
 
 // deno-lint-ignore no-explicit-any
-export type NotImportant = any
+export type NotImportant = any;
