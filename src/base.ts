@@ -1,22 +1,22 @@
 import { err, Result } from "resultra";
 import { NotImplementedError } from "./errors";
 import { Pipeable } from "./pipe";
-import { ICborType, IDecoder, IEncoder, NotImportant, TDecodeFunction, TEncodeFunction } from "./types";
+import {
+  ICborType,
+  IDecoder,
+  IEncoder,
+  NotImportant,
+  TDecodeFunction,
+  TEncodeFunction,
+} from "./types";
 
 const getDefaultEncode = () => () => err(new NotImplementedError("encode"));
 const getDefaultDecode = () => () => err(new NotImplementedError("decode"));
 
-export class CborBuilder<
-ET,
-DT,
-EE extends Error,
-DE extends Error,
-EC,
-DC
-> {
-  private _encode: TEncodeFunction<ET, EE, EC>
-  private _decode: TDecodeFunction<DT, DE, DC>
-  private _nullable: boolean
+export class CborBuilder<ET, DT, EE extends Error, DE extends Error, EC, DC> {
+  private _encode: TEncodeFunction<ET, EE, EC>;
+  private _decode: TDecodeFunction<DT, DE, DC>;
+  private _nullable: boolean;
 
   constructor() {
     this._encode = getDefaultEncode() as unknown as TEncodeFunction<ET, EE, EC>;
@@ -31,9 +31,16 @@ DC
   ): CborBuilder<NET, DT, NEE, DE, NEC, DC>;
   encode(encode: NotImportant) {
     this._encode = encode;
-    return this as CborBuilder<NotImportant, DT, NotImportant, DE, NotImportant, DC>;
+    return this as CborBuilder<
+      NotImportant,
+      DT,
+      NotImportant,
+      DE,
+      NotImportant,
+      DC
+    >;
   }
-  
+
   decode<NDT, NDE extends Error>(
     fn: (d: IDecoder) => Result<NDT, NDE>
   ): CborBuilder<ET, NDT, EE, NDE, EC, unknown>;
@@ -42,7 +49,14 @@ DC
   ): CborBuilder<ET, NDT, EE, NDE, EC, NDC>;
   decode(decode: NotImportant) {
     this._decode = decode;
-    return this as CborBuilder<ET, NotImportant, EE, NotImportant, EC, NotImportant>;
+    return this as CborBuilder<
+      ET,
+      NotImportant,
+      EE,
+      NotImportant,
+      EC,
+      NotImportant
+    >;
   }
 
   nullable(value = true): this {
@@ -50,11 +64,18 @@ DC
     return this;
   }
   build(): CborType<ET, DT, EE, DE, EC, DC> {
-    return new CborType(this._encode as (value: ET, e: IEncoder, ctx: EC) => Result<void, EE>, this._decode as  (d: IDecoder, ctx: DC) => Result<DT, DE>, this._nullable);
+    return new CborType(
+      this._encode as (value: ET, e: IEncoder, ctx: EC) => Result<void, EE>,
+      this._decode as (d: IDecoder, ctx: DC) => Result<DT, DE>,
+      this._nullable
+    );
   }
 }
 
-export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC> extends Pipeable implements ICborType<ET, DT, EE, DE, EC, DC>{
+export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
+  extends Pipeable
+  implements ICborType<ET, DT, EE, DE, EC, DC>
+{
   __inferEncodedValue!: ET;
   __inferEncodingCtx!: EC;
   __inferEncodingError!: EE;
@@ -70,7 +91,7 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC> extend
     decode: (d: IDecoder, ctx: DC) => Result<DT, DE>,
     nullable: boolean
   ) {
-    super()
+    super();
     this.encode = encode as TEncodeFunction<ET, EE, EC>;
     this.decode = decode as TDecodeFunction<DT, DE, DC>;
     this.nullable = nullable;
@@ -91,11 +112,42 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC> extend
     return ty instanceof CborType
       ? ty
       : CborType.builder()
-        .encode((v: ET, e: IEncoder, c: EC) => ty.encode(v, e, c))
-        .decode((d: IDecoder, c: DC) => ty.decode(d, c))
-        .nullable(ty.nullable)
-        .build();
+          .encode((v: ET, e: IEncoder, c: EC) => ty.encode(v, e, c))
+          .decode((d: IDecoder, c: DC) => ty.decode(d, c))
+          .nullable(ty.nullable)
+          .build();
   }
+  /**
+   * Given a source type (`this`) that handles values of type S, creates a target type (`targetTy`)
+   * that handles values of type T.
+   *
+   * NOTE: In functional programming this method makes CborType to become a functor.
+   *
+   * When decoding: `bytes -> this.decode -> S -> toNewDecodedValue -> T`
+   *
+   * When encoding: `T -> toOldEncodedValue -> S -> sourceTy.encode -> bytes`
+   *
+   * @param toNewDecodedValue - Pure function that transforms the decoded value from source type S
+   * to target type T. Called after successful decoding to convert the value.
+   *
+   * @param toOldEncodedValue - Pure function that transforms target type T back to source type S
+   * before encoding. Called to prepare the value for encoding.
+   *
+   *
+   * @returns A new CBOR type (targetTy) that handles values of type T while using the original type's
+   *          encoding/decoding logic. Inherits error types and context types from the source type.
+   *
+   * @example
+   * ```typescript
+   * import { u32 } from '@whiteand/cbor';
+   *
+   * // Creates a type that handles boolean values using u32 encoding
+   * const booleanType = u32.convert(
+   *   (num: number) => num !== 0,    // decode: number -> boolean
+   *   (bool: boolean) => bool ? 1 : 0 // encode: boolean -> number
+   * );
+   * ```
+   */
   convert<T>(
     toNewDecodedValue: (value: DT) => T,
     toOldEncodedValue: (value: NoInfer<T>) => ET
@@ -108,11 +160,9 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC> extend
         return this.decode(decoder, ctx).map(toNewDecodedValue);
       },
     };
-  
+
     Reflect.setPrototypeOf(obj, this);
-  
-    return obj as CborType<T, T, EE, DE, EC, DC>
+
+    return obj as CborType<T, T, EE, DE, EC, DC>;
   }
 }
-
-

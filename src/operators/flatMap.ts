@@ -65,7 +65,16 @@ export function flatMap<
     startPosition: number
   ) => Result<NewDecodedType, NDE>,
   nullable?: boolean
-) {
+): <EE extends Error, DE extends Error, EC extends NEC, DC extends NDC>(
+  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
+) => CborType<
+  NewEncodedType,
+  NewDecodedType,
+  NEE | EE,
+  NDE | DE,
+  NEC & EC,
+  NDC & DC
+> {
   return <EE extends Error, DE extends Error, EC extends NEC, DC extends NDC>(
     ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
   ): CborType<
