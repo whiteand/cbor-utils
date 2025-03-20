@@ -35,8 +35,6 @@ type TFlatMap = <
 >;
 
 /**
- * Operator sourceTy: CborType<S> -> targetTy: CborType<T>
- *
  * Given a source type (sourceTy) that handles values of type S, creates a target type (targetTy)
  * that handles values of type T. The transformation between S and T is handled by the provided
  * encoding and decoding functions, while maintaining type safety and proper error handling.
