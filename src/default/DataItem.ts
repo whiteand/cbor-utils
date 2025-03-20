@@ -1,20 +1,28 @@
 import { TaggedDataItem } from "./TaggedDataItem";
 
-/**
- * DataItem describes all possible valid CBOR Data Items
- */
-export type DataItem =
+type PrimitiveDataItem =
   | number
   | bigint
-  | TaggedDataItem<DataItem>
   | Uint8Array
   | boolean
   | null
   | undefined
-  | Map<DataItem, DataItem>
   | string
-  | DataItem[]
   | Simple<number>;
+
+/**
+ * DataItem describes all possible valid CBOR Data Items
+ */
+export interface ITaggedDataItem extends TaggedDataItem<DataItem> {}
+export interface IMappedDataItem extends Map<DataItem, DataItem> {}
+export interface IArrayedDataItem extends Array<DataItem> {}
+
+/** Represents all possible cbor values */
+export type DataItem =
+  | ITaggedDataItem
+  | IMappedDataItem
+  | IArrayedDataItem
+  | PrimitiveDataItem;
 
 export class Simple<T extends number = number> {
   private static SIMPLES: Simple[] = [];
