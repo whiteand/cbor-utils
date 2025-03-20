@@ -1,7 +1,7 @@
-import { ok } from "resultra";
+import { ok, Result } from "resultra";
 import { CborType } from "../base";
 import { UnexpectedValueError } from "../UnexpectedValueError";
-import { ICborType, IEncoder, NotImportant } from "../types";
+import { ICborType, IDecoder, IEncoder, NotImportant } from "../types";
 
 /**
  *
@@ -29,7 +29,9 @@ export function constant<In, const V extends In>(
   EC,
   DC
 > {
-  return <EE extends Error, DE extends Error, EC, DC>(ty) => {
+  return <EE extends Error, DE extends Error, EC, DC>(
+    ty: ICborType<In, In, EE, DE, EC, DC>
+  ) => {
     interface IConstant {
       expectedValue: V;
       isEqual(exp: NoInfer<V>, b: NoInfer<In>): boolean;
@@ -41,14 +43,18 @@ export function constant<In, const V extends In>(
         value: V,
         e: IEncoder,
         ctx: NotImportant
-      ) {
+      ): Result<void, EE | UnexpectedValueError<In, V>> {
         const { expectedValue } = this;
         if (!this.isEqual(value, expectedValue)) {
           return new UnexpectedValueError(expectedValue, value).err();
         }
         return ty.encode(value, e, ctx);
       })
-      .decode(function decode(d, ctx) {
+      .decode(function decode(
+        this: IConstant,
+        d: IDecoder,
+        ctx: DC
+      ): Result<V, DE | UnexpectedValueError<In, V>> {
         const v = ty.decode(d, ctx);
         if (!v.ok()) {
           return v;
@@ -57,7 +63,7 @@ export function constant<In, const V extends In>(
         if (!this.isEqual(expectedValue, v.value)) {
           return new UnexpectedValueError(expectedValue, v.value).err();
         }
-        return ok(v.value);
+        return ok(v.value as V);
       })
       .build();
 
