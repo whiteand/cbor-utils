@@ -72,6 +72,25 @@ export class CborBuilder<ET, DT, EE extends Error, DE extends Error, EC, DC> {
   }
 }
 
+/**
+ * Core class representing a CBOR type that can encode values to CBOR format and decode them back.
+ * Implements the functor pattern through its `convert` method and supports method chaining via `pipe`.
+ *
+ * Type Parameters:
+ * @typeParam ET - Encoded Type. The type of values that can be encoded.
+ * @typeParam DT - Decoded Type. The type of values that are produced after decoding.
+ * @typeParam EE - Encoding Error. The type of errors that can occur during encoding.
+ * @typeParam DE - Decoding Error. The type of errors that can occur during decoding.
+ * @typeParam EC - Encoding Context. Additional context needed during encoding.
+ * @typeParam DC - Decoding Context. Additional context needed during decoding.
+ *
+ * Key Features:
+ * - Type-safe encoding and decoding
+ * - Error handling using Result type
+ * - Context-aware operations
+ * - Nullable value support
+ * - Composable through pipe and convert operations
+ */
 export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
   extends Pipeable
   implements ICborType<ET, DT, EE, DE, EC, DC>
@@ -79,11 +98,18 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
   __inferEncodedValue!: ET;
   __inferEncodingCtx!: EC;
   __inferEncodingError!: EE;
-  encode: TEncodeFunction<ET, EE, EC>;
+  encode: (
+    value: ET,
+    e: IEncoder,
+    ...args: unknown extends EC ? [] | [EC] : [EC]
+  ) => Result<void, EE>;
   __inferDecodedValue!: DT;
   __inferDecodingCtx!: DC;
   __inferDecodingError!: DE;
-  decode: TDecodeFunction<DT, DE, DC>;
+  decode: (
+    d: IDecoder,
+    ...args: unknown extends DC ? [] | [DC] : [DC]
+  ) => Result<DT, DE>;
   public nullable: boolean;
 
   constructor(
