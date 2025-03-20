@@ -6,7 +6,8 @@
         "emitDeclarationOnly": true,
         "strict": true,
         "moduleResolution": "node",
-        "isolatedDeclarations": true
+        "isolatedDeclarations": true,
+        "sourceMap": true
     },
     "include": [
         "src/index.ts",
