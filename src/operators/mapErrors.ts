@@ -1,7 +1,14 @@
-import { err } from "resultra";
+import { err, Result } from "resultra";
 import { CborType } from "../base";
 import { ICborType, IDecoder, IEncoder } from "../types";
 
+/**
+ * Maps the encoding and decoding errors of a CBOR type.
+ *
+ * @param ee function that transforms the encoding error into a new encoding error
+ * @param de function that transforms decoding error into a new decoding error
+ * @returns new type with mapped errors
+ */
 export function mapErrors<
   ET,
   DT,
@@ -17,11 +24,11 @@ export function mapErrors<
 ) => CborType<ET, DT, NEE, NDE, EC, DC> {
   return <EC, DC>(ty: ICborType<ET, DT, EE, DE, EC, DC>) =>
     CborType.builder()
-      .encode((v: ET, e: IEncoder, c: EC) => {
+      .encode((v: ET, e: IEncoder, c: EC): Result<void, NEE> => {
         const r = ty.encode(v, e, c);
         return r.ok() ? r : err(ee(r.error, v));
       })
-      .decode((d: IDecoder, c: DC) => {
+      .decode((d: IDecoder, c: DC): Result<DT, NDE> => {
         const p = d.ptr;
         const m = d.buf[p];
         const r = ty.decode(d, c);

@@ -14,9 +14,15 @@ import {
 import { TupleVals } from "../utils/TupleVals";
 import { getJsType } from "../utils/getJsType";
 
+/**
+ * Infers the tuple of encoded values based on the tuple of CBOR Types
+ */
 export type InferEncodedSeqType<TS extends readonly AnyCborTypeCodec[]> = {
   -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
 };
+/**
+ * Infers the tuple of decoded values based on the tuple of CBOR Types
+ */
 export type InferDecodedSeqType<TS extends readonly AnyCborTypeCodec[]> = {
   -readonly [ind in keyof TS]: DecodedType<TS[ind]>;
 };

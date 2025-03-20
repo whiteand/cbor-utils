@@ -152,6 +152,7 @@ export interface ICborType<
   DC = unknown
 > extends IEncodable<ET, EE, EC>,
     IDecodable<DT, DE, DC> {
+  /** if true the underlying cbor can consist of a single Null data item. */
   nullable: boolean;
 }
 /** All CBOR types are assignable to a variable for type `AnyCborTypeCodec` */

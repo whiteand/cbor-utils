@@ -53,6 +53,8 @@ export class Decoder extends BaseDecoder {
   }
 
   /**
+   * Constructs a new decoder instance from bytes or other decoder
+   *
    * @param b bytes or other decoder
    * @param ptr optional ptr to start decoding from
    * @returns new decoder instance that will start decoding from ptr
@@ -68,11 +70,20 @@ export class Decoder extends BaseDecoder {
   }
 }
 
+/**
+ * A decoder which throws an error if the value is not decoded successfully.
+ */
 export class ThrowOnFailDecoder extends BaseDecoder {
   constructor(bytes: Uint8Array, ptr = 0) {
     super(bytes, ptr);
   }
 
+  /**
+   * Decodes a value using the passed type `ty` and the context.
+   *
+   * @param ty type that should be decoded
+   * @param args context (if necessary)
+   */
   decode<T, DE extends Error, DC>(
     ty: IDecodable<T, DE, DC>,
     ...args: unknown extends DC ? [] | [DC] : [DC]

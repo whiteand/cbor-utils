@@ -66,6 +66,9 @@ type OrDecodeErrors<
   [ind in keyof TS]: DecodeError<TS[ind]>;
 };
 
+/**
+ * Represents the situation when all of the possible types failed to encode or decode a value.
+ */
 class OrError<const Errs extends readonly Error[]> extends BaseError {
   public readonly errors: Errs;
   constructor(errors: Errs) {
@@ -76,6 +79,14 @@ class OrError<const Errs extends readonly Error[]> extends BaseError {
   }
 }
 
+/**
+ * Given the list of CBOR types creates a new type that will
+ * try each type to encode or decoded a value in the order of their appearance
+ * in the list.
+ *
+ * @param types Types that will be tried to encode or decode a value
+ * @returns new type that will try each type to encode or decode a value
+ */
 export function or<
   EC,
   DC,

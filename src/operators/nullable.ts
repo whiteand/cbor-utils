@@ -5,6 +5,14 @@ import { NULL_BYTE } from "../constants";
 import { getVoidOk } from "../getVoidOk";
 import { ICborType, IDecoder, IEncoder, NotImportant } from "../types";
 
+/**
+ *
+ * Transforms a CBOR type to nullable type.
+ *
+ * `CborType<T> -> CborType<T | null>`
+ *
+ * @returns Type that allows null CBOR Data item to be decoded as null
+ */
 export function nullable(): <
   ET,
   DT,
@@ -19,15 +27,24 @@ export function nullable(): <
     ty: ICborType<ET, DT, EE, DE, EC, DC>
   ): CborType<ET | null, DT | null, EE, DE | DecodingError, EC, DC> =>
     CborType.builder()
-      .encode((value: ET | null, e: IEncoder, ctx: NotImportant): Result<void, EE> => {
-        if (value == null) {
-          e.write(NULL_BYTE);
-          return getVoidOk();
+      .encode(
+        (
+          value: ET | null,
+          e: IEncoder,
+          ctx: NotImportant
+        ): Result<void, EE> => {
+          if (value == null) {
+            e.write(NULL_BYTE);
+            return getVoidOk();
+          }
+          return ty.encode(value, e, ctx);
         }
-        return ty.encode(value, e, ctx);
-      })
+      )
       .decode(
-        (d: IDecoder, ctx: NotImportant): Result<DT | null, DE | DecodingError> => {
+        (
+          d: IDecoder,
+          ctx: NotImportant
+        ): Result<DT | null, DE | DecodingError> => {
           const marker = d.buf[d.ptr];
           if (marker === NULL_BYTE) {
             d.ptr++;

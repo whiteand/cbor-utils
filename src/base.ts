@@ -103,17 +103,42 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
   extends Pipeable
   implements ICborType<ET, DT, EE, DE, EC, DC>
 {
+  /** Virtual field just for type inference */
   __inferEncodedValue!: ET;
+  /** Virtual field just for type inference */
   __inferEncodingCtx!: EC;
+  /** Virtual field just for type inference */
   __inferEncodingError!: EE;
+  /**
+   * Encodes the value of type `ET` into encoder `e`
+   * using context passed as last argument (if necessary)
+   *
+   * @param value - Value to encode
+   * @param e - Encoder to write to
+   * @param args - Additional context argument (if necessary)
+   * @returns Result of encoding
+   */
   encode: (
     value: ET,
     e: IEncoder,
     ...args: unknown extends EC ? [] | [EC] : [EC]
   ) => Result<void, EE>;
+
+  /** Virtual field just for type inference */
   __inferDecodedValue!: DT;
+  /** Virtual field just for type inference */
   __inferDecodingCtx!: DC;
+  /** Virtual field just for type inference */
   __inferDecodingError!: DE;
+
+  /**
+   * Decodes the value of type `DT` from decoder `d`
+   * using context passed as last argument (if necessary)
+   *
+   * @param d - Decoder to read from
+   * @param args - Additional context argument (if necessary)
+   * @returns Result of decoding
+   */
   decode: (
     d: IDecoder,
     ...args: unknown extends DC ? [] | [DC] : [DC]

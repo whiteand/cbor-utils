@@ -17,6 +17,12 @@ type TDecodeFunction = (<T, E extends Error, C>(
 };
 
 /**
+ * A function that creates decoder and passes it to the callback
+ * the result of callback call is returned as ok result.
+ *
+ * Underlying decoder throws an error if decoding fails.
+ * This error is catched and returned as a error result.
+ *
  * @param b bytes to decode from
  * @param cb callback that will be called that should throw an error if decoding fails
  * @returns result of decoding, or error if decoding failed
@@ -27,6 +33,11 @@ export const tryDecode: <T>(
 ) => Result<T, unknown> = (b, cb) => catchError(cb, new ThrowOnFailDecoder(b));
 
 /**
+ * A function that creates decoder and passes it to the callback
+ * the result of callback as a result of decoding.
+ *
+ * You can use `decode.type` to decode a specific CBOR Type without usage of callback.
+ *
  * @param bytes Bytes or Decoder
  * @param cb function that usess passed decoder to decode value
  * @param args optional context argument
