@@ -46,7 +46,7 @@ export function array(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
     DC
   > => {
     function decodeArrayIndefinite<T, DE, DC>(
-      ty: IDecodable<T, DE, DC>,
+      ty: IDecodable<T, DE, unknown extends DC ? [] | [NotImportant] : [DC]>,
       d: IDecoder,
       ctx: DC
     ) {
@@ -64,7 +64,7 @@ export function array(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
       return ok(res);
     }
     function decodeArrayU32<T, DE, DC>(
-      ty: IDecodable<T, DE, DC>,
+      ty: IDecodable<T, DE, unknown extends DC ? [] | [NotImportant] : [DC]>,
       len: number,
       d: IDecoder,
       ctx: DC
@@ -79,7 +79,7 @@ export function array(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
     }
 
     function decodeArrayU64<T, DE, DC>(
-      ty: IDecodable<T, DE, DC>,
+      ty: IDecodable<T, DE, unknown extends DC ? [] | [NotImportant] : [DC]>,
       len: bigint,
       d: IDecoder,
       ctx: DC

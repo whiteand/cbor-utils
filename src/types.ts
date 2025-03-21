@@ -74,11 +74,11 @@ export type TEncodeFunction<in T, out EE, EC> = (
  * @typeParam EE - Type of error that can be returned when encoding fails
  * @typeParam EC - Type of context that can be passed during encoding
  */
-export interface IEncodable<T, EE, EC> {
+export interface IEncodable<T, EE, ECArgs extends [] | [NotImportant]> {
   /** Virtual fields necessary only for type inference */
   __inferEncodedValue: T;
   /** Virtual fields necessary only for type inference */
-  __inferEncodingCtx: EC;
+  __inferEncodingCtx: [] extends ECArgs ? unknown : ECArgs[0];
   /** Virtual fields necessary only for type inference */
   __inferEncodingError: EE;
 
@@ -91,11 +91,7 @@ export interface IEncodable<T, EE, EC> {
    * @param args - Additional context argument (if necessary)
    * @returns Result of encoding
    */
-  encode: (
-    value: T,
-    e: IEncoder,
-    ...args: unknown extends EC ? [] | [EC] : [EC]
-  ) => Result<void, EE>;
+  encode: (value: T, e: IEncoder, ...args: ECArgs) => Result<void, EE>;
 }
 
 /** Describes the signature of decode function */
@@ -111,11 +107,11 @@ export type TDecodeFunction<T, DE, DC> = (
  * @typeParam DE - Type of error that can be returned when decoding fails
  * @typeParam DC - Type of context that can be passed during decoding
  */
-export interface IDecodable<T, DE, DC> {
+export interface IDecodable<T, DE, DCArgs extends [] | [NotImportant]> {
   /** Virtual fields necessary only for type inference */
   __inferDecodedValue: T;
   /** Virtual fields necessary only for type inference */
-  __inferDecodingCtx: DC;
+  __inferDecodingCtx: [] extends DCArgs ? unknown : DCArgs[0];
   /** Virtual fields necessary only for type inference */
   __inferDecodingError: DE;
 
@@ -127,10 +123,7 @@ export interface IDecodable<T, DE, DC> {
    * @param args - Additional context argument (if necessary)
    * @returns Result of decoding
    */
-  decode: (
-    d: IDecoder,
-    ...args: unknown extends DC ? [] | [DC] : [DC]
-  ) => Result<T, DE>;
+  decode: (d: IDecoder, ...args: DCArgs) => Result<T, DE>;
 }
 
 /**
@@ -150,8 +143,20 @@ export interface ICborType<
   DE extends Error = Error,
   EC = unknown,
   DC = unknown
-> extends IEncodable<ET, EE, EC>,
-    IDecodable<DT, DE, DC> {
+> extends IEncodable<ET, EE, unknown extends EC ? [] | [NotImportant] : [EC]>,
+    IDecodable<DT, DE, unknown extends DC ? [] | [NotImportant] : [DC]> {
+  /** Virtual fields necessary only for type inference */
+  __inferEncodedValue: ET;
+  /** Virtual fields necessary only for type inference */
+  __inferEncodingCtx: EC;
+  /** Virtual fields necessary only for type inference */
+  __inferEncodingError: EE;
+  /** Virtual fields necessary only for type inference */
+  __inferDecodedValue: DT;
+  /** Virtual fields necessary only for type inference */
+  __inferDecodingCtx: DC;
+  /** Virtual fields necessary only for type inference */
+  __inferDecodingError: DE;
   /** if true the underlying cbor can consist of a single Null data item. */
   nullable: boolean;
 }

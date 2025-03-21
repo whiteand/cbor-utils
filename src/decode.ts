@@ -11,7 +11,7 @@ type TDecodeFunction = (<T, E extends Error, C>(
 ) => Result<T, E>) & {
   type: <const T, const E extends Error, const C>(
     bytes: Uint8Array | IDecoder,
-    ty: IDecodable<T, E, C>,
+    ty: IDecodable<T, E, unknown extends C ? [] | [NotImportant] : [C]>,
     ...args: unknown extends C ? [] | [C] : [C]
   ) => Result<T, E>;
 };

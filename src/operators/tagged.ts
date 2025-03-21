@@ -32,7 +32,7 @@ function sameTag(v: number | bigint, tag: number | bigint) {
 
 function encodeTagged<T, EE, EC>(
   e: IEncoder,
-  ty: IEncodable<T, EE, EC>,
+  ty: IEncodable<T, EE, unknown extends EC ? [] | [NotImportant] : [EC]>,
   value: TaggedDataItem<T>,
   ctx: EC
 ): Result<void, EE | OverflowError> {

@@ -1,5 +1,5 @@
 import { Result } from "resultra";
-import { IEncodable, IEncoder } from "./types";
+import { IEncodable, IEncoder, NotImportant } from "./types";
 
 /**
  * @param current current buffer size
@@ -126,9 +126,9 @@ export class Encoder extends BaseEncoder implements IEncoder {
    * @returns ok if encoding was successful, error result otherwise
    */
   encode<T, EE extends Error, EC>(
-    ty: IEncodable<T, EE, EC>,
+    ty: IEncodable<T, EE, unknown extends EC ? [] | [NotImportant] : [EC]>,
     value: Readonly<T>,
-    ...args: unknown extends EC ? [] | [EC] : [EC]
+    ...args: unknown extends EC ? [] | [NotImportant] : [EC]
   ): Result<void, EE> {
     return ty.encode(value, this, (args as [EC])[0]);
   }
@@ -151,9 +151,9 @@ export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
    * @returns void, because it throws an error if encoding fails
    */
   encode<T, EE extends Error, EC>(
-    ty: IEncodable<T, EE, EC>,
+    ty: IEncodable<T, EE, unknown extends EC ? [] | [NotImportant] : [EC]>,
     value: NoInfer<T>,
-    ...args: unknown extends EC ? [] | [EC] : [EC]
+    ...args: unknown extends EC ? [] | [NotImportant] : [EC]
   ): void {
     return ty.encode(value, this, (args as [EC])[0]).unwrap();
   }
