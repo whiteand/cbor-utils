@@ -174,14 +174,14 @@ export type AnyCborTypeCodec = ICborType<
 export type AnyDecodableType = IDecodable<
   NotImportant,
   NotImportant,
-  NotImportant
+  [] | [NotImportant]
 >;
 
 /** All encodable types are assignable to a variable of type `AnyEncodableType` */
 export type AnyEncodableType = IEncodable<
   NotImportant,
   NotImportant,
-  NotImportant
+  [] | [NotImportant]
 >;
 
 /** Infers decoded type from the passed cbor type */
