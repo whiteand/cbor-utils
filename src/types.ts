@@ -1,6 +1,37 @@
 import type { Result } from "resultra";
 
 /**
+ * Context is either present or absent based on the type of arguments
+ */
+export type AnyContextArgs = [] | [NotImportant];
+
+export type AndContextArgs<
+  CtxAArgs extends AnyContextArgs,
+  CtxBArgs extends AnyContextArgs
+> = Extract<
+  [...CtxAArgs, ...CtxBArgs] extends [infer A, infer B]
+    ? [A & B]
+    : [...CtxAArgs, ...CtxBArgs],
+  [] | [NotImportant]
+>;
+
+export type AndContext<CtxA, CtxB> = unknown extends CtxA
+  ? CtxB
+  : unknown extends CtxB
+  ? CtxA
+  : CtxA & CtxB;
+
+/** If args possiblly empty - then context is not necessary,therefore unknown */
+export type ContextFromArgs<Args extends AnyContextArgs> = Args extends Args
+  ? [] extends Args
+    ? unknown
+    : Args[0]
+  : never;
+
+/** if context is unknown then we do not need to require the passing of context */
+export type ArgsFromContext<C> = unknown extends C ? [] | [NotImportant] : [C];
+
+/**
  * Represents the source of the encoded cbor bytes
  * It's a simple wrapper over the array of bytes
  * You can feel free to update it's fields in your CBOR types
@@ -50,7 +81,11 @@ export interface IEncoder {
    *
    * @param pos - position to move back to
    */
-  restore(pos: number): void;
+  restore(pos: number): this;
+  /**
+   * Ensures that the buffer can hold at least `size` bytes more
+   */
+  reserve(size: number): this;
 }
 
 /** Describes the signature of encode function
@@ -61,10 +96,10 @@ export interface IEncoder {
  * @param e - Encoder to write to
  * @param args - Additional context argument (if necessary)
  */
-export type TEncodeFunction<in T, out EE, EC> = (
+export type TEncodeFunction<in T, out EE, ECArgs extends AnyContextArgs> = (
   value: T,
   e: IEncoder,
-  ...args: unknown extends EC ? [] | [EC] : [EC]
+  ...args: ECArgs
 ) => Result<void, EE>;
 
 /**
@@ -74,11 +109,11 @@ export type TEncodeFunction<in T, out EE, EC> = (
  * @typeParam EE - Type of error that can be returned when encoding fails
  * @typeParam EC - Type of context that can be passed during encoding
  */
-export interface IEncodable<T, EE, ECArgs extends [] | [NotImportant]> {
+export interface IEncodable<T, EE, ECArgs extends AnyContextArgs> {
   /** Virtual fields necessary only for type inference */
   __inferEncodedValue: T;
   /** Virtual fields necessary only for type inference */
-  __inferEncodingCtx: [] extends ECArgs ? unknown : ECArgs[0];
+  __inferEncodingCtx: ContextFromArgs<ECArgs>;
   /** Virtual fields necessary only for type inference */
   __inferEncodingError: EE;
 
@@ -95,9 +130,9 @@ export interface IEncodable<T, EE, ECArgs extends [] | [NotImportant]> {
 }
 
 /** Describes the signature of decode function */
-export type TDecodeFunction<T, DE, DC> = (
+export type TDecodeFunction<T, DE, DCArgs extends AnyContextArgs> = (
   d: IDecoder,
-  ...args: unknown extends DC ? [] | [DC] : [DC]
+  ...args: DCArgs
 ) => Result<T, DE>;
 
 /**
@@ -107,11 +142,11 @@ export type TDecodeFunction<T, DE, DC> = (
  * @typeParam DE - Type of error that can be returned when decoding fails
  * @typeParam DC - Type of context that can be passed during decoding
  */
-export interface IDecodable<T, DE, DCArgs extends [] | [NotImportant]> {
+export interface IDecodable<T, DE, DCArgs extends AnyContextArgs> {
   /** Virtual fields necessary only for type inference */
   __inferDecodedValue: T;
   /** Virtual fields necessary only for type inference */
-  __inferDecodingCtx: [] extends DCArgs ? unknown : DCArgs[0];
+  __inferDecodingCtx: ContextFromArgs<DCArgs>;
   /** Virtual fields necessary only for type inference */
   __inferDecodingError: DE;
 
@@ -141,22 +176,10 @@ export interface ICborType<
   DT = NotImportant,
   EE extends Error = Error,
   DE extends Error = Error,
-  EC = unknown,
-  DC = unknown
-> extends IEncodable<ET, EE, unknown extends EC ? [] | [NotImportant] : [EC]>,
-    IDecodable<DT, DE, unknown extends DC ? [] | [NotImportant] : [DC]> {
-  /** Virtual fields necessary only for type inference */
-  __inferEncodedValue: ET;
-  /** Virtual fields necessary only for type inference */
-  __inferEncodingCtx: EC;
-  /** Virtual fields necessary only for type inference */
-  __inferEncodingError: EE;
-  /** Virtual fields necessary only for type inference */
-  __inferDecodedValue: DT;
-  /** Virtual fields necessary only for type inference */
-  __inferDecodingCtx: DC;
-  /** Virtual fields necessary only for type inference */
-  __inferDecodingError: DE;
+  ECArgs extends AnyContextArgs = AnyContextArgs,
+  DCArgs extends AnyContextArgs = AnyContextArgs
+> extends IEncodable<ET, EE, ECArgs>,
+    IDecodable<DT, DE, DCArgs> {
   /** if true the underlying cbor can consist of a single Null data item. */
   nullable: boolean;
 }

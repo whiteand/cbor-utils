@@ -1,6 +1,15 @@
 import { err, Result } from "resultra";
 import { CborType } from "../base";
-import { ICborType, IDecoder, IEncoder } from "../types";
+import {
+  AnyContextArgs,
+  ContextFromArgs,
+  ICborType,
+  IDecoder,
+  IEncoder,
+  NotImportant,
+  TDecodeFunction,
+  TEncodeFunction,
+} from "../types";
 
 /**
  * Maps the encoding and decoding errors of a CBOR type.
@@ -19,20 +28,26 @@ export function mapErrors<
 >(
   ee: (e: EE, v: ET) => NEE,
   de: (de: DE, marker: number, position: number) => NDE
-): <EC, DC>(
-  ty: ICborType<ET, DT, EE, DE, EC, DC>
-) => CborType<ET, DT, NEE, NDE, EC, DC> {
-  return <EC, DC>(ty: ICborType<ET, DT, EE, DE, EC, DC>) =>
+): <ECArgs extends AnyContextArgs, DCArgs extends AnyContextArgs>(
+  ty: ICborType<ET, DT, EE, DE, ECArgs, DCArgs>
+) => CborType<ET, DT, NEE, NDE, ECArgs, DCArgs> {
+  return <ECArgs extends AnyContextArgs, DCArgs extends AnyContextArgs>(
+    ty: ICborType<ET, DT, EE, DE, ECArgs, DCArgs>
+  ) =>
     CborType.builder()
-      .encode((v: ET, e: IEncoder, c: EC): Result<void, NEE> => {
-        const r = ty.encode(v, e, c);
+      .encode(((
+        v: ET,
+        e: IEncoder,
+        c: ContextFromArgs<ECArgs>
+      ): Result<void, NEE> => {
+        const r = (ty.encode as NotImportant)(v, e, c);
         return r.ok() ? r : err(ee(r.error, v));
-      })
-      .decode((d: IDecoder, c: DC): Result<DT, NDE> => {
+      }) as NotImportant as TEncodeFunction<ET, NEE, ECArgs>)
+      .decode(((d: IDecoder, c: ContextFromArgs<DCArgs>): Result<DT, NDE> => {
         const p = d.ptr;
         const m = d.buf[p];
-        const r = ty.decode(d, c);
+        const r = (ty.decode as NotImportant)(d, c);
         return r.ok() ? r : err(de(r.error, m, p));
-      })
+      }) as NotImportant as TDecodeFunction<DT, NDE, DCArgs>)
       .build();
 }

@@ -1,6 +1,13 @@
 import { Result } from "resultra";
 import { CborType } from "../base";
-import { ICborType, IDecoder, IEncoder, NotImportant } from "../types";
+import {
+  AndContextArgs,
+  AnyContextArgs,
+  ICborType,
+  IDecoder,
+  IEncoder,
+  NotImportant,
+} from "../types";
 
 /**
  * Given a source type (sourceTy) that handles values of type S, creates a target type (targetTy)
@@ -51,39 +58,49 @@ export function flatMap<
   NewDecodedType,
   NEE extends Error,
   NDE extends Error,
-  NEC,
-  NDC
+  NECArgs extends AnyContextArgs,
+  NDCArgs extends AnyContextArgs
 >(
   newEncode: (
     value: NewEncodedType,
-    ctx: NEC
+    ctx: NECArgs
   ) => Result<NoInfer<OldEncodedType>, NEE>,
   newDecode: (
     value: OldDecodedType,
     decoder: IDecoder,
-    ctx: NDC,
+    ctx: NDCArgs,
     startPosition: number
   ) => Result<NewDecodedType, NDE>,
   nullable?: boolean
-): <EE extends Error, DE extends Error, EC extends NEC, DC extends NDC>(
-  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
+): <
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends NECArgs,
+  DCArgs extends NDCArgs
+>(
+  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, ECArgs, DCArgs>
 ) => CborType<
   NewEncodedType,
   NewDecodedType,
   NEE | EE,
   NDE | DE,
-  NEC & EC,
-  NDC & DC
+  AndContextArgs<NECArgs, ECArgs>,
+  AndContextArgs<NDCArgs, DCArgs>
 > {
-  return <EE extends Error, DE extends Error, EC extends NEC, DC extends NDC>(
-    ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, EC, DC>
+  return <
+    EE extends Error,
+    DE extends Error,
+    ECArgs extends NECArgs,
+    DCArgs extends NDCArgs
+  >(
+    ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, ECArgs, DCArgs>
   ): CborType<
     NewEncodedType,
     NewDecodedType,
     NEE | EE,
     NDE | DE,
-    NEC & EC,
-    NDC & DC
+    AndContextArgs<NECArgs, ECArgs>,
+    AndContextArgs<NDCArgs, DCArgs>
   > => {
     interface IObj {
       newEncode(

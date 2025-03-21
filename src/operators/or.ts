@@ -2,7 +2,9 @@ import { err } from "resultra";
 import { CborType } from "../base";
 import { BaseError } from "../BaseError";
 import {
+  AnyContextArgs,
   Assume,
+  ContextFromArgs,
   DecodedType,
   DecodeError,
   EncodedType,
@@ -11,6 +13,8 @@ import {
   IDecoder,
   IEncoder,
   NotImportant,
+  TDecodeFunction,
+  TEncodeFunction,
 } from "../types";
 import { TupleVals } from "../utils/TupleVals";
 
@@ -88,15 +92,15 @@ class OrError<const Errs extends readonly Error[]> extends BaseError {
  * @returns new type that will try each type to encode or decode a value
  */
 export function or<
-  EC,
-  DC,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs,
   const Types extends readonly ICborType<
     NotImportant,
     NotImportant,
     NotImportant,
     NotImportant,
-    EC,
-    DC
+    ECArgs,
+    DCArgs
   >[]
 >(
   ...types: Types
@@ -105,8 +109,8 @@ export function or<
   InferDecodedOrType<Types>,
   OrError<Assume<OrEncodeErrors<Types>, Error[]>>,
   OrError<Assume<OrDecodeErrors<Types>, Error[]>>,
-  EC,
-  DC
+  ECArgs,
+  DCArgs
 > {
   interface IOr {
     types: Types;
@@ -123,7 +127,9 @@ export function or<
       const errors = [] as Error[];
       const { types } = this;
       for (const ty of types) {
-        const res = ty.encode(v, e, ctx);
+        const res = (
+          ty.encode as TEncodeFunction<NotImportant, Error, [NotImportant]>
+        )(v, e, ctx);
         if (res.ok()) {
           return res;
         } else {
@@ -138,7 +144,9 @@ export function or<
       const errors = [] as Error[];
       const { types } = this;
       for (const ty of types) {
-        const res = ty.decode(d, c);
+        const res = (
+          ty.decode as TDecodeFunction<NotImportant, Error, [NotImportant]>
+        )(d, c);
         if (res.ok()) {
           return res;
         } else {
@@ -162,7 +170,7 @@ export function or<
     InferDecodedOrType<Types>,
     OrError<Assume<OrEncodeErrors<Types>, Error[]>>,
     OrError<Assume<OrDecodeErrors<Types>, Error[]>>,
-    EC,
-    DC
+    ECArgs,
+    DCArgs
   >;
 }

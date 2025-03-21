@@ -2,7 +2,7 @@ import { Result, ok } from "resultra";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
 import { flatMap } from "./flatMap";
-import { ICborType } from "../types";
+import { AnyContextArgs, ICborType, IDecoder, IEncoder } from "../types";
 import { TaggedDataItem } from "../default/TaggedDataItem";
 
 /**
@@ -18,25 +18,41 @@ import { TaggedDataItem } from "../default/TaggedDataItem";
 export function untag(
   tag: number | bigint,
   name: string
-): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<TaggedDataItem<ET>, TaggedDataItem<DT>, EE, DE, EC, DC>
-) => CborType<ET, DT, EE, TypeMismatchError | DE, EC, DC> {
-  return <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborType<TaggedDataItem<ET>, TaggedDataItem<DT>, EE, DE, EC, DC>
-  ) =>
-    flatMap<
+): <
+  ET,
+  DT,
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<TaggedDataItem<ET>, TaggedDataItem<DT>, EE, DE, ECArgs, DCArgs>
+) => CborType<ET, DT, EE, TypeMismatchError | DE, ECArgs, DCArgs> {
+  return <
+    ET,
+    DT,
+    EE extends Error,
+    DE extends Error,
+    ECArgs extends AnyContextArgs,
+    DCArgs extends AnyContextArgs
+  >(
+    ty: ICborType<
       TaggedDataItem<ET>,
-      ET,
       TaggedDataItem<DT>,
-      DT,
-      never,
-      TypeMismatchError,
-      unknown,
-      unknown
-    >(
-      (v: ET): Result<TaggedDataItem<ET>, never> =>
-        ok(new TaggedDataItem(tag, v)),
-      (t: TaggedDataItem<DT>): Result<DT, TypeMismatchError> => {
+      EE,
+      DE,
+      ECArgs,
+      DCArgs
+    >
+  ) =>
+    new CborType(
+      (value: ET, e: IEncoder, ...ctx: ECArgs): Result<void, EE> => {
+        return ty.encode(new TaggedDataItem(tag, value), e, ...ctx);
+      },
+      (d: IDecoder, ...ctx: DCArgs): Result<DT, TypeMismatchError | DE> => {
+        const tRes = ty.decode(d, ...ctx);
+        if (!tRes.ok()) return tRes;
+        const t = tRes.value;
         if (t.tag !== tag) {
           return new TypeMismatchError(
             name,
@@ -44,6 +60,7 @@ export function untag(
           ).err();
         }
         return ok(t.value);
-      }
-    )(ty);
+      },
+      ty.nullable
+    );
 }

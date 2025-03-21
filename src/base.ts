@@ -1,42 +1,61 @@
 import { err, Result } from "resultra";
 import { NotImplementedError } from "./errors";
 import { Pipeable } from "./pipe";
-import { ICborType, IDecoder, IEncoder, NotImportant } from "./types";
+import {
+  AnyContextArgs,
+  ContextFromArgs,
+  ICborType,
+  IDecoder,
+  IEncoder,
+  NotImportant,
+  TDecodeFunction,
+  TEncodeFunction,
+} from "./types";
 
 const getDefaultEncode = () => () => err(new NotImplementedError("encode"));
 const getDefaultDecode = () => () => err(new NotImplementedError("decode"));
 
-export class CborBuilder<ET, DT, EE extends Error, DE extends Error, EC, DC> {
+export class CborBuilder<
+  ET,
+  DT,
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+> {
   private _encode: (
     value: ET,
     e: IEncoder,
-    ...args: unknown extends EC ? [] | [EC] : [EC]
+    ...args: ECArgs
   ) => Result<void, EE>;
 
-  private _decode: (
-    d: IDecoder,
-    ...args: unknown extends DC ? [] | [DC] : [DC]
-  ) => Result<DT, DE>;
+  private _decode: (d: IDecoder, ...args: DCArgs) => Result<DT, DE>;
   private _nullable: boolean;
 
   constructor() {
     this._encode = getDefaultEncode() as unknown as (
       value: ET,
       e: IEncoder,
-      ...args: unknown extends EC ? [] | [EC] : [EC]
+      ...args: ECArgs
     ) => Result<void, EE>;
     this._decode = getDefaultDecode() as unknown as (
       d: IDecoder,
-      ...args: unknown extends DC ? [] | [DC] : [DC]
+      ...args: DCArgs
     ) => Result<DT, DE>;
     this._nullable = false;
   }
   encode<NET, NEE extends Error>(
     fn: (v: NET, e: IEncoder) => Result<void, NEE>
-  ): CborBuilder<NET, DT, NEE, DE, unknown, DC>;
+  ): CborBuilder<NET, DT, NEE, DE, [], DCArgs>;
   encode<NET, NEE extends Error, NEC>(
     fn: (value: NET, e: IEncoder, ctx: NEC) => Result<void, NEE>
-  ): CborBuilder<NET, DT, NEE, DE, NEC, DC>;
+  ): CborBuilder<NET, DT, NEE, DE, [NEC], DCArgs>;
+  encode<NET, NEE extends Error, NEC extends AnyContextArgs>(
+    fn: (value: NET, e: IEncoder, ctx: any) => Result<void, NEE>
+  ): CborBuilder<NET, DT, NEE, DE, NEC, DCArgs>;
+  encode<NET, NEE extends Error, NEC extends AnyContextArgs>(
+    fn: (value: NET, e: IEncoder, ...ctx: NEC) => Result<void, NEE>
+  ): CborBuilder<NET, DT, NEE, DE, NEC, DCArgs>;
   encode(encode: NotImportant) {
     this._encode = encode;
     return this as CborBuilder<
@@ -45,16 +64,19 @@ export class CborBuilder<ET, DT, EE extends Error, DE extends Error, EC, DC> {
       NotImportant,
       DE,
       NotImportant,
-      DC
+      DCArgs
     >;
   }
 
   decode<NDT, NDE extends Error>(
     fn: (d: IDecoder) => Result<NDT, NDE>
-  ): CborBuilder<ET, NDT, EE, NDE, EC, unknown>;
+  ): CborBuilder<ET, NDT, EE, NDE, ECArgs, [unknown]>;
   decode<NDT, NDE extends Error, NDC>(
     fn: (d: IDecoder, ctx: NDC) => Result<NDT, NDE>
-  ): CborBuilder<ET, NDT, EE, NDE, EC, NDC>;
+  ): CborBuilder<ET, NDT, EE, NDE, ECArgs, [NDC]>;
+  decode<NDT, NDE extends Error, NDC extends AnyContextArgs>(
+    fn: (d: IDecoder, ...ctx: NDC) => Result<NDT, NDE>
+  ): CborBuilder<ET, NDT, EE, NDE, ECArgs, NDC>;
   decode(decode: NotImportant) {
     this._decode = decode;
     return this as CborBuilder<
@@ -62,7 +84,7 @@ export class CborBuilder<ET, DT, EE extends Error, DE extends Error, EC, DC> {
       NotImportant,
       EE,
       NotImportant,
-      EC,
+      ECArgs,
       NotImportant
     >;
   }
@@ -71,12 +93,8 @@ export class CborBuilder<ET, DT, EE extends Error, DE extends Error, EC, DC> {
     this._nullable = value;
     return this;
   }
-  build(): CborType<ET, DT, EE, DE, EC, DC> {
-    return new CborType(
-      this._encode as (value: ET, e: IEncoder, ctx: EC) => Result<void, EE>,
-      this._decode as (d: IDecoder, ctx: DC) => Result<DT, DE>,
-      this._nullable
-    );
+  build(): CborType<ET, DT, EE, DE, ECArgs, DCArgs> {
+    return new CborType(this._encode, this._decode, this._nullable);
   }
 }
 
@@ -99,14 +117,21 @@ export class CborBuilder<ET, DT, EE extends Error, DE extends Error, EC, DC> {
  * - Nullable value support
  * - Composable through pipe and convert operations
  */
-export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
+export class CborType<
+    ET,
+    DT,
+    EE extends Error,
+    DE extends Error,
+    ECArgs extends AnyContextArgs,
+    DCArgs extends AnyContextArgs
+  >
   extends Pipeable
-  implements ICborType<ET, DT, EE, DE, EC, DC>
+  implements ICborType<ET, DT, EE, DE, ECArgs, DCArgs>
 {
   /** Virtual field just for type inference */
   __inferEncodedValue!: ET;
   /** Virtual field just for type inference */
-  __inferEncodingCtx!: EC;
+  __inferEncodingCtx!: ContextFromArgs<ECArgs>;
   /** Virtual field just for type inference */
   __inferEncodingError!: EE;
   /**
@@ -118,16 +143,12 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
    * @param args - Additional context argument (if necessary)
    * @returns Result of encoding
    */
-  encode: (
-    value: ET,
-    e: IEncoder,
-    ...args: unknown extends EC ? [] | [EC] : [EC]
-  ) => Result<void, EE>;
+  encode: (value: ET, e: IEncoder, ...args: ECArgs) => Result<void, EE>;
 
   /** Virtual field just for type inference */
   __inferDecodedValue!: DT;
   /** Virtual field just for type inference */
-  __inferDecodingCtx!: DC;
+  __inferDecodingCtx!: ContextFromArgs<DCArgs>;
   /** Virtual field just for type inference */
   __inferDecodingError!: DE;
 
@@ -139,27 +160,17 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
    * @param args - Additional context argument (if necessary)
    * @returns Result of decoding
    */
-  decode: (
-    d: IDecoder,
-    ...args: unknown extends DC ? [] | [DC] : [DC]
-  ) => Result<DT, DE>;
+  decode: (d: IDecoder, ...args: DCArgs) => Result<DT, DE>;
   public nullable: boolean;
 
   constructor(
-    encode: (value: ET, e: IEncoder, ctx: EC) => Result<void, EE>,
-    decode: (d: IDecoder, ctx: DC) => Result<DT, DE>,
+    encode: (value: ET, e: IEncoder, ...ctx: ECArgs) => Result<void, EE>,
+    decode: (d: IDecoder, ...ctx: DCArgs) => Result<DT, DE>,
     nullable: boolean
   ) {
     super();
-    this.encode = encode as (
-      value: ET,
-      e: IEncoder,
-      ...args: unknown extends EC ? [] | [EC] : [EC]
-    ) => Result<void, EE>;
-    this.decode = decode as (
-      d: IDecoder,
-      ...args: unknown extends DC ? [] | [DC] : [DC]
-    ) => Result<DT, DE>;
+    this.encode = encode;
+    this.decode = decode;
     this.nullable = nullable;
   }
   static builder(): CborBuilder<
@@ -167,21 +178,39 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
     never,
     NotImplementedError,
     NotImplementedError,
-    unknown,
-    unknown
+    [],
+    []
   > {
     return new CborBuilder();
   }
-  static from<ET, DT, EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborType<ET, DT, EE, DE, EC, DC>
-  ): CborType<ET, DT, EE, DE, EC, DC> {
+  static from<
+    ET,
+    DT,
+    EE extends Error,
+    DE extends Error,
+    ECArgs extends AnyContextArgs,
+    DCArgs extends AnyContextArgs
+  >(
+    ty: ICborType<ET, DT, EE, DE, ECArgs, DCArgs>
+  ): CborType<ET, DT, EE, DE, ECArgs, DCArgs> {
     return ty instanceof CborType
       ? ty
       : CborType.builder()
           .encode(
-            (v: ET, e: IEncoder, c: EC): Result<void, EE> => ty.encode(v, e, c)
+            ((v: ET, e: IEncoder, c: NotImportant): Result<void, EE> =>
+              (ty.encode as NotImportant)(v, e, c)) as TEncodeFunction<
+              ET,
+              EE,
+              ECArgs
+            >
           )
-          .decode((d: IDecoder, c: DC): Result<DT, DE> => ty.decode(d, c))
+          .decode(
+            ((d: IDecoder, c: NotImportant): Result<DT, DE> =>
+              (ty.decode as NotImportant)(
+                d,
+                c
+              )) as NotImportant as TDecodeFunction<DT, DE, DCArgs>
+          )
           .nullable(ty.nullable)
           .build();
   }
@@ -219,18 +248,24 @@ export class CborType<ET, DT, EE extends Error, DE extends Error, EC, DC>
   convert<T>(
     toNewDecodedValue: (value: DT) => T,
     toOldEncodedValue: (value: NoInfer<T>) => ET
-  ): CborType<T, T, EE, DE, EC, DC> {
+  ): CborType<T, T, EE, DE, ECArgs, DCArgs> {
     const obj = {
-      encode: (value: T, encoder: IEncoder, ctx: EC) => {
-        return this.encode(toOldEncodedValue(value), encoder, ctx);
+      encode: (value: T, encoder: IEncoder, ctx: ContextFromArgs<ECArgs>) => {
+        return (this.encode as NotImportant)(
+          toOldEncodedValue(value),
+          encoder,
+          ctx
+        );
       },
-      decode: (decoder: IDecoder, ctx: DC) => {
-        return this.decode(decoder, ctx).map(toNewDecodedValue);
+      decode: (decoder: IDecoder, ctx: ContextFromArgs<DCArgs>) => {
+        return (this.decode as NotImportant)(decoder, ctx).map(
+          toNewDecodedValue
+        );
       },
     };
 
     Reflect.setPrototypeOf(obj, this);
 
-    return obj as CborType<T, T, EE, DE, EC, DC>;
+    return obj as NotImportant as CborType<T, T, EE, DE, ECArgs, DCArgs>;
   }
 }

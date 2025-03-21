@@ -15,12 +15,16 @@ import { DecodingError } from "../DecodingError";
 import { OverflowError } from "../OverflowError";
 import {
   AnyCborTypeCodec,
+  AnyContextArgs,
+  ContextFromArgs,
   ICborType,
   IDecodable,
   IDecoder,
   IEncodable,
   IEncoder,
   NotImportant,
+  TDecodeFunction,
+  TEncodeFunction,
 } from "../types";
 
 function sameTag(v: number | bigint, tag: number | bigint) {
@@ -30,14 +34,18 @@ function sameTag(v: number | bigint, tag: number | bigint) {
   return BigInt(v) === BigInt(tag);
 }
 
-function encodeTagged<T, EE, EC>(
+function encodeTagged<T, EE, ECArgs extends AnyContextArgs>(
   e: IEncoder,
-  ty: IEncodable<T, EE, unknown extends EC ? [] | [NotImportant] : [EC]>,
+  ty: IEncodable<T, EE, ECArgs>,
   value: TaggedDataItem<T>,
-  ctx: EC
+  ctx: ContextFromArgs<ECArgs>
 ): Result<void, EE | OverflowError> {
   return writeTypeAndArg(e, TAG_TYPE, value.tag).andThen(() =>
-    ty.encode(value.value, e, ctx)
+    (ty.encode as TEncodeFunction<T, EE, [ContextFromArgs<ECArgs>]>)(
+      value.value,
+      e,
+      ctx
+    )
   );
 }
 
@@ -76,37 +84,58 @@ function decodeTag(
  */
 export function tagged(
   tag: number | bigint
-): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<ET, DT, EE, DE, EC, DC>
+): <
+  ET,
+  DT,
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<ET, DT, EE, DE, ECArgs, DCArgs>
 ) => CborType<
   Readonly<TaggedDataItem<ET>>,
   TaggedDataItem<DT>,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
   DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
-  EC,
-  DC
+  ECArgs,
+  DCArgs
 >;
-export function tagged(): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<ET, DT, EE, DE, EC, DC>
+export function tagged(): <
+  ET,
+  DT,
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<ET, DT, EE, DE, ECArgs, DCArgs>
 ) => CborType<
   Readonly<TaggedDataItem<ET>>,
   TaggedDataItem<DT>,
   EE | OverflowError,
   DE | DecodingError,
-  EC,
-  DC
+  ECArgs,
+  DCArgs
 >;
 export function tagged(
   tag?: number | bigint
-): <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<ET, DT, EE, DE, EC, DC>
+): <
+  ET,
+  DT,
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<ET, DT, EE, DE, ECArgs, DCArgs>
 ) => CborType<
   Readonly<TaggedDataItem<ET>>,
   TaggedDataItem<DT>,
   EE | OverflowError | UnexpectedValueError<number | bigint, number | bigint>,
   DE | DecodingError | UnexpectedValueError<number | bigint, number | bigint>,
-  EC,
-  DC
+  ECArgs,
+  DCArgs
 >;
 export function tagged(
   tag?: number | bigint
@@ -132,26 +161,37 @@ export function tagged(
       IDecodable<NotImportant, NotImportant, NotImportant>;
   }
   return tag == null
-    ? function <ET, DT, EE extends Error, DE extends Error, EC, DC>(
+    ? function <
+        ET,
+        DT,
+        EE extends Error,
+        DE extends Error,
+        ECArgs extends AnyContextArgs,
+        DCArgs extends AnyContextArgs
+      >(
         inner: AnyCborTypeCodec
       ): CborType<
         Readonly<TaggedDataItem<ET>>,
         TaggedDataItem<DT>,
         EE | OverflowError,
         DE | DecodingError,
-        EC,
-        DC
+        ECArgs,
+        DCArgs
       > {
         const proto = CborType.builder()
           .encode(function (
             this: IInner,
             value: Readonly<TaggedDataItem<ET>>,
             e: IEncoder,
-            ctx: EC
+            ctx: ContextFromArgs<ECArgs>
           ): Result<void, EE | OverflowError> {
-            return encodeTagged<ET, EE, EC>(e, this.inner, value, ctx);
+            return encodeTagged<ET, EE, ECArgs>(e, this.inner, value, ctx);
           })
-          .decode(function decode(this: IInner, d: IDecoder, ctx: DC) {
+          .decode(function decode(
+            this: IInner,
+            d: IDecoder,
+            ctx: ContextFromArgs<DCArgs>
+          ) {
             const tRes = decodeTag(d);
             if (!tRes.ok()) return tRes;
             const t = tRes.value;
@@ -167,8 +207,15 @@ export function tagged(
 
         return taggedType;
       }
-    : <ET, DT, EE extends Error, DE extends Error, EC, DC>(
-        ty: ICborType<ET, DT, EE, DE, EC, DC>
+    : <
+        ET,
+        DT,
+        EE extends Error,
+        DE extends Error,
+        ECArgs extends AnyContextArgs,
+        DCArgs extends AnyContextArgs
+      >(
+        ty: ICborType<ET, DT, EE, DE, ECArgs, DCArgs>
       ): CborType<
         Readonly<TaggedDataItem<ET>>,
         TaggedDataItem<DT>,
@@ -178,19 +225,24 @@ export function tagged(
         | DE
         | DecodingError
         | UnexpectedValueError<number | bigint, number | bigint>,
-        EC,
-        DC
+        ECArgs,
+        DCArgs
       > => {
         const proto = CborType.builder()
-          .encode((value: Readonly<TaggedDataItem<ET>>, e: IEncoder, ctx: EC) =>
-            sameTag(value.tag, tag)
-              ? encodeTagged(e, ty, value, ctx)
-              : new UnexpectedValueError(tag, value.tag).err()
+          .encode(
+            (
+              value: Readonly<TaggedDataItem<ET>>,
+              e: IEncoder,
+              ctx: ContextFromArgs<ECArgs>
+            ) =>
+              sameTag(value.tag, tag)
+                ? encodeTagged(e, ty, value, ctx)
+                : new UnexpectedValueError(tag, value.tag).err()
           )
           .decode(
             (
               d: IDecoder,
-              ctx: DC
+              ctx: ContextFromArgs<DCArgs>
             ): Result<
               TaggedDataItem<DT>,
               EndOfInputError | TypeMismatchError | InvalidCborError | DE
@@ -201,13 +253,26 @@ export function tagged(
               if (!sameTag(t, tag)) {
                 return new UnexpectedValueError(tag, t).err();
               }
-              const value = ty.decode(d, ctx);
+              const value = (
+                ty.decode as TDecodeFunction<DT, DE, [ContextFromArgs<DCArgs>]>
+              )(d, ctx);
               if (!value.ok()) return value;
               return ok(new TaggedDataItem(t, value.value));
             }
           )
           .build();
 
-        return proto;
+        return proto as NotImportant as CborType<
+          Readonly<TaggedDataItem<ET>>,
+          TaggedDataItem<DT>,
+          | EE
+          | OverflowError
+          | UnexpectedValueError<number | bigint, number | bigint>,
+          | DE
+          | DecodingError
+          | UnexpectedValueError<number | bigint, number | bigint>,
+          ECArgs,
+          DCArgs
+        >;
       };
 }

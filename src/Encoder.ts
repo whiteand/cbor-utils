@@ -1,5 +1,5 @@
 import { Result } from "resultra";
-import { IEncodable, IEncoder, NotImportant } from "./types";
+import { AnyContextArgs, IEncodable, IEncoder, NotImportant } from "./types";
 
 /**
  * @param current current buffer size
@@ -17,7 +17,7 @@ function nextSize(current: number, minimal: number) {
 /**
  * Base class for all encoders
  */
-abstract class BaseEncoder {
+abstract class BaseEncoder implements IEncoder {
   /** Buffer to write into during encoding */
   buf: Uint8Array;
   /**
@@ -56,12 +56,13 @@ abstract class BaseEncoder {
    *
    * @param value position of the cursor in the underlying buffer that should be restored
    */
-  restore(value: number): void {
+  restore(value: number): this {
     if (this.buf.length > value) {
       this.ptr = value;
     } else {
       throw new Error("invalid restore position: " + value);
     }
+    return this;
   }
 
   /**
@@ -87,6 +88,13 @@ abstract class BaseEncoder {
     const newBuf = new Uint8Array(newSize);
     newBuf.set(this.buf);
     this.buf = newBuf;
+  }
+  reserve(size: number): this {
+    const newSize = this.ptr + size;
+    if (newSize >= this.buf.length) {
+      this.realloc(nextSize(this.buf.length, newSize));
+    }
+    return this;
   }
   /**
    * Appends bytes to the underlying buffer.
@@ -125,12 +133,12 @@ export class Encoder extends BaseEncoder implements IEncoder {
    * @param args additional context argument (if necessary)
    * @returns ok if encoding was successful, error result otherwise
    */
-  encode<T, EE extends Error, EC>(
-    ty: IEncodable<T, EE, unknown extends EC ? [] | [NotImportant] : [EC]>,
+  encode<T, EE extends Error, ECArgs extends AnyContextArgs>(
+    ty: IEncodable<T, EE, ECArgs>,
     value: Readonly<T>,
-    ...args: unknown extends EC ? [] | [NotImportant] : [EC]
+    ...args: NoInfer<ECArgs>
   ): Result<void, EE> {
-    return ty.encode(value, this, (args as [EC])[0]);
+    return (ty.encode as NotImportant)(value, this, args[0]);
   }
 }
 
@@ -150,11 +158,11 @@ export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
    * @param args additional context argument (if necessary)
    * @returns void, because it throws an error if encoding fails
    */
-  encode<T, EE extends Error, EC>(
-    ty: IEncodable<T, EE, unknown extends EC ? [] | [NotImportant] : [EC]>,
+  encode<T, EE extends Error, ECArgs extends AnyContextArgs>(
+    ty: IEncodable<T, EE, ECArgs>,
     value: NoInfer<T>,
-    ...args: unknown extends EC ? [] | [NotImportant] : [EC]
+    ...args: NoInfer<ECArgs>
   ): void {
-    return ty.encode(value, this, (args as [EC])[0]).unwrap();
+    return (ty.encode as NotImportant)(value, this, args[0]).unwrap();
   }
 }

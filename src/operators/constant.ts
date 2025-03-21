@@ -1,7 +1,13 @@
 import { ok, Result } from "resultra";
 import { CborType } from "../base";
 import { UnexpectedValueError } from "../UnexpectedValueError";
-import { ICborType, IDecoder, IEncoder, NotImportant } from "../types";
+import {
+  AnyContextArgs,
+  ICborType,
+  IDecoder,
+  IEncoder,
+  NotImportant,
+} from "../types";
 
 /**
  *
@@ -19,18 +25,28 @@ import { ICborType, IDecoder, IEncoder, NotImportant } from "../types";
 export function constant<In, const V extends In>(
   expectedValue: V,
   isEqual: (exp: NoInfer<V>, b: NoInfer<In>) => boolean = Object.is
-): <EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<In, In, EE, DE, EC, DC>
+): <
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<In, In, EE, DE, ECArgs, DCArgs>
 ) => CborType<
   V,
   V,
   EE | UnexpectedValueError<In, V>,
   DE | UnexpectedValueError<In, V>,
-  EC,
-  DC
+  ECArgs,
+  DCArgs
 > {
-  return <EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborType<In, In, EE, DE, EC, DC>
+  return <
+    EE extends Error,
+    DE extends Error,
+    ECArgs extends AnyContextArgs,
+    DCArgs extends AnyContextArgs
+  >(
+    ty: ICborType<In, In, EE, DE, ECArgs, DCArgs>
   ) => {
     interface IConstant {
       expectedValue: V;
@@ -48,14 +64,14 @@ export function constant<In, const V extends In>(
         if (!this.isEqual(value, expectedValue)) {
           return new UnexpectedValueError(expectedValue, value).err();
         }
-        return ty.encode(value, e, ctx);
+        return (ty.encode as NotImportant)(value, e, ctx);
       })
       .decode(function decode(
         this: IConstant,
         d: IDecoder,
-        ctx: DC
+        ctx: DCArgs
       ): Result<V, DE | UnexpectedValueError<In, V>> {
-        const v = ty.decode(d, ctx);
+        const v = (ty.decode as NotImportant)(d, ctx);
         if (!v.ok()) {
           return v;
         }
@@ -79,8 +95,8 @@ export function constant<In, const V extends In>(
       V,
       EE | UnexpectedValueError<In, V>,
       DE | UnexpectedValueError<In, V>,
-      EC,
-      DC
+      ECArgs,
+      DCArgs
     >;
   };
 }
