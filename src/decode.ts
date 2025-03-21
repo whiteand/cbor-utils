@@ -9,10 +9,10 @@ type TDecodeFunction = (<T, E extends Error, C>(
   cb: (d: Decoder, ctx: C) => Result<T, E>,
   ...args: unknown extends C ? [] | [C] : [C]
 ) => Result<T, E>) & {
-  type: <const T, const E extends Error, const C>(
+  type: <const T, const E extends Error, CArgs extends [] | [NotImportant]>(
     bytes: Uint8Array | IDecoder,
-    ty: IDecodable<T, E, unknown extends C ? [] | [NotImportant] : [C]>,
-    ...args: unknown extends C ? [] | [C] : [C]
+    ty: IDecodable<T, E, CArgs>,
+    ...args: CArgs
   ) => Result<T, E>;
 };
 
@@ -47,7 +47,7 @@ export const decode: TDecodeFunction = ((bytes, cb, ctx) =>
   cb(Decoder.from(bytes), ctx as NotImportant)) as TDecodeFunction;
 
 decode.type = ((bytes, ty, ctx) =>
-  ty.decode(
+  (ty.decode as NotImportant)(
     Decoder.from(bytes),
-    ctx as NotImportant
+    ctx
   )) as TDecodeFunction["type"];
