@@ -180,33 +180,27 @@ export type AnyEncodableType = IEncodable<
 >;
 
 /** Infers decoded type from the passed cbor type */
-export type DecodedType<T extends AnyDecodableType> = T extends T
-  ? T["__inferDecodedValue"]
-  : never;
+export type DecodedType<T extends { __inferDecodedValue: NotImportant }> =
+  T extends T ? T["__inferDecodedValue"] : never;
 /** Infers encoded tpye from the passed cbor type */
-export type EncodedType<T extends AnyEncodableType> = T extends T
-  ? T["__inferEncodedValue"]
-  : never;
+export type EncodedType<T extends { __inferEncodedValue: NotImportant }> =
+  T extends T ? T["__inferEncodedValue"] : never;
 
 /** Infers decoding error type from the passed cbor type */
-export type DecodeError<T extends AnyDecodableType> = T extends T
-  ? T["__inferDecodingError"]
-  : never;
+export type DecodeError<T extends { __inferDecodingError: NotImportant }> =
+  T extends T ? T["__inferDecodingError"] : never;
 
 /** Infers decoding context type from the passed cbor type */
-export type DecodeContext<T extends AnyDecodableType> = T extends T
-  ? T["__inferDecodingCtx"]
-  : never;
+export type DecodeContext<T extends { __inferDecodingCtx: NotImportant }> =
+  T extends T ? T["__inferDecodingCtx"] : never;
 
 /** Infers encoding error type from the passed cbor type */
-export type EncodeError<T extends AnyEncodableType> = T extends T
-  ? T["__inferEncodingError"]
-  : never;
+export type EncodeError<T extends { __inferEncodingError: NotImportant }> =
+  T extends T ? T["__inferEncodingError"] : never;
 
 /** Infers encoding context type from the passed cbor type */
-export type EncodeContext<T extends AnyEncodableType> = T extends T
-  ? T["__inferEncodingCtx"]
-  : never;
+export type EncodeContext<T extends { __inferEncodingCtx: NotImportant }> =
+  T extends T ? T["__inferEncodingCtx"] : never;
 
 /** Helper that allows to use either specific type or default one if not proper */
 export type Assume<T, U> = T extends U ? T : U;
