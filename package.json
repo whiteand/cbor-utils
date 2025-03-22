@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "vitest",
+    "test:run": "vitest --run",
     "build": "tsup && tsc",
     "lint:ox": "npx --yes oxlint@latest --allow=constructor-super",
     "lint:jsr": "npm run build:jsr-json && bunx jsr publish --dry-run",
