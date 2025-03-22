@@ -258,11 +258,19 @@ export type Assume<T, U> = T extends U ? T : U;
 export type Z = any;
 
 /**
- * Given a list of cbor types maps it to a list of args
+ * Given a list of cbor types maps it to a list of decoding context args
  */
-export type SelectContextArgsFromProp<
-  TS extends readonly Record<"__inferDecodingCtx" | "__inferEncodingCtx", Z>[],
-  prop extends "__inferDecodingCtx" | "__inferEncodingCtx"
+export type SelectEncodingContextArgs<
+  TS extends readonly { __inferEncodingCtx: Z }[]
 > = {
-  [ind in keyof TS]: ArgsFromContext<TS[ind][prop]>;
+  [ind in keyof TS]: ArgsFromContext<TS[ind]["__inferEncodingCtx"]>;
+};
+
+/**
+ * Given a list of cbor types maps it to a list of encoding context args
+ */
+export type SelectDecodingContextArgs<
+  TS extends readonly { __inferDecodingCtx: Z }[]
+> = {
+  [ind in keyof TS]: ArgsFromContext<TS[ind]["__inferDecodingCtx"]>;
 };

@@ -68,6 +68,12 @@ export type {
   IEncoder,
   TDecodeFunction,
   TEncodeFunction,
+  AndManyContextsArgs,
+  SelectDecodingContextArgs,
+  SelectEncodingContextArgs,
+  AnyContextArgs,
+  ContextFromArgs,
+  ArgsFromContext,
 } from "./types";
 export { UnderflowError } from "./UnderflowError";
 export { UnexpectedValueError } from "./UnexpectedValueError";

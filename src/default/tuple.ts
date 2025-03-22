@@ -15,8 +15,9 @@ import {
   Z,
   AndManyContextsArgs,
   ContextFromArgs,
-  SelectContextArgsFromProp,
   AnyCborTypeCodec,
+  SelectEncodingContextArgs,
+  SelectDecodingContextArgs,
 } from "../types";
 import { TupleVals } from "../utils/TupleVals";
 import { arrayLen } from "./arrayLen";
@@ -68,8 +69,8 @@ export function tuple<const Types extends readonly AnyCborTypeCodec[]>(
   InferDecodedTupleType<Types>,
   InferTupleEE<Types> | TypeMismatchError,
   InferTupleDE<Types> | EndOfInputError | TypeMismatchError | InvalidCborError,
-  AndManyContextsArgs<SelectContextArgsFromProp<Types, "__inferEncodingCtx">>,
-  AndManyContextsArgs<SelectContextArgsFromProp<Types, "__inferDecodingCtx">>
+  AndManyContextsArgs<SelectEncodingContextArgs<Types>>,
+  AndManyContextsArgs<SelectDecodingContextArgs<Types>>
 > {
   const n = types.length as InferLen<Types>;
   const s = seq<Types>(types);
@@ -80,9 +81,7 @@ export function tuple<const Types extends readonly AnyCborTypeCodec[]>(
         v: InferEncodedTupleType<Types>,
         e: IEncoder,
         ctx: ContextFromArgs<
-          AndManyContextsArgs<
-            SelectContextArgsFromProp<Types, "__inferEncodingCtx">
-          >
+          AndManyContextsArgs<SelectEncodingContextArgs<Types>>
         >
       ): Result<void, InferTupleEE<Types> | TypeMismatchError> =>
         arrayLen
@@ -96,9 +95,7 @@ export function tuple<const Types extends readonly AnyCborTypeCodec[]>(
       (
         d: IDecoder,
         ctx: ContextFromArgs<
-          AndManyContextsArgs<
-            SelectContextArgsFromProp<Types, "__inferDecodingCtx">
-          >
+          AndManyContextsArgs<SelectDecodingContextArgs<Types>>
         >
       ): Result<
         InferDecodedTupleType<Types>,

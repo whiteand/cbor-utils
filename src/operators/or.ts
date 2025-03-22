@@ -12,7 +12,8 @@ import {
   IEncoder,
   Z,
   AndManyContextsArgs,
-  SelectContextArgsFromProp,
+  SelectEncodingContextArgs,
+  SelectDecodingContextArgs,
 } from "../types";
 import { TupleVals } from "../utils/TupleVals";
 
@@ -66,8 +67,8 @@ export function or<const Types extends readonly ICborType<Z, Z, Z, Z, Z, Z>[]>(
   InferDecodedOrType<Types>,
   OrError<Assume<OrEncodeErrors<Types>, Error[]>>,
   OrError<Assume<OrDecodeErrors<Types>, Error[]>>,
-  AndManyContextsArgs<SelectContextArgsFromProp<Types, "__inferEncodingCtx">>,
-  AndManyContextsArgs<SelectContextArgsFromProp<Types, "__inferDecodingCtx">>
+  AndManyContextsArgs<SelectEncodingContextArgs<Types>>,
+  AndManyContextsArgs<SelectDecodingContextArgs<Types>>
 > {
   interface IOr {
     types: Types;
@@ -118,7 +119,7 @@ export function or<const Types extends readonly ICborType<Z, Z, Z, Z, Z, Z>[]>(
     InferDecodedOrType<Types>,
     OrError<Assume<OrEncodeErrors<Types>, Error[]>>,
     OrError<Assume<OrDecodeErrors<Types>, Error[]>>,
-    AndManyContextsArgs<SelectContextArgsFromProp<Types, "__inferEncodingCtx">>,
-    AndManyContextsArgs<SelectContextArgsFromProp<Types, "__inferDecodingCtx">>
+    AndManyContextsArgs<SelectEncodingContextArgs<Types>>,
+    AndManyContextsArgs<SelectDecodingContextArgs<Types>>
   >;
 }
