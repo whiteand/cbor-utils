@@ -1,21 +1,45 @@
 import { IPipeable } from "../pipe";
 import { IDecoder, IEncoder, Z } from "../types";
+import { ByteLengthReceiver } from "./byteLength";
+
+export interface OutputByteStream extends IEncoder {}
+
+export interface InputByteStream extends IDecoder {}
 
 export type SuccessResult = 0;
 
-export interface Inferable<T> {
+export interface Inferable<T, R> {
   __inferT: T;
+  __inferResults: R;
 }
+
+export type InferTypeInner<T extends { __inferT: Z }> = T["__inferT"];
+export type InferResultsInner<T extends { __inferResults: Z }> =
+  T["__inferResults"];
+
+export type InferType<T> = T extends T
+  ? T extends { __inferT: Z }
+    ? InferTypeInner<T>
+    : never
+  : never;
+
+export type InferResults<T> = T extends T
+  ? T extends { __inferResults: Z }
+    ? InferResultsInner<T["__inferResults"]>
+    : never
+  : never;
 
 export type AnyEncodable = IEncodable<Z, Z>;
 
-export interface IEncodable<T, Results> extends IPipeable, Inferable<T> {
+export interface IEncodable<T, Results>
+  extends IPipeable,
+    Inferable<T, Results> {
   /**
    *
    * @param value value that should be encoded
-   * @param encoder encoder into which the value will be encoded
+   * @param output encoder into which the value will be encoded
    */
-  encode(value: T, encoder: IEncoder): Results;
+  encode(value: T, output: OutputByteStream): Results;
   /**
    * Will the value be encoded as 0xf6 (null) data item
    *
@@ -43,7 +67,9 @@ export interface IEncodable<T, Results> extends IPipeable, Inferable<T> {
 
 export type AnyDecodable = IDecodable<Z, Z>;
 
-export interface IDecodable<T, Results> extends IPipeable, Inferable<T> {
+export interface IDecodable<T, Results>
+  extends IPipeable,
+    Inferable<T, Results> {
   /**
    * Returns 0 if the value was successfully decoded.
    * Otherwise returns error code.
@@ -52,7 +78,7 @@ export interface IDecodable<T, Results> extends IPipeable, Inferable<T> {
    *
    * @param decoder decoder from which the value will be decoded
    */
-  decode(decoder: IDecoder): Results;
+  decode(decoder: InputByteStream): Results;
   /**
    * Returns decoded value, if the data item was successfully decoded.
    * Unsafe: ensure that decode operation returned 0.
@@ -65,16 +91,13 @@ export interface IDecodable<T, Results> extends IPipeable, Inferable<T> {
   /**
    * Skips the encoded structure item in decoder
    */
-  skip(decoder): void;
-  /*
-   * How many bytes will be read from decoder
-   */
-  byteLength(decoder): number;
+  skip(decoder: InputByteStream): void;
+
   /**
    * The number of data items that will be read from decoder
    * @param decoder decoder from which the data items will be read
    */
-  dataItems(decoder): void;
+  dataItems(decoder: InputByteStream): void;
   /**
    * How many data items will be read from decoder
    */
@@ -86,9 +109,34 @@ export interface IDecodable<T, Results> extends IPipeable, Inferable<T> {
   maxDataItems(): number;
 }
 
-export type AnyType = IType<Z, Z, Z, Z>;
+export type AnyType = IType<Z, Z>;
 
-export interface IType<ET, DT, EE, DE> extends IPipeable {
-  encoder: IEncodable<ET, EE>;
-  decoder: IDecodable<DT, DE>;
+interface TypeInferable<E, D> {
+  __inferEncoder: E;
+  __inferDecoder: D;
+}
+
+export type InferEncoderInner<T extends { __inferEncoder: Z }> =
+  T["__inferEncoder"];
+
+export type InferDecoderInner<T extends { __inferDecoder: Z }> =
+  T["__inferDecoder"];
+
+export type InferEncoder<T> = T extends T
+  ? T extends { __inferEncoder: Z }
+    ? InferEncoderInner<T>
+    : never
+  : never;
+
+export type InferDecoder<T> = T extends T
+  ? T extends { __inferDecoder: Z }
+    ? InferDecoderInner<T>
+    : never
+  : never;
+
+export interface IType<E, D> extends IPipeable, TypeInferable<E, D> {
+  encoder(): E;
+  decoder(): D;
+  encode(value: InferType<E>, output: OutputByteStream): InferResults<E>;
+  decode(input: InputByteStream): InferResults<D>;
 }
