@@ -66,6 +66,6 @@ export const simple: CborType<
   Simple<number>,
   TypeMismatchError,
   TypeMismatchError | EndOfInputError | InvalidCborError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder().encode(encodeSpecial).decode(decodeSpecial).build();

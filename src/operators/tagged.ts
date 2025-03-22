@@ -22,9 +22,7 @@ import {
   IDecoder,
   IEncodable,
   IEncoder,
-  NotImportant,
-  TDecodeFunction,
-  TEncodeFunction,
+  Z,
 } from "../types";
 
 function sameTag(v: number | bigint, tag: number | bigint) {
@@ -41,11 +39,7 @@ function encodeTagged<T, EE, ECArgs extends AnyContextArgs>(
   ctx: ContextFromArgs<ECArgs>
 ): Result<void, EE | OverflowError> {
   return writeTypeAndArg(e, TAG_TYPE, value.tag).andThen(() =>
-    (ty.encode as TEncodeFunction<T, EE, [ContextFromArgs<ECArgs>]>)(
-      value.value,
-      e,
-      ctx
-    )
+    (ty.encode as Z)(value.value, e, ctx)
   );
 }
 
@@ -140,25 +134,10 @@ export function tagged(
 export function tagged(
   tag?: number | bigint
 ): (
-  ty: CborType<
-    NotImportant,
-    NotImportant,
-    Error,
-    Error,
-    NotImportant,
-    NotImportant
-  >
-) => CborType<
-  NotImportant,
-  NotImportant,
-  Error,
-  Error,
-  NotImportant,
-  NotImportant
-> {
+  ty: CborType<Z, Z, Error, Error, Z, Z>
+) => CborType<Z, Z, Error, Error, Z, Z> {
   interface IInner {
-    inner: IEncodable<NotImportant, NotImportant, NotImportant> &
-      IDecodable<NotImportant, NotImportant, NotImportant>;
+    inner: IEncodable<Z, Z, Z> & IDecodable<Z, Z, Z>;
   }
   return tag == null
     ? function <
@@ -253,16 +232,14 @@ export function tagged(
               if (!sameTag(t, tag)) {
                 return new UnexpectedValueError(tag, t).err();
               }
-              const value = (
-                ty.decode as TDecodeFunction<DT, DE, [ContextFromArgs<DCArgs>]>
-              )(d, ctx);
+              const value = (ty.decode as Z)(d, ctx);
               if (!value.ok()) return value;
               return ok(new TaggedDataItem(t, value.value));
             }
           )
           .build();
 
-        return proto as NotImportant as CborType<
+        return proto as Z as CborType<
           Readonly<TaggedDataItem<ET>>,
           TaggedDataItem<DT>,
           | EE

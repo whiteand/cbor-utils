@@ -7,7 +7,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { getEoiError } from "../EndOfInputError";
 import { Simple } from "./DataItem";
 import { SPECIAL_TYPE_MASK } from "../constants";
-import { NotImportant } from "../types";
+import { Z } from "../types";
 
 describe("simple", () => {
   const tests: Array<{
@@ -52,7 +52,7 @@ describe("simple", () => {
     "correctly encodes $v => $b",
     ({ v, b }) => {
       const e = new Encoder();
-      e.encode(ty, v as NotImportant).unwrap();
+      e.encode(ty, v as Z).unwrap();
       expect(hex(e.finish())).toBe(b);
     }
   );
@@ -60,7 +60,7 @@ describe("simple", () => {
     "fails to encode $v => $ee",
     ({ v, ee }) => {
       const e = new Encoder();
-      const res = e.encode(ty, v as NotImportant);
+      const res = e.encode(ty, v as Z);
       expect(!res.ok()).toBe(true);
       expect(!res.ok() && res.error).toEqual(ee);
     }

@@ -97,8 +97,8 @@ export const mapLen: CborType<
   number | bigint | null,
   OverflowError,
   EndOfInputError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder()
   .encode(
     (v: bigint | number | null, e: IEncoder): Result<void, OverflowError> =>

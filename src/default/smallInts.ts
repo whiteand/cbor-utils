@@ -32,8 +32,8 @@ function createSmallIntType(
   number,
   OverflowError | UnderflowError,
   InvalidCborError | EndOfInputError | TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > {
   return uint.pipe(
     flatMap(
@@ -76,7 +76,14 @@ function createSmallIntType(
         ).err();
       }
     )
-  );
+  ) as CborType<
+    number,
+    number,
+    OverflowError | UnderflowError,
+    InvalidCborError | EndOfInputError | TypeMismatchError,
+    [],
+    []
+  >;
 }
 
 /**
@@ -87,8 +94,8 @@ export const u8: CborType<
   number,
   OverflowError | UnderflowError,
   InvalidCborError | EndOfInputError | TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > = createSmallIntType(8);
 
 /**
@@ -99,8 +106,8 @@ export const u16: CborType<
   number,
   OverflowError | UnderflowError,
   InvalidCborError | EndOfInputError | TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > = createSmallIntType(16);
 
 /**
@@ -111,6 +118,6 @@ export const u32: CborType<
   number,
   OverflowError | UnderflowError,
   InvalidCborError | EndOfInputError | TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > = createSmallIntType(32);

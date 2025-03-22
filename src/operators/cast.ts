@@ -1,5 +1,5 @@
 import { CborType } from "../base";
-import { ICborType } from "../types";
+import { AnyContextArgs, ICborType } from "../types";
 
 /**
  *
@@ -16,12 +16,18 @@ import { ICborType } from "../types";
 export function cast<FromE, ToE extends FromE, FromD = FromE, ToD = ToE>(): <
   EE extends Error,
   DE extends Error,
-  EC,
-  DC
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
 >(
-  ty: ICborType<FromE, FromD, EE, DE, EC, DC>
-) => CborType<ToE, ToD, EE, DE, EC, DC> {
-  return <EE extends Error, DE extends Error, EC, DC>(
-    ty: ICborType<FromE, FromD, EE, DE, EC, DC>
-  ) => CborType.from(ty as unknown as CborType<ToE, ToD, EE, DE, EC, DC>);
+  ty: ICborType<FromE, FromD, EE, DE, ECArgs, DCArgs>
+) => CborType<ToE, ToD, EE, DE, ECArgs, DCArgs> {
+  return <
+    EE extends Error,
+    DE extends Error,
+    ECArgs extends AnyContextArgs,
+    DCArgs extends AnyContextArgs
+  >(
+    ty: ICborType<FromE, FromD, EE, DE, ECArgs, DCArgs>
+  ) =>
+    CborType.from(ty as unknown as CborType<ToE, ToD, EE, DE, ECArgs, DCArgs>);
 }

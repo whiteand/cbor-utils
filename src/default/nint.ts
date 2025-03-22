@@ -30,8 +30,8 @@ export const nint: CborType<
   number | bigint,
   OverflowError | TypeMismatchError,
   DecodingError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder()
   .encode((v: number | bigint, e: IEncoder) => {
     if (typeof v === "number") {

@@ -1,4 +1,4 @@
-import { NotImportant } from "./types";
+import { Z } from "./types";
 
 export interface IPipeable {
   pipe<A, B>(this: A, ab: (_: A) => B): B;
@@ -289,7 +289,10 @@ export interface IPipeable {
   ): U;
 }
 
-export const pipeArguments: <A>(self: A, args: IArguments) => unknown = <A>(self: A, args: IArguments): unknown => {
+export const pipeArguments: <A>(self: A, args: IArguments) => unknown = <A>(
+  self: A,
+  args: IArguments
+): unknown => {
   switch (args.length) {
     case 1:
       return args[0](self);
@@ -638,7 +641,7 @@ export class Pipeable implements IPipeable {
     _rs?: unknown,
     _st?: unknown,
     _tu?: unknown
-  ): NotImportant {
+  ): Z {
     return pipeArguments(this, arguments);
   }
 }

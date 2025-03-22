@@ -1,13 +1,7 @@
 import { ok, Result } from "resultra";
 import { CborType } from "../base";
 import { UnexpectedValueError } from "../UnexpectedValueError";
-import {
-  AnyContextArgs,
-  ICborType,
-  IDecoder,
-  IEncoder,
-  NotImportant,
-} from "../types";
+import { AnyContextArgs, ICborType, IDecoder, IEncoder, Z } from "../types";
 
 /**
  *
@@ -58,20 +52,20 @@ export function constant<In, const V extends In>(
         this: IConstant,
         value: V,
         e: IEncoder,
-        ctx: NotImportant
+        ctx: Z
       ): Result<void, EE | UnexpectedValueError<In, V>> {
         const { expectedValue } = this;
         if (!this.isEqual(value, expectedValue)) {
           return new UnexpectedValueError(expectedValue, value).err();
         }
-        return (ty.encode as NotImportant)(value, e, ctx);
+        return (ty.encode as Z)(value, e, ctx);
       })
       .decode(function decode(
         this: IConstant,
         d: IDecoder,
         ctx: DCArgs
       ): Result<V, DE | UnexpectedValueError<In, V>> {
-        const v = (ty.decode as NotImportant)(d, ctx);
+        const v = (ty.decode as Z)(d, ctx);
         if (!v.ok()) {
           return v;
         }
@@ -90,7 +84,7 @@ export function constant<In, const V extends In>(
       isEqual,
     });
 
-    return constantType as NotImportant as CborType<
+    return constantType as Z as CborType<
       V,
       V,
       EE | UnexpectedValueError<In, V>,

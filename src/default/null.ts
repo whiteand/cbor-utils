@@ -17,8 +17,8 @@ export const nullType: CborType<
   null,
   UnexpectedValueError<null, null>,
   EndOfInputError | TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder()
   .encode((v: null, e: IEncoder) =>
     v !== null

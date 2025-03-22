@@ -51,6 +51,6 @@ export const f32: CborType<
   number,
   OverflowError,
   TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder().encode(encodeF32).decode(decodeF32).build();

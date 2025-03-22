@@ -12,35 +12,37 @@ import {
   ICborType,
   IDecoder,
   IEncoder,
-  NotImportant,
+  Z,
+  AndManyContextsArgs,
+  ContextFromArgs,
+  SelectContextArgsFromProp,
+  AnyCborTypeCodec,
 } from "../types";
 import { TupleVals } from "../utils/TupleVals";
 import { arrayLen } from "./arrayLen";
 import { Result } from "resultra";
 
 export type InferEncodedTupleType<
-  TS extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
+  TS extends readonly ICborType<Z, Z, Error, Error, Z, Z>[]
 > = {
   -readonly [ind in keyof TS]: EncodedType<TS[ind]>;
 };
 export type InferDecodedTupleType<
-  TS extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
+  TS extends readonly ICborType<Z, Z, Error, Error, Z, Z>[]
 > = {
   -readonly [ind in keyof TS]: DecodedType<TS[ind]>;
 };
 
-type InferTupleEE<
-  TS extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
-> = TupleVals<{
-  -readonly [ind in keyof TS]: EncodeError<TS[ind]>;
-}>;
-type InferTupleDE<
-  TS extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
-> = TupleVals<{
-  -readonly [ind in keyof TS]: DecodeError<TS[ind]>;
-}>;
+type InferTupleEE<TS extends readonly ICborType<Z, Z, Error, Error, Z, Z>[]> =
+  TupleVals<{
+    -readonly [ind in keyof TS]: EncodeError<TS[ind]>;
+  }>;
+type InferTupleDE<TS extends readonly ICborType<Z, Z, Error, Error, Z, Z>[]> =
+  TupleVals<{
+    -readonly [ind in keyof TS]: DecodeError<TS[ind]>;
+  }>;
 
-type InferLen<TS extends readonly NotImportant[]> = TS["length"];
+type InferLen<TS extends readonly Z[]> = TS["length"];
 
 /**
  * Type constructor that creates a tuple type from a list of element types.
@@ -59,31 +61,33 @@ type InferLen<TS extends readonly NotImportant[]> = TS["length"];
  * @param types
  * @returns
  */
-export function tuple<
-  const EC,
-  const DC,
-  const Types extends readonly ICborType<NotImportant, NotImportant, Error, Error, NotImportant, NotImportant>[]
->(
+export function tuple<const Types extends readonly AnyCborTypeCodec[]>(
   types: Types
 ): CborType<
   InferEncodedTupleType<Types>,
   InferDecodedTupleType<Types>,
   InferTupleEE<Types> | TypeMismatchError,
   InferTupleDE<Types> | EndOfInputError | TypeMismatchError | InvalidCborError,
-  EC,
-  DC
+  AndManyContextsArgs<SelectContextArgsFromProp<Types, "__inferEncodingCtx">>,
+  AndManyContextsArgs<SelectContextArgsFromProp<Types, "__inferDecodingCtx">>
 > {
   const n = types.length as InferLen<Types>;
-  const s = seq<EC, DC, Types>(types);
+  const s = seq<Types>(types);
 
   return CborType.builder()
     .encode(
       (
         v: InferEncodedTupleType<Types>,
         e: IEncoder,
-        ctx: EC
+        ctx: ContextFromArgs<
+          AndManyContextsArgs<
+            SelectContextArgsFromProp<Types, "__inferEncodingCtx">
+          >
+        >
       ): Result<void, InferTupleEE<Types> | TypeMismatchError> =>
-        arrayLen.encode(n, e).andThen(() => s.encode(v, e, ctx)) as Result<
+        arrayLen
+          .encode(n, e)
+          .andThen(() => (s.encode as Z)(v, e, ctx)) as Result<
           void,
           InferTupleEE<Types> | TypeMismatchError
         >
@@ -91,7 +95,11 @@ export function tuple<
     .decode(
       (
         d: IDecoder,
-        ctx: DC
+        ctx: ContextFromArgs<
+          AndManyContextsArgs<
+            SelectContextArgsFromProp<Types, "__inferDecodingCtx">
+          >
+        >
       ): Result<
         InferDecodedTupleType<Types>,
         | InferTupleDE<Types>
@@ -108,8 +116,8 @@ export function tuple<
             "tuple length mismatch"
           ).err();
         }
-        return s.decode(d, ctx);
+        return (s.decode as Z)(d, ctx);
       }
     )
-    .build();
+    .build() as Z;
 }

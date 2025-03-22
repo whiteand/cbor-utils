@@ -7,7 +7,7 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { getEoiError } from "../EndOfInputError";
 import { OverflowError } from "../OverflowError";
 import { UnderflowError } from "../UnderflowError";
-import { NotImportant } from "../types";
+import { Z } from "../types";
 
 describe("nint", () => {
   const tests = [
@@ -57,7 +57,7 @@ describe("nint", () => {
     "correctly encodes $v => $b",
     ({ v, b }) => {
       const e = new Encoder();
-      e.encode(ty, v as NotImportant).unwrap();
+      e.encode(ty, v as Z).unwrap();
       expect(hex(e.finish())).toBe(b);
     }
   );
@@ -65,7 +65,7 @@ describe("nint", () => {
     "fails to encode $v => $ee",
     ({ v, ee }) => {
       const e = new Encoder();
-      const res = e.encode(ty, v as NotImportant);
+      const res = e.encode(ty, v as Z);
       expect(!res.ok()).toBe(true);
       expect(!res.ok() && res.error).toEqual(ee);
     }

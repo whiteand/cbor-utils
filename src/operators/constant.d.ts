@@ -1,5 +1,5 @@
 import { CborType } from "../base";
-import { ICborType } from "../types";
+import { AnyContextArgs, ICborType } from "../types";
 import { UnexpectedValueError } from "../UnexpectedValueError";
 
 /**
@@ -18,13 +18,18 @@ import { UnexpectedValueError } from "../UnexpectedValueError";
 declare function constant<In, const V extends In>(
   expectedValue: V,
   isEqual?: (exp: NoInfer<V>, b: NoInfer<In>) => boolean
-): <EE extends Error, DE extends Error, EC, DC>(
-  ty: ICborType<In, In, EE, DE, EC, DC>
+): <
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<In, In, EE, DE, ECArgs, DCArgs>
 ) => CborType<
   V,
   V,
   EE | UnexpectedValueError<In, V>,
   DE | UnexpectedValueError<In, V>,
-  EC,
-  DC
+  ECArgs,
+  DCArgs
 >;

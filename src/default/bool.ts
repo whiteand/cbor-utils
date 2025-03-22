@@ -17,8 +17,8 @@ export const bool: CborType<
   boolean,
   TypeMismatchError,
   EndOfInputError | TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder()
   .encode((v: boolean, e: IEncoder) => {
     if (typeof v !== "boolean") {
@@ -28,22 +28,24 @@ export const bool: CborType<
     e.write(SPECIAL_TYPE_MASK | (v ? 21 : 20));
     return getVoidOk();
   })
-  .decode((d: IDecoder): Result<boolean, EndOfInputError | TypeMismatchError> => {
-    if (done(d)) {
-      return getEoiResult();
+  .decode(
+    (d: IDecoder): Result<boolean, EndOfInputError | TypeMismatchError> => {
+      if (done(d)) {
+        return getEoiResult();
+      }
+      const m = d.buf[d.ptr++];
+      switch (getInfo(m)) {
+        case 20:
+          return ok(false);
+        case 21:
+          return ok(true);
+        default:
+          d.ptr--;
+          return new TypeMismatchError(
+            "boolean",
+            getTypeString(d.buf[d.ptr])
+          ).err();
+      }
     }
-    const m = d.buf[d.ptr++];
-    switch (getInfo(m)) {
-      case 20:
-        return ok(false);
-      case 21:
-        return ok(true);
-      default:
-        d.ptr--;
-        return new TypeMismatchError(
-          "boolean",
-          getTypeString(d.buf[d.ptr])
-        ).err();
-    }
-  })
+  )
   .build();

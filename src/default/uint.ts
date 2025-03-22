@@ -26,8 +26,8 @@ export const uint: CborType<
   number | bigint,
   OverflowError | TypeMismatchError,
   EndOfInputError | TypeMismatchError | InvalidCborError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder()
   .encode(
     (

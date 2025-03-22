@@ -1,7 +1,6 @@
 import { Result, ok } from "resultra";
 import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
-import { flatMap } from "./flatMap";
 import { AnyContextArgs, ICborType, IDecoder, IEncoder } from "../types";
 import { TaggedDataItem } from "../default/TaggedDataItem";
 

@@ -1,5 +1,5 @@
 import { Result } from "resultra";
-import { IDecodable, IDecoder, NotImportant } from "./types";
+import { AnyContextArgs, IDecodable, IDecoder, Z } from "./types";
 
 /**
  * Basic class which defines buffer and pointer into the buffer.
@@ -44,11 +44,11 @@ export class Decoder extends BaseDecoder {
    * @param args
    * @returns
    */
-  decode<T, DE extends Error, DC>(
-    ty: IDecodable<T, DE, unknown extends DC ? [] | [NotImportant] : [DC]>,
-    ...args: unknown extends DC ? [] | [DC] : [DC]
+  decode<T, DE extends Error, DCArgs extends AnyContextArgs>(
+    ty: IDecodable<T, DE, DCArgs>,
+    ...args: DCArgs
   ): Result<T, DE>;
-  decode(ty: NotImportant, ctx: unknown) {
+  decode(ty: Z, ctx: unknown) {
     return ty.decode(this, ctx);
   }
 
@@ -85,10 +85,10 @@ export class ThrowOnFailDecoder extends BaseDecoder {
    * @param args context (if necessary)
    */
   decode<T, DE extends Error, DC>(
-    ty: IDecodable<T, DE, unknown extends DC ? [] | [NotImportant] : [DC]>,
+    ty: IDecodable<T, DE, unknown extends DC ? [] | [Z] : [DC]>,
     ...args: unknown extends DC ? [] | [DC] : [DC]
   ): T;
-  decode(ty: NotImportant, ctx: unknown) {
+  decode(ty: Z, ctx: unknown) {
     return ty.decode(this, ctx).unwrap();
   }
 }

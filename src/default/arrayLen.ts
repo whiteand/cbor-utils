@@ -10,7 +10,7 @@ import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { done } from "../utils/done";
 import { writeTypeAndArg } from "../writeTypeAndArg";
-import { IDecoder, IEncoder } from "../types";
+import { IDecoder, IEncoder, Z } from "../types";
 
 /**
  * A cbor type for encoding and decoding the length of the array.
@@ -84,8 +84,8 @@ export const arrayLen: CborType<
   number | bigint | null,
   OverflowError,
   EndOfInputError | TypeMismatchError | InvalidCborError,
-  unknown,
-  unknown
+  [] | [Z],
+  [] | [Z]
 > = CborType.builder()
   .encode((len: number | bigint | null, e: IEncoder) =>
     writeTypeAndArg(e, ARRAY_TYPE, len)
@@ -106,4 +106,4 @@ export const arrayLen: CborType<
       return readArg(d);
     }
   )
-  .build();
+  .build() as Z;

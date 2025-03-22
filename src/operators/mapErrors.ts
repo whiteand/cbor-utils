@@ -6,7 +6,7 @@ import {
   ICborType,
   IDecoder,
   IEncoder,
-  NotImportant,
+  Z,
   TDecodeFunction,
   TEncodeFunction,
 } from "../types";
@@ -40,14 +40,14 @@ export function mapErrors<
         e: IEncoder,
         c: ContextFromArgs<ECArgs>
       ): Result<void, NEE> => {
-        const r = (ty.encode as NotImportant)(v, e, c);
+        const r = (ty.encode as Z)(v, e, c);
         return r.ok() ? r : err(ee(r.error, v));
-      }) as NotImportant as TEncodeFunction<ET, NEE, ECArgs>)
+      }) as Z as TEncodeFunction<ET, NEE, ECArgs>)
       .decode(((d: IDecoder, c: ContextFromArgs<DCArgs>): Result<DT, NDE> => {
         const p = d.ptr;
         const m = d.buf[p];
-        const r = (ty.decode as NotImportant)(d, c);
+        const r = (ty.decode as Z)(d, c);
         return r.ok() ? r : err(de(r.error, m, p));
-      }) as NotImportant as TDecodeFunction<DT, NDE, DCArgs>)
+      }) as Z as TDecodeFunction<DT, NDE, DCArgs>)
       .build();
 }

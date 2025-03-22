@@ -38,8 +38,8 @@ export const bignum: CborType<
   bigint,
   TypeMismatchError | OverflowError,
   DecodingError | UnexpectedValueError<string, string>,
-  unknown,
-  unknown
+  [],
+  []
 > = bytes.pipe(
   tagged(),
   flatMap(

@@ -1,5 +1,5 @@
 import { Result } from "resultra";
-import { AnyContextArgs, IEncodable, IEncoder, NotImportant } from "./types";
+import { AnyContextArgs, IEncodable, IEncoder, Z } from "./types";
 
 /**
  * @param current current buffer size
@@ -138,7 +138,7 @@ export class Encoder extends BaseEncoder implements IEncoder {
     value: Readonly<T>,
     ...args: NoInfer<ECArgs>
   ): Result<void, EE> {
-    return (ty.encode as NotImportant)(value, this, args[0]);
+    return (ty.encode as Z)(value, this, args[0]);
   }
 }
 
@@ -163,6 +163,6 @@ export class ThrowOnFailEncoder extends BaseEncoder implements IEncoder {
     value: NoInfer<T>,
     ...args: NoInfer<ECArgs>
   ): void {
-    return (ty.encode as NotImportant)(value, this, args[0]).unwrap();
+    return (ty.encode as Z)(value, this, args[0]).unwrap();
   }
 }

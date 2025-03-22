@@ -18,7 +18,7 @@ import { done } from "../utils/done";
 
 function decodeIndefiniteString(d: IDecoder): Result<string, DecodingError> {
   const chunks: string[] = [];
-  
+
   while (!done(d)) {
     const m = d.buf[d.ptr];
     if (m === BREAK_BYTE) {
@@ -79,6 +79,6 @@ export const str: CborType<
   string,
   OverflowError | TypeMismatchError,
   DecodingError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder().encode(encodeString).decode(decodeString).build();

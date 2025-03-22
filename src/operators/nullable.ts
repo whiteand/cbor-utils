@@ -9,11 +9,10 @@ import {
   ICborType,
   IDecoder,
   IEncoder,
-  NotImportant,
+  Z,
   TDecodeFunction,
   TEncodeFunction,
 } from "../types";
-import { encode } from "../encode";
 
 /**
  *
@@ -53,19 +52,16 @@ export function nullable(): <
           e.write(NULL_BYTE);
           return getVoidOk();
         }
-        return (ty.encode as NotImportant)(value, e, ctx);
-      }) as unknown as TEncodeFunction<ET | null, EE, ECArgs>)
-      .decode(((
-        d: IDecoder,
-        ctx: NotImportant
-      ): Result<DT | null, DE | DecodingError> => {
+        return (ty.encode as Z)(value, e, ctx);
+      }) as Z as TEncodeFunction<ET | null, EE, ECArgs>)
+      .decode(((d: IDecoder, ctx: Z): Result<DT | null, DE | DecodingError> => {
         const marker = d.buf[d.ptr];
         if (marker === NULL_BYTE) {
           d.ptr++;
           return ok(null);
         }
-        return (ty.decode as TDecodeFunction<DT, DE, [NotImportant]>)(d, ctx);
-      }) as TDecodeFunction<DT | null, DE, DCArgs>)
+        return (ty.decode as Z)(d, ctx);
+      }) as Z as TDecodeFunction<DT | null, DE, DCArgs>)
       .nullable(true)
       .build();
 }

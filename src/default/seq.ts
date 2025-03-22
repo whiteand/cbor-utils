@@ -3,13 +3,18 @@ import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
 import { getVoidOk } from "../getVoidOk";
 import {
+  AndManyContextsArgs,
   AnyCborTypeCodec,
+  ContextFromArgs,
+  DecodeContextArgs,
   DecodeError,
   DecodedType,
+  EncodeContextArgs,
   EncodeError,
   EncodedType,
   IDecoder,
   IEncoder,
+  Z,
 } from "../types";
 import { TupleVals } from "../utils/TupleVals";
 import { getJsType } from "../utils/getJsType";
@@ -52,19 +57,19 @@ type InferSeqDE<TS extends readonly AnyCborTypeCodec[]> = TupleVals<{
  * The `seq` produces Data Streams, not Data Items. Read terminology section in the [SPECIFICATION](https://www.rfc-editor.org/rfc/rfc8949#name-terminology)
  *
  */
-export function seq<
-  EC,
-  DC,
-  const TypesList extends readonly AnyCborTypeCodec[]
->(
+export function seq<const TypesList extends readonly AnyCborTypeCodec[]>(
   types: TypesList
 ): CborType<
   InferEncodedSeqType<TypesList>,
   InferDecodedSeqType<TypesList>,
   InferSeqEE<TypesList> | TypeMismatchError,
   InferSeqDE<TypesList>,
-  EC,
-  DC
+  AndManyContextsArgs<{
+    [ind in keyof TypesList]: EncodeContextArgs<TypesList[ind]>;
+  }>,
+  AndManyContextsArgs<{
+    [ind in keyof TypesList]: DecodeContextArgs<TypesList[ind]>;
+  }>
 > {
   const n = types.length;
   const typeStr = `array[${n}]`;
@@ -73,7 +78,11 @@ export function seq<
       (
         v: InferEncodedSeqType<TypesList>,
         e: IEncoder,
-        ctx: EC
+        ctx: ContextFromArgs<
+          AndManyContextsArgs<{
+            [ind in keyof TypesList]: EncodeContextArgs<TypesList[ind]>;
+          }>
+        >
       ): Result<void, InferSeqEE<TypesList> | TypeMismatchError> => {
         if (!v || typeof v.length != "number")
           return new TypeMismatchError(typeStr, getJsType(v)).err();
@@ -92,7 +101,9 @@ export function seq<
     .decode(
       (
         d: IDecoder,
-        c: DC
+        c: AndManyContextsArgs<{
+          [ind in keyof TypesList]: DecodeContextArgs<TypesList[ind]>;
+        }>
       ): Result<InferDecodedSeqType<TypesList>, InferSeqDE<TypesList>> => {
         const tuple: unknown[] = [];
         for (let i = 0; i < n; i++) {
@@ -103,5 +114,5 @@ export function seq<
         return ok(tuple as InferEncodedSeqType<TypesList>);
       }
     )
-    .build();
+    .build() as Z;
 }

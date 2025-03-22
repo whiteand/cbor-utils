@@ -6,7 +6,7 @@ import {
   ICborType,
   IDecoder,
   IEncoder,
-  NotImportant,
+  Z,
 } from "../types";
 
 /**
@@ -51,6 +51,70 @@ import {
  * )
  * ```
  */
+
+export function flatMap<
+  OldEncodedType,
+  NewEncodedType,
+  OldDecodedType,
+  NewDecodedType,
+  NEE extends Error,
+  NDE extends Error
+>(
+  newEncode: (value: NewEncodedType) => Result<NoInfer<OldEncodedType>, NEE>,
+  newDecode: (
+    value: OldDecodedType,
+    decoder: IDecoder
+  ) => Result<NewDecodedType, NDE>,
+  nullable?: boolean
+): <
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, ECArgs, DCArgs>
+) => CborType<
+  NewEncodedType,
+  NewDecodedType,
+  NEE | EE,
+  NDE | DE,
+  ECArgs,
+  DCArgs
+>;
+export function flatMap<
+  OldEncodedType,
+  NewEncodedType,
+  OldDecodedType,
+  NewDecodedType,
+  NEE extends Error,
+  NDE extends Error
+>(
+  newEncode: (
+    value: NewEncodedType,
+    ctx: unknown
+  ) => Result<NoInfer<OldEncodedType>, NEE>,
+  newDecode: (
+    value: OldDecodedType,
+    decoder: IDecoder,
+    ctx: unknown,
+    startPosition: number
+  ) => Result<NewDecodedType, NDE>,
+  nullable?: boolean
+): <
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, ECArgs, DCArgs>
+) => CborType<
+  NewEncodedType,
+  NewDecodedType,
+  NEE | EE,
+  NDE | DE,
+  ECArgs,
+  DCArgs
+>;
 export function flatMap<
   OldEncodedType,
   NewEncodedType,
@@ -63,13 +127,12 @@ export function flatMap<
 >(
   newEncode: (
     value: NewEncodedType,
-    ctx: NECArgs
+    ...ctx: NECArgs
   ) => Result<NoInfer<OldEncodedType>, NEE>,
   newDecode: (
     value: OldDecodedType,
     decoder: IDecoder,
-    ctx: NDCArgs,
-    startPosition: number
+    ...ctx: [...NDCArgs, number]
   ) => Result<NewDecodedType, NDE>,
   nullable?: boolean
 ): <
@@ -86,41 +149,59 @@ export function flatMap<
   NDE | DE,
   AndContextArgs<NECArgs, ECArgs>,
   AndContextArgs<NDCArgs, DCArgs>
-> {
-  return <
-    EE extends Error,
-    DE extends Error,
-    ECArgs extends NECArgs,
-    DCArgs extends NDCArgs
-  >(
-    ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, ECArgs, DCArgs>
-  ): CborType<
-    NewEncodedType,
-    NewDecodedType,
-    NEE | EE,
-    NDE | DE,
-    AndContextArgs<NECArgs, ECArgs>,
-    AndContextArgs<NDCArgs, DCArgs>
-  > => {
+>;
+export function flatMap<
+  OldEncodedType,
+  NewEncodedType,
+  OldDecodedType,
+  NewDecodedType,
+  NEE extends Error,
+  NDE extends Error
+>(
+  newEncode: (value: NewEncodedType) => Result<NoInfer<OldEncodedType>, NEE>,
+  newDecode: (
+    value: OldDecodedType,
+    decoder: IDecoder,
+    ctx: unknown,
+    startPosition: number
+  ) => Result<NewDecodedType, NDE>,
+  nullable?: boolean
+): <
+  EE extends Error,
+  DE extends Error,
+  ECArgs extends AnyContextArgs,
+  DCArgs extends AnyContextArgs
+>(
+  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, ECArgs, DCArgs>
+) => CborType<
+  NewEncodedType,
+  NewDecodedType,
+  NEE | EE,
+  NDE | DE,
+  ECArgs,
+  DCArgs
+>;
+export function flatMap<
+  OldEncodedType,
+  NewEncodedType,
+  OldDecodedType,
+  NewDecodedType,
+  NEE extends Error,
+  NDE extends Error
+>(
+  newEncode: Z,
+  newDecode: Z,
+  nullable?: boolean
+): <EE extends Error, DE extends Error>(
+  ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, Z, Z>
+) => CborType<NewEncodedType, NewDecodedType, NEE | EE, NDE | DE, Z, Z> {
+  return <EE extends Error, DE extends Error>(
+    ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, Z, Z>
+  ): CborType<NewEncodedType, NewDecodedType, NEE | EE, NDE | DE, Z, Z> => {
     interface IObj {
-      newEncode(
-        value: NotImportant,
-        ctx: NotImportant
-      ): Result<NotImportant, NotImportant>;
-      newDecode(
-        value: NotImportant,
-        d: NotImportant,
-        ctx: NotImportant,
-        startPosition: number
-      ): Result<NotImportant, NotImportant>;
-      sourceType: ICborType<
-        NotImportant,
-        NotImportant,
-        NotImportant,
-        NotImportant,
-        NotImportant,
-        NotImportant
-      >;
+      newEncode(value: Z, ctx: Z): Result<Z, Z>;
+      newDecode(value: Z, d: Z, ctx: Z, startPosition: number): Result<Z, Z>;
+      sourceType: ICborType<Z, Z, Z, Z, Z, Z>;
     }
 
     const proto = CborType.builder()
@@ -157,6 +238,6 @@ export function flatMap<
 
     Reflect.setPrototypeOf(obj, proto);
 
-    return obj as NotImportant;
+    return obj as Z;
   };
 }

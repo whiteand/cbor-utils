@@ -3,23 +3,39 @@ import type { Result } from "resultra";
 /**
  * Context is either present or absent based on the type of arguments
  */
-export type AnyContextArgs = [] | [NotImportant];
+export type AnyContextArgs = readonly [] | readonly [Z];
 
+/**
+ * Combines two context argument types into one that supports both
+ */
 export type AndContextArgs<
-  CtxAArgs extends AnyContextArgs,
-  CtxBArgs extends AnyContextArgs
+  CtxAArgs extends readonly Z[],
+  CtxBArgs extends readonly Z[]
 > = Extract<
-  [...CtxAArgs, ...CtxBArgs] extends [infer A, infer B]
+  [...CtxAArgs, ...CtxBArgs] extends readonly [infer A, infer B]
     ? [A & B]
     : [...CtxAArgs, ...CtxBArgs],
-  [] | [NotImportant]
+  [] | [Z]
 >;
 
-export type AndContext<CtxA, CtxB> = unknown extends CtxA
-  ? CtxB
-  : unknown extends CtxB
-  ? CtxA
-  : CtxA & CtxB;
+type AndManyContextsArgsInner<TS> = TS extends readonly []
+  ? []
+  : TS extends readonly [infer A]
+  ? [] extends A
+    ? []
+    : A
+  : TS extends readonly [infer A, ...infer B]
+  ? AndContextArgs<
+      Extract<A, readonly Z[]>,
+      Extract<AndManyContextsArgsInner<B>, readonly Z[]>
+    >
+  : never;
+
+/** Given a list of CBOR context args returns context args that support all of passed requirements */
+export type AndManyContextsArgs<TS> = Extract<
+  AndManyContextsArgsInner<TS>,
+  AnyContextArgs
+>;
 
 /** If args possiblly empty - then context is not necessary,therefore unknown */
 export type ContextFromArgs<Args extends AnyContextArgs> = Args extends Args
@@ -29,7 +45,7 @@ export type ContextFromArgs<Args extends AnyContextArgs> = Args extends Args
   : never;
 
 /** if context is unknown then we do not need to require the passing of context */
-export type ArgsFromContext<C> = unknown extends C ? [] | [NotImportant] : [C];
+export type ArgsFromContext<C> = unknown extends C ? [] : [C];
 
 /**
  * Represents the source of the encoded cbor bytes
@@ -172,8 +188,8 @@ export interface IDecodable<T, DE, DCArgs extends AnyContextArgs> {
  * @typeParam DC - Decoding Context
  */
 export interface ICborType<
-  ET = NotImportant,
-  DT = NotImportant,
+  ET = Z,
+  DT = Z,
   EE extends Error = Error,
   DE extends Error = Error,
   ECArgs extends AnyContextArgs = AnyContextArgs,
@@ -184,55 +200,69 @@ export interface ICborType<
   nullable: boolean;
 }
 /** All CBOR types are assignable to a variable for type `AnyCborTypeCodec` */
-export type AnyCborTypeCodec = ICborType<
-  NotImportant,
-  NotImportant,
-  Error,
-  Error,
-  NotImportant,
-  NotImportant
->;
+export type AnyCborTypeCodec = ICborType<Z, Z, Error, Error, Z, Z>;
 
 /** All decodable types are assignable to a variable of type `AnyDecodableType` */
-export type AnyDecodableType = IDecodable<
-  NotImportant,
-  NotImportant,
-  [] | [NotImportant]
->;
+export type AnyDecodableType = IDecodable<Z, Z, [] | [Z]>;
 
 /** All encodable types are assignable to a variable of type `AnyEncodableType` */
-export type AnyEncodableType = IEncodable<
-  NotImportant,
-  NotImportant,
-  [] | [NotImportant]
->;
+export type AnyEncodableType = IEncodable<Z, Z, [] | [Z]>;
 
 /** Infers decoded type from the passed cbor type */
-export type DecodedType<T extends { __inferDecodedValue: NotImportant }> =
-  T extends T ? T["__inferDecodedValue"] : never;
+export type DecodedType<T extends { __inferDecodedValue: Z }> = T extends T
+  ? T["__inferDecodedValue"]
+  : never;
+
+/**
+ * Given a CBOR type returns it's decode context args
+ */
+export type DecodeContextArgs<T extends { __inferDecodingCtx: Z }> =
+  ArgsFromContext<DecodeContext<T>>;
+
+/**
+ * Given a CBOR type returns it's encode context args
+ */
+export type EncodeContextArgs<T extends { __inferEncodingCtx: Z }> =
+  ArgsFromContext<EncodeContext<T>>;
+
 /** Infers encoded tpye from the passed cbor type */
-export type EncodedType<T extends { __inferEncodedValue: NotImportant }> =
-  T extends T ? T["__inferEncodedValue"] : never;
+export type EncodedType<T extends { __inferEncodedValue: Z }> = T extends T
+  ? T["__inferEncodedValue"]
+  : never;
 
 /** Infers decoding error type from the passed cbor type */
-export type DecodeError<T extends { __inferDecodingError: NotImportant }> =
-  T extends T ? T["__inferDecodingError"] : never;
+export type DecodeError<T extends { __inferDecodingError: Z }> = T extends T
+  ? T["__inferDecodingError"]
+  : never;
 
 /** Infers decoding context type from the passed cbor type */
-export type DecodeContext<T extends { __inferDecodingCtx: NotImportant }> =
-  T extends T ? T["__inferDecodingCtx"] : never;
+export type DecodeContext<T extends { __inferDecodingCtx: Z }> = T extends T
+  ? T["__inferDecodingCtx"]
+  : never;
 
 /** Infers encoding error type from the passed cbor type */
-export type EncodeError<T extends { __inferEncodingError: NotImportant }> =
-  T extends T ? T["__inferEncodingError"] : never;
+export type EncodeError<T extends { __inferEncodingError: Z }> = T extends T
+  ? T["__inferEncodingError"]
+  : never;
 
 /** Infers encoding context type from the passed cbor type */
-export type EncodeContext<T extends { __inferEncodingCtx: NotImportant }> =
-  T extends T ? T["__inferEncodingCtx"] : never;
+export type EncodeContext<T extends { __inferEncodingCtx: Z }> = T extends T
+  ? T["__inferEncodingCtx"]
+  : never;
 
 /** Helper that allows to use either specific type or default one if not proper */
 export type Assume<T, U> = T extends U ? T : U;
 
 /** Just an alias for any which is used when we are not interested in the exact type details */
 // deno-lint-ignore no-explicit-any
-export type NotImportant = any;
+export type Z = any;
+
+/**
+ * Given a list of cbor types maps it to a list of args
+ */
+export type SelectContextArgsFromProp<
+  TS extends readonly Record<"__inferDecodingCtx" | "__inferEncodingCtx", Z>[],
+  prop extends "__inferDecodingCtx" | "__inferEncodingCtx"
+> = {
+  [ind in keyof TS]: ArgsFromContext<TS[ind][prop]>;
+};

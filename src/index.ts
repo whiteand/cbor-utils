@@ -6,7 +6,7 @@ export { Decoder } from "./Decoder";
 export type { DecodingError } from "./DecodingError";
 export { any } from "./default/any";
 export { arrayLen } from "./default/arrayLen";
-export { u128, u64 } from "./default/bigInts";
+export { u64 } from "./default/bigInts";
 export { bignum } from "./default/bignum";
 export { bool } from "./default/bool";
 export { bytes } from "./default/bytes";

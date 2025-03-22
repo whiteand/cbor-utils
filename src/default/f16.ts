@@ -181,6 +181,6 @@ export const f16: CborType<
   number,
   OverflowError,
   TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder().encode(encodeF16).decode(decodeHalfFloat).build();

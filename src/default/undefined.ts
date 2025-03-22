@@ -17,8 +17,8 @@ export const undefinedType: CborType<
   undefined,
   UnexpectedValueError<undefined, undefined>,
   EndOfInputError | TypeMismatchError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder()
   .encode(function encodeUndefined(v: undefined, e: IEncoder) {
     if (v !== undefined) {

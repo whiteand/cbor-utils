@@ -7,7 +7,7 @@ import {
   ICborType,
   IDecoder,
   IEncoder,
-  NotImportant,
+  Z,
   TDecodeFunction,
   TEncodeFunction,
 } from "./types";
@@ -51,42 +51,28 @@ export class CborBuilder<
     fn: (value: NET, e: IEncoder, ctx: NEC) => Result<void, NEE>
   ): CborBuilder<NET, DT, NEE, DE, [NEC], DCArgs>;
   encode<NET, NEE extends Error, NEC extends AnyContextArgs>(
-    fn: (value: NET, e: IEncoder, ctx: any) => Result<void, NEE>
+    fn: (value: NET, e: IEncoder, ctx: Z) => Result<void, NEE>
   ): CborBuilder<NET, DT, NEE, DE, NEC, DCArgs>;
   encode<NET, NEE extends Error, NEC extends AnyContextArgs>(
     fn: (value: NET, e: IEncoder, ...ctx: NEC) => Result<void, NEE>
   ): CborBuilder<NET, DT, NEE, DE, NEC, DCArgs>;
-  encode(encode: NotImportant) {
+  encode(encode: Z) {
     this._encode = encode;
-    return this as CborBuilder<
-      NotImportant,
-      DT,
-      NotImportant,
-      DE,
-      NotImportant,
-      DCArgs
-    >;
+    return this as CborBuilder<Z, DT, Z, DE, Z, DCArgs>;
   }
 
   decode<NDT, NDE extends Error>(
     fn: (d: IDecoder) => Result<NDT, NDE>
-  ): CborBuilder<ET, NDT, EE, NDE, ECArgs, [unknown]>;
+  ): CborBuilder<ET, NDT, EE, NDE, ECArgs, []>;
   decode<NDT, NDE extends Error, NDC>(
     fn: (d: IDecoder, ctx: NDC) => Result<NDT, NDE>
   ): CborBuilder<ET, NDT, EE, NDE, ECArgs, [NDC]>;
   decode<NDT, NDE extends Error, NDC extends AnyContextArgs>(
     fn: (d: IDecoder, ...ctx: NDC) => Result<NDT, NDE>
   ): CborBuilder<ET, NDT, EE, NDE, ECArgs, NDC>;
-  decode(decode: NotImportant) {
+  decode(decode: Z) {
     this._decode = decode;
-    return this as CborBuilder<
-      ET,
-      NotImportant,
-      EE,
-      NotImportant,
-      ECArgs,
-      NotImportant
-    >;
+    return this as CborBuilder<ET, Z, EE, Z, ECArgs, Z>;
   }
 
   nullable(value = true): this {
@@ -197,19 +183,12 @@ export class CborType<
       ? ty
       : CborType.builder()
           .encode(
-            ((v: ET, e: IEncoder, c: NotImportant): Result<void, EE> =>
-              (ty.encode as NotImportant)(v, e, c)) as TEncodeFunction<
-              ET,
-              EE,
-              ECArgs
-            >
+            ((v: ET, e: IEncoder, c: Z): Result<void, EE> =>
+              (ty.encode as Z)(v, e, c)) as Z as TEncodeFunction<ET, EE, ECArgs>
           )
           .decode(
-            ((d: IDecoder, c: NotImportant): Result<DT, DE> =>
-              (ty.decode as NotImportant)(
-                d,
-                c
-              )) as NotImportant as TDecodeFunction<DT, DE, DCArgs>
+            ((d: IDecoder, c: Z): Result<DT, DE> =>
+              (ty.decode as Z)(d, c)) as Z as TDecodeFunction<DT, DE, DCArgs>
           )
           .nullable(ty.nullable)
           .build();
@@ -251,21 +230,15 @@ export class CborType<
   ): CborType<T, T, EE, DE, ECArgs, DCArgs> {
     const obj = {
       encode: (value: T, encoder: IEncoder, ctx: ContextFromArgs<ECArgs>) => {
-        return (this.encode as NotImportant)(
-          toOldEncodedValue(value),
-          encoder,
-          ctx
-        );
+        return (this.encode as Z)(toOldEncodedValue(value), encoder, ctx);
       },
       decode: (decoder: IDecoder, ctx: ContextFromArgs<DCArgs>) => {
-        return (this.decode as NotImportant)(decoder, ctx).map(
-          toNewDecodedValue
-        );
+        return (this.decode as Z)(decoder, ctx).map(toNewDecodedValue);
       },
     };
 
     Reflect.setPrototypeOf(obj, this);
 
-    return obj as NotImportant as CborType<T, T, EE, DE, ECArgs, DCArgs>;
+    return obj as Z as CborType<T, T, EE, DE, ECArgs, DCArgs>;
   }
 }

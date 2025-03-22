@@ -76,6 +76,6 @@ export const bytes: CborType<
   Uint8Array,
   OverflowError,
   DecodingError,
-  unknown,
-  unknown
+  [],
+  []
 > = CborType.builder().encode(encodeBytes).decode(decodeBytes).build();
