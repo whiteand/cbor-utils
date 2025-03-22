@@ -84,8 +84,8 @@ export const arrayLen: CborType<
   number | bigint | null,
   OverflowError,
   EndOfInputError | TypeMismatchError | InvalidCborError,
-  [] | [Z],
-  [] | [Z]
+  [],
+  []
 > = CborType.builder()
   .encode((len: number | bigint | null, e: IEncoder) =>
     writeTypeAndArg(e, ARRAY_TYPE, len)

@@ -15,7 +15,7 @@ export type AndContextArgs<
   [...CtxAArgs, ...CtxBArgs] extends readonly [infer A, infer B]
     ? [A & B]
     : [...CtxAArgs, ...CtxBArgs],
-  [] | [Z]
+  AnyContextArgs
 >;
 
 type AndManyContextsArgsInner<TS> = TS extends readonly []
@@ -203,10 +203,10 @@ export interface ICborType<
 export type AnyCborTypeCodec = ICborType<Z, Z, Error, Error, Z, Z>;
 
 /** All decodable types are assignable to a variable of type `AnyDecodableType` */
-export type AnyDecodableType = IDecodable<Z, Z, [] | [Z]>;
+export type AnyDecodableType = IDecodable<Z, Z, Z>;
 
 /** All encodable types are assignable to a variable of type `AnyEncodableType` */
-export type AnyEncodableType = IEncodable<Z, Z, [] | [Z]>;
+export type AnyEncodableType = IEncodable<Z, Z, Z>;
 
 /** Infers decoded type from the passed cbor type */
 export type DecodedType<T extends { __inferDecodedValue: Z }> = T extends T

@@ -1,7 +1,7 @@
 import { catchError } from "resultra/utils";
 import { Decoder, ThrowOnFailDecoder } from "./Decoder";
 import { Result } from "resultra";
-import { IDecodable, IDecoder, Z } from "./types";
+import { AnyContextArgs, IDecodable, IDecoder, Z } from "./types";
 
 /** A type of the decode function */
 type TDecodeFunction = (<T, E extends Error, C>(
@@ -9,7 +9,7 @@ type TDecodeFunction = (<T, E extends Error, C>(
   cb: (d: Decoder, ctx: C) => Result<T, E>,
   ...args: unknown extends C ? [] | [C] : [C]
 ) => Result<T, E>) & {
-  type: <const T, const E extends Error, CArgs extends [] | [Z]>(
+  type: <const T, const E extends Error, CArgs extends AnyContextArgs>(
     bytes: Uint8Array | IDecoder,
     ty: IDecodable<T, E, CArgs>,
     ...args: CArgs

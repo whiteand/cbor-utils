@@ -84,9 +84,9 @@ export class ThrowOnFailDecoder extends BaseDecoder {
    * @param ty type that should be decoded
    * @param args context (if necessary)
    */
-  decode<T, DE extends Error, DC>(
-    ty: IDecodable<T, DE, unknown extends DC ? [] | [Z] : [DC]>,
-    ...args: unknown extends DC ? [] | [DC] : [DC]
+  decode<T, DE extends Error, DCArgs extends AnyContextArgs>(
+    ty: IDecodable<T, DE, DCArgs>,
+    ...args: DCArgs
   ): T;
   decode(ty: Z, ctx: unknown) {
     return ty.decode(this, ctx).unwrap();

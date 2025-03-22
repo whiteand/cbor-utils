@@ -74,6 +74,8 @@ export type {
   AnyContextArgs,
   ContextFromArgs,
   ArgsFromContext,
+  DecodeContextArgs,
+  EncodeContextArgs,
 } from "./types";
 export { UnderflowError } from "./UnderflowError";
 export { UnexpectedValueError } from "./UnexpectedValueError";

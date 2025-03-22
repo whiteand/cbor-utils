@@ -119,7 +119,7 @@ export function array(): <
         e: IEncoder,
         ctx: ContextFromArgs<ECArgs>
       ): Result<void, EE | OverflowError> {
-        const res = arrayLen.encode(value.length, e, ctx);
+        const res = arrayLen.encode(value.length, e);
         if (!res.ok()) {
           return res;
         }
@@ -138,7 +138,7 @@ export function array(): <
         d: IDecoder,
         ctx: ContextFromArgs<DCArgs>
       ): Result<DT[], DE | DecodingError> {
-        const lenRes = arrayLen.decode(d, ctx);
+        const lenRes = arrayLen.decode(d);
         if (!lenRes.ok()) return lenRes;
         const len = lenRes.value;
         switch (typeof len) {
