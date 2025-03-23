@@ -65,7 +65,11 @@ testCborType(
     { decoded: 1, hex: "01" },
     { decoded: 0xff, hex: "18ff" },
   ],
-  []
+  [
+    { type: "encode", value: -1, error: UNDERFLOW_ERROR_CODE },
+    { type: "encode", value: 0x100, error: OVERFLOW_ERROR_CODE },
+    { type: "decode", hex: "80", error: TYPE_MISMATCH_ERROR_CODE },
+  ]
 );
 
 testCborType(
@@ -77,7 +81,11 @@ testCborType(
     { decoded: 0xff, hex: "18ff" },
     { decoded: 0xffff, hex: "19ffff" },
   ],
-  []
+  [
+    { type: "encode", value: -1, error: UNDERFLOW_ERROR_CODE },
+    { type: "encode", value: 0x10000, error: OVERFLOW_ERROR_CODE },
+    { type: "decode", hex: "80", error: TYPE_MISMATCH_ERROR_CODE },
+  ]
 );
 
 testCborType(
@@ -92,7 +100,11 @@ testCborType(
     { decoded: 2147483648, hex: "1a80000000" },
     { decoded: 0xffffffff, hex: "1affffffff" },
   ],
-  []
+  [
+    { type: "encode", value: -1, error: UNDERFLOW_ERROR_CODE },
+    { type: "encode", value: 0x100000000, error: OVERFLOW_ERROR_CODE },
+    { type: "decode", hex: "80", error: TYPE_MISMATCH_ERROR_CODE },
+  ]
 );
 
 testCborType(
@@ -108,5 +120,11 @@ testCborType(
     { decoded: 0xffffffffn, hex: "1affffffff" },
     { decoded: 0xffffffffffffffffn, hex: "1bffffffffffffffff" },
   ],
-  []
+  [
+    { type: "encode", value: -1, error: UNDERFLOW_ERROR_CODE },
+    { type: "encode", value: 0x10000000000000000, error: OVERFLOW_ERROR_CODE },
+    { type: "encode", value: -1n, error: UNDERFLOW_ERROR_CODE },
+    { type: "encode", value: 0x10000000000000000n, error: OVERFLOW_ERROR_CODE },
+    { type: "decode", hex: "80", error: TYPE_MISMATCH_ERROR_CODE },
+  ]
 );

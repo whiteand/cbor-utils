@@ -52,4 +52,50 @@ export abstract class Decodable<T, Results>
       }
     })(this, f);
   }
+
+  /**
+   * Fallibly maps decoded value using passed function.
+   *
+   * @param f Function that transforms decoded value after decoding
+   * @returns a new decoder that applies the function `f` to decoded value
+   */
+  tryMap<U, R extends number>(
+    f: (value: T, receiver: { value: U }) => R,
+    nullValue: () => U
+  ): Decodable<U, Results | R> {
+    return new (class extends Decodable<U, Results | R> {
+      value!: U;
+      constructor(
+        private readonly original: IDecodable<T, Results>,
+        private readonly f: (value: T, receiver: { value: U }) => R,
+        private readonly getNull: () => U
+      ) {
+        super();
+      }
+      nullValue(): U {
+        return this.getNull();
+      }
+      skip(input: InputByteStream): Results | R {
+        return this.original.skip(input);
+      }
+      dataItems(input: InputByteStream): void {
+        return this.original.dataItems(input);
+      }
+      minDataItems(): number {
+        return this.original.minDataItems();
+      }
+      maxDataItems(): number {
+        return this.original.minDataItems();
+      }
+      decode(input: InputByteStream): Results | R {
+        let res = this.original.decode(input);
+        if (res !== 0) return res;
+        const value = this.original.getValue();
+        return this.f(value, this);
+      }
+      getValue() {
+        return this.value;
+      }
+    })(this, f, nullValue);
+  }
 }
