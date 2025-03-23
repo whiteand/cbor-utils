@@ -1,11 +1,13 @@
-import { Decodable } from "../decodable";
-import { Encodable } from "../encodable";
+import { Pipeable } from "../../pipe";
+import { IDecodable, IEncodable } from "../types";
 import { InputByteStream, OutputByteStream } from "../types";
 
-export abstract class SingleDataItemEncodable<T, Results> extends Encodable<
-  T,
-  Results
-> {
+export abstract class SingleDataItemEncodable<T, Results>
+  extends Pipeable
+  implements IEncodable<T, Results>
+{
+  __inferT!: T;
+  __inferResults!: Results;
   dataItems(): number {
     return 1;
   }
@@ -18,14 +20,16 @@ export abstract class SingleDataItemEncodable<T, Results> extends Encodable<
   abstract encode(value: T, encoder: OutputByteStream): Results;
   abstract isNull(value: T): boolean;
 }
-export abstract class SingleDataItemDecodable<T, Results> extends Decodable<
-  T,
-  Results
-> {
+export abstract class SingleDataItemDecodable<T, Results>
+  extends Pipeable
+  implements IDecodable<T, Results>
+{
+  __inferT!: T;
+  __inferResults!: Results;
   abstract decode(decoder: InputByteStream): Results;
   abstract getValue(): T;
   abstract nullValue(): T;
-  abstract skip(decoder: any): void;
+  abstract skip(decoder: InputByteStream): void;
   dataItems(): number {
     return 1;
   }

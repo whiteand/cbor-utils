@@ -1,11 +1,8 @@
-import { Result, ok } from "resultra";
-import { getEoiResult, EndOfInputError } from "../../EndOfInputError";
 import { getInfo } from "../../marker";
 import { IDecoder } from "../../types";
-import { InvalidCborError } from "../../InvalidCborError";
 import { done } from "../../utils/done";
-import { SuccessResult } from "../types";
 import { EOI_ERROR_CODE, INVALID_CBOR_ERROR_CODE } from "../error-codes";
+import { SuccessResult } from "../types";
 
 export type ReadArgErrors =
   | typeof EOI_ERROR_CODE

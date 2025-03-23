@@ -140,3 +140,6 @@ export interface IType<E, D> extends IPipeable, TypeInferable<E, D> {
   encode(value: InferType<E>, output: OutputByteStream): InferResults<E>;
   decode(input: InputByteStream): InferResults<D>;
 }
+
+export type InferEncodedType<T> = InferType<InferEncoder<T>>;
+export type InferDecodedType<T> = InferType<InferDecoder<T>>;

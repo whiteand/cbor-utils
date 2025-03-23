@@ -9,7 +9,7 @@ import {
   OutputByteStream,
 } from "./types";
 
-export class Type<E, D> extends Pipeable implements IType<E, D> {
+export class CborType<E, D> extends Pipeable implements IType<E, D> {
   __inferDecoder!: D;
   __inferEncoder!: E;
   constructor(private readonly e: E, private readonly d: D) {

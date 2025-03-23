@@ -14,5 +14,7 @@ export {
   AnyType,
   InferDecoder,
   InferEncoder,
+  InferEncodedType,
+  InferDecodedType,
   IType,
 } from "./types";
