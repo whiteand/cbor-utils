@@ -1,17 +1,18 @@
-import { Result } from "resultra";
-import { OverflowError } from "../../OverflowError";
-import { MAX_U128, MAX_U16, MAX_U32, MAX_U64, MAX_U8 } from "../../limits";
-import { OutputByteStream, SuccessResult } from "../types";
-import { OVERFLOW_ERROR_CODE } from "../error-codes";
+import { MAX_U16, MAX_U32, MAX_U64, MAX_U8 } from "../../limits";
+import { OVERFLOW_ERROR_CODE, UNDERFLOW_ERROR_CODE } from "../error-codes";
 import { MajorType } from "../major";
+import { OutputByteStream, SuccessResult } from "../types";
 
-export type WriteTypeAndArgResults = SuccessResult | typeof OVERFLOW_ERROR_CODE;
+export type WriteTypeAndArgResults =
+  | SuccessResult
+  | typeof OVERFLOW_ERROR_CODE
+  | typeof UNDERFLOW_ERROR_CODE;
 
 export function writeTypeAndArg(
   out: OutputByteStream,
   ty: MajorType,
   value: number | bigint | null
-): SuccessResult | typeof OVERFLOW_ERROR_CODE {
+): WriteTypeAndArgResults {
   if (typeof value === "number") {
     return writeTypeAndArgNumber(out, ty, value);
   }
@@ -26,6 +27,7 @@ function writeTypeAndArgNumber(
   ty: MajorType,
   value: number
 ): WriteTypeAndArgResults {
+  if (value < 0) return UNDERFLOW_ERROR_CODE;
   if (value <= MAX_U32) {
     return encodeSmallInt(out, ty, value);
   }
@@ -50,6 +52,7 @@ function writeTypeAndArgBigInt(
   ty: MajorType,
   bigInt: bigint
 ): WriteTypeAndArgResults {
+  if (bigInt < 0n) return UNDERFLOW_ERROR_CODE;
   if (bigInt <= MAX_U32) {
     return encodeSmallInt(e, ty, Number(bigInt));
   }
@@ -67,7 +70,7 @@ function encodeSmallInt(
 ): SuccessResult {
   const tyMask = ty << 5;
   if (smallInt < 24) {
-    e.write(tyMask | smallInt);
+    e.write(tyMask | (smallInt & 0xff));
     return 0;
   }
   if (smallInt <= MAX_U8) {
@@ -84,7 +87,7 @@ function encodeU8(
   tyMask: number,
   smallInt: number
 ): SuccessResult {
-  e.write(tyMask | 24).write(smallInt);
+  e.write(tyMask | 24).write(smallInt & 0xff);
   return 0;
 }
 

@@ -7,6 +7,7 @@ import {
   INVALID_CBOR_ERROR_CODE,
   OVERFLOW_ERROR_CODE,
   TYPE_MISMATCH_ERROR_CODE,
+  UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
 import {
   InferDecoder,
@@ -21,7 +22,9 @@ import { writeTypeAndArg } from "./writeTypeAndArg";
 
 type Uint = number | bigint;
 
-export type UintEncoderErrors = typeof OVERFLOW_ERROR_CODE;
+export type UintEncoderErrors =
+  | typeof OVERFLOW_ERROR_CODE
+  | typeof UNDERFLOW_ERROR_CODE;
 
 /**
  * A CBOR type that encodes and decodes unsigned integers
