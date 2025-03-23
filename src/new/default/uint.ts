@@ -1,14 +1,7 @@
-import { ok, Result } from "resultra";
-import { EndOfInputError, getEoiResult } from "../../EndOfInputError";
-import { InvalidCborError } from "../../InvalidCborError";
-import { OverflowError } from "../../OverflowError";
-import { TypeMismatchError } from "../../TypeMismatchError";
-import { CborType } from "../cbor-type";
 import { NUMBER_TYPE } from "../../constants";
-import { getTypeString } from "../../getTypeString";
 import { getType } from "../../marker";
-import { IDecoder, IEncoder } from "../../types";
 import { done } from "../../utils/done";
+import { CborType } from "../cbor-type";
 import {
   EOI_ERROR_CODE,
   INVALID_CBOR_ERROR_CODE,
@@ -16,7 +9,7 @@ import {
   TYPE_MISMATCH_ERROR_CODE,
 } from "../error-codes";
 import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
-import { ArgReceiver, argReceiver, readArg } from "./readArg";
+import { ArgReceiver, readArg } from "./readArg";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
 import { writeTypeAndArg } from "./writeTypeAndArg";
 
@@ -53,7 +46,7 @@ class UintDecoder extends SingleDataItemDecodable<
   Uint,
   SuccessResult | UintDecoderErrors
 > {
-  private receiver: ArgReceiver;
+  protected receiver: ArgReceiver;
   constructor() {
     super();
     this.receiver = new ArgReceiver();
