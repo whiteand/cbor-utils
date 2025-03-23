@@ -97,7 +97,7 @@ const MAX_SIZE = {
 function createEncoder(size: 8 | 16 | 32) {
   class SmallIntEncoder extends SingleDataItemEncodable<
     number,
-    SuccessResult | typeof OVERFLOW_ERROR_CODE
+    SuccessResult | UintEncoderErrors
   > {
     static MAX_VALUE = MAX_SIZE[size];
     static MIN_VALUE = 0;
@@ -105,7 +105,7 @@ function createEncoder(size: 8 | 16 | 32) {
     constructor(
       private readonly uintEncoder: WithEncodeMethod<
         number,
-        SuccessResult | typeof OVERFLOW_ERROR_CODE
+        SuccessResult | UintEncoderErrors
       >
     ) {
       super();
@@ -114,7 +114,7 @@ function createEncoder(size: 8 | 16 | 32) {
     encode(
       value: number,
       encoder: OutputByteStream
-    ): SuccessResult | typeof OVERFLOW_ERROR_CODE {
+    ): SuccessResult | UintEncoderErrors {
       if (value > SmallIntEncoder.MAX_VALUE) {
         return OVERFLOW_ERROR_CODE;
       }
@@ -128,10 +128,14 @@ function createEncoder(size: 8 | 16 | 32) {
   return new SmallIntEncoder(uint.encoder());
 }
 
+export type SmallIntDecoderErrors =
+  | UintDecoderErrors
+  | typeof OVERFLOW_ERROR_CODE;
+
 function createDecoder(size: 8 | 16 | 32) {
   class SmallIntDecoder extends SingleDataItemDecodable<
     number,
-    SuccessResult | UintDecoderErrors
+    SuccessResult | SmallIntDecoderErrors
   > {
     static MAX_VALUE = MAX_SIZE[size];
     static MIN_VALUE = 0;
@@ -139,12 +143,12 @@ function createDecoder(size: 8 | 16 | 32) {
     constructor(private readonly uintDecoder: InferDecoder<typeof uint>) {
       super();
     }
-    decode(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
+    decode(decoder: InputByteStream): SuccessResult | SmallIntDecoderErrors {
       const res = this.uintDecoder.decode(decoder);
       if (res !== 0) return res;
       if (!this.uintDecoder.isNumber()) return TYPE_MISMATCH_ERROR_CODE;
       const value = this.uintDecoder.getValue();
-      if (value > SmallIntDecoder.MAX_VALUE) return TYPE_MISMATCH_ERROR_CODE;
+      if (value > SmallIntDecoder.MAX_VALUE) return OVERFLOW_ERROR_CODE;
       return 0;
     }
     getValue(): number {
@@ -153,7 +157,7 @@ function createDecoder(size: 8 | 16 | 32) {
     nullValue(): number {
       return 0;
     }
-    skip(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
+    skip(decoder: InputByteStream): SuccessResult | SmallIntDecoderErrors {
       return this.decode(decoder);
     }
   }
@@ -163,26 +167,4 @@ function createDecoder(size: 8 | 16 | 32) {
 export const u8 = new CborType(createEncoder(8), createDecoder(8));
 export const u16 = new CborType(createEncoder(16), createDecoder(16));
 export const u32 = new CborType(createEncoder(32), createDecoder(32));
-
-class U64Decoder extends SingleDataItemDecodable<
-  bigint,
-  SuccessResult | UintDecoderErrors
-> {
-  decode(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
-    return this.uintDecoder.decode(decoder);
-  }
-  getValue(): bigint {
-    return BigInt(this.uintDecoder.getValue());
-  }
-  nullValue(): bigint {
-    return 0n;
-  }
-  skip(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
-    return this.uintDecoder.skip(decoder);
-  }
-  constructor(private readonly uintDecoder: InferDecoder<typeof uint>) {
-    super();
-  }
-}
-
-export const u64 = new CborType(uint.encoder(), new U64Decoder(uint.decoder()));
+export const u64 = new CborType(uint.encoder(), uint.decoder().map(BigInt));
