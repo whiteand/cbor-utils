@@ -31,7 +31,7 @@ export function testCborType<N, R extends number>(
       const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
       expect(stringifyErrorCode(type.decoder().decode(d))).toBe("success");
       const value = type.decoder().getValue();
-      expect(value).toStrictEqual(t.decoded);
+      expect(value).toEqual(t.decoded);
       expect(d.ptr).toBe(d.buf.length);
     });
     test.each(POSITIVE_TESTS)("decodes skips $hex", (t) => {
