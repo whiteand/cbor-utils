@@ -1,5 +1,5 @@
 export * from "./error-codes";
-export { Type } from "./type";
+export { CborType } from "./cbor-type";
 export {
   OutputByteStream,
   InputByteStream,

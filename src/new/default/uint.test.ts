@@ -1,13 +1,7 @@
-import { describe, expect, test } from "vitest";
-import { Decoder } from "../../Decoder";
-import { fromHex } from "../../utils/hex";
-import { uint } from "./uint";
-import { stringifyErrorCode } from "../stringifyErrorCode";
+import { testPositive } from "../test-utils";
+import { u16, u32, u64, u8, uint } from "./uint";
 
-export const TESTS: Array<{
-  hex: string;
-  decoded?: unknown;
-}> = [
+testPositive("uint", uint, [
   {
     hex: "00",
     decoded: 0,
@@ -45,20 +39,38 @@ export const TESTS: Array<{
     decoded: 1000000,
   },
   { decoded: 2n ** 64n - 1n, hex: "1bffffffffffffffff" },
-];
+]);
 
-describe("uint", () => {
-  test.each(TESTS)("decodes $hex => $decoded", (t) => {
-    const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
-    expect(stringifyErrorCode(uint.decoder().decode(d))).toBe("success");
-    const value = uint.decoder().getValue();
-    expect(value).toStrictEqual(t.decoded);
-    expect(d.ptr).toBe(d.buf.length);
-  });
-  const SKIP_TESTS = TESTS;
-  test.each(SKIP_TESTS)("decodes skips $hex", (t) => {
-    const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
-    expect(stringifyErrorCode(uint.decoder().skip(d))).toBe("success");
-    expect(d.ptr).toBe(d.buf.length);
-  });
-});
+testPositive("u8", u8, [
+  { decoded: 0, hex: "00" },
+  { decoded: 1, hex: "01" },
+  { decoded: 0xff, hex: "18ff" },
+]);
+
+testPositive("u16", u16, [
+  { decoded: 0, hex: "00" },
+  { decoded: 1, hex: "01" },
+  { decoded: 0xff, hex: "18ff" },
+  { decoded: 0xffff, hex: "19ffff" },
+]);
+
+testPositive("u32", u32, [
+  { decoded: 0, hex: "00" },
+  { decoded: 1, hex: "01" },
+  { decoded: 0xff, hex: "18ff" },
+  { decoded: 0xffff, hex: "19ffff" },
+  { decoded: 2147483647, hex: "1a7fffffff" },
+  { decoded: 2147483648, hex: "1a80000000" },
+  { decoded: 0xffffffff, hex: "1affffffff" },
+]);
+
+testPositive("u64", u64, [
+  { decoded: 0n, hex: "00" },
+  { decoded: 1n, hex: "01" },
+  { decoded: 0xffn, hex: "18ff" },
+  { decoded: 0xffffn, hex: "19ffff" },
+  { decoded: 2147483647n, hex: "1a7fffffff" },
+  { decoded: 2147483648n, hex: "1a80000000" },
+  { decoded: 0xffffffffn, hex: "1affffffff" },
+  { decoded: 0xffffffffffffffffn, hex: "1bffffffffffffffff" },
+]);

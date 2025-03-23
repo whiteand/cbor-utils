@@ -26,10 +26,10 @@ export abstract class SingleDataItemDecodable<T, Results>
 {
   __inferT!: T;
   __inferResults!: Results;
-  abstract decode(decoder: InputByteStream): Results;
+  abstract decode(input: InputByteStream): Results;
   abstract getValue(): T;
   abstract nullValue(): T;
-  abstract skip(decoder: InputByteStream): void;
+  abstract skip(input: InputByteStream): Results;
   dataItems(): number {
     return 1;
   }

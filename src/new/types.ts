@@ -1,6 +1,5 @@
 import { IPipeable } from "../pipe";
 import { IDecoder, IEncoder, Z } from "../types";
-import { ByteLengthReceiver } from "./byteLength";
 
 export interface OutputByteStream extends IEncoder {}
 
@@ -31,15 +30,19 @@ export type InferResults<T> = T extends T
 
 export type AnyEncodable = IEncodable<Z, Z>;
 
-export interface IEncodable<T, Results>
-  extends IPipeable,
-    Inferable<T, Results> {
+export interface WithEncodeMethod<T, Results> {
   /**
-   *
+   * Encodes the value of type T into output byte stream output
    * @param value value that should be encoded
    * @param output encoder into which the value will be encoded
    */
   encode(value: T, output: OutputByteStream): Results;
+}
+
+export interface IEncodable<T, Results>
+  extends IPipeable,
+    Inferable<T, Results>,
+    WithEncodeMethod<T, Results> {
   /**
    * Will the value be encoded as 0xf6 (null) data item
    *
@@ -67,23 +70,27 @@ export interface IEncodable<T, Results>
 
 export type AnyDecodable = IDecodable<Z, Z>;
 
-export interface IDecodable<T, Results>
-  extends IPipeable,
-    Inferable<T, Results> {
+export interface WithDecodeAndGetValue<T, Results> {
   /**
    * Returns 0 if the value was successfully decoded.
    * Otherwise returns error code.
    * You can get the error message from the documentation of the concrete decoder.
    * If value successfully decoded (returned value is 0), you can receive decoded value from getValue method.
    *
-   * @param decoder decoder from which the value will be decoded
+   * @param input decoder from which the value will be decoded
    */
-  decode(decoder: InputByteStream): Results;
+  decode(input: InputByteStream): Results;
   /**
    * Returns decoded value, if the data item was successfully decoded.
    * Unsafe: ensure that decode operation returned 0.
    */
   getValue(): T;
+}
+
+export interface IDecodable<T, Results>
+  extends IPipeable,
+    Inferable<T, Results>,
+    WithDecodeAndGetValue<T, Results> {
   /**
    * Returns the value that will be returned when the data item is absent (or null)
    */
@@ -91,13 +98,13 @@ export interface IDecodable<T, Results>
   /**
    * Skips the encoded structure item in decoder
    */
-  skip(decoder: InputByteStream): void;
+  skip(input: InputByteStream): Results;
 
   /**
    * The number of data items that will be read from decoder
-   * @param decoder decoder from which the data items will be read
+   * @param input decoder from which the data items will be read
    */
-  dataItems(decoder: InputByteStream): void;
+  dataItems(input: InputByteStream): void;
   /**
    * How many data items will be read from decoder
    */

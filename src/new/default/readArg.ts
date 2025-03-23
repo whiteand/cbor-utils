@@ -41,6 +41,12 @@ export class ArgReceiver {
   isNull() {
     return this.variant === 3;
   }
+  /**
+   * @returns Returns true if the decoded value has type "number"
+   */
+  isNumber() {
+    return this.variant === 1;
+  }
 }
 
 export const argReceiver: ArgReceiver = new ArgReceiver();
@@ -95,12 +101,12 @@ function decodeU64(d: IDecoder): bigint {
 }
 
 function decodeU32(d: IDecoder): number {
-  return (
-    (d.buf[d.ptr++] << 24) |
-    (d.buf[d.ptr++] << 16) |
-    (d.buf[d.ptr++] << 8) |
-    d.buf[d.ptr++]
-  );
+  let res = d.buf[d.ptr++];
+  res = (res << 8) | d.buf[d.ptr++];
+  res = (res << 8) | d.buf[d.ptr++];
+  res =
+    res <= 0x7fffff ? (res << 8) | d.buf[d.ptr++] : res * 256 + d.buf[d.ptr++];
+  return res;
 }
 
 function decodeU16(d: IDecoder): number {

@@ -8,7 +8,13 @@ import {
   OVERFLOW_ERROR_CODE,
   TYPE_MISMATCH_ERROR_CODE,
 } from "../error-codes";
-import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
+import {
+  InferDecoder,
+  InputByteStream,
+  OutputByteStream,
+  SuccessResult,
+  WithEncodeMethod,
+} from "../types";
 import { ArgReceiver, readArg } from "./readArg";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
 import { writeTypeAndArg } from "./writeTypeAndArg";
@@ -46,7 +52,7 @@ class UintDecoder extends SingleDataItemDecodable<
   Uint,
   SuccessResult | UintDecoderErrors
 > {
-  protected receiver: ArgReceiver;
+  private receiver: ArgReceiver;
   constructor() {
     super();
     this.receiver = new ArgReceiver();
@@ -62,6 +68,12 @@ class UintDecoder extends SingleDataItemDecodable<
     if (this.receiver.isNull()) return INVALID_CBOR_ERROR_CODE;
     return 0;
   }
+  isNumber(): boolean {
+    return this.receiver.isNumber();
+  }
+  getArgumentReceiver(): ArgReceiver {
+    return this.receiver;
+  }
   getValue(): Uint {
     return this.receiver.get()!;
   }
@@ -76,3 +88,101 @@ class UintDecoder extends SingleDataItemDecodable<
 const uintDecoder = new UintDecoder();
 
 export const uint = new CborType(uintEncoder, uintDecoder);
+
+const MAX_SIZE = {
+  8: 0xff,
+  16: 0xffff,
+  32: 0xffffffff,
+};
+function createEncoder(size: 8 | 16 | 32) {
+  class SmallIntEncoder extends SingleDataItemEncodable<
+    number,
+    SuccessResult | typeof OVERFLOW_ERROR_CODE
+  > {
+    static MAX_VALUE = MAX_SIZE[size];
+    static MIN_VALUE = 0;
+    static BITS = size;
+    constructor(
+      private readonly uintEncoder: WithEncodeMethod<
+        number,
+        SuccessResult | typeof OVERFLOW_ERROR_CODE
+      >
+    ) {
+      super();
+    }
+
+    encode(
+      value: number,
+      encoder: OutputByteStream
+    ): SuccessResult | typeof OVERFLOW_ERROR_CODE {
+      if (value > SmallIntEncoder.MAX_VALUE) {
+        return OVERFLOW_ERROR_CODE;
+      }
+      return this.uintEncoder.encode(value, encoder);
+    }
+    isNull(): boolean {
+      return false;
+    }
+  }
+
+  return new SmallIntEncoder(uint.encoder());
+}
+
+function createDecoder(size: 8 | 16 | 32) {
+  class SmallIntDecoder extends SingleDataItemDecodable<
+    number,
+    SuccessResult | UintDecoderErrors
+  > {
+    static MAX_VALUE = MAX_SIZE[size];
+    static MIN_VALUE = 0;
+    static BITS = size;
+    constructor(private readonly uintDecoder: InferDecoder<typeof uint>) {
+      super();
+    }
+    decode(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
+      const res = this.uintDecoder.decode(decoder);
+      if (res !== 0) return res;
+      if (!this.uintDecoder.isNumber()) return TYPE_MISMATCH_ERROR_CODE;
+      const value = this.uintDecoder.getValue();
+      if (value > SmallIntDecoder.MAX_VALUE) return TYPE_MISMATCH_ERROR_CODE;
+      return 0;
+    }
+    getValue(): number {
+      return this.uintDecoder.getValue() as number;
+    }
+    nullValue(): number {
+      return 0;
+    }
+    skip(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
+      return this.decode(decoder);
+    }
+  }
+  return new SmallIntDecoder(uint.decoder());
+}
+
+export const u8 = new CborType(createEncoder(8), createDecoder(8));
+export const u16 = new CborType(createEncoder(16), createDecoder(16));
+export const u32 = new CborType(createEncoder(32), createDecoder(32));
+
+class U64Decoder extends SingleDataItemDecodable<
+  bigint,
+  SuccessResult | UintDecoderErrors
+> {
+  decode(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
+    return this.uintDecoder.decode(decoder);
+  }
+  getValue(): bigint {
+    return BigInt(this.uintDecoder.getValue());
+  }
+  nullValue(): bigint {
+    return 0n;
+  }
+  skip(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
+    return this.uintDecoder.skip(decoder);
+  }
+  constructor(private readonly uintDecoder: InferDecoder<typeof uint>) {
+    super();
+  }
+}
+
+export const u64 = new CborType(uint.encoder(), new U64Decoder(uint.decoder()));
