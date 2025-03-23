@@ -57,6 +57,7 @@ export abstract class Decodable<T, Results>
    * Fallibly maps decoded value using passed function.
    *
    * @param f Function that transforms decoded value after decoding
+   * @param nullValue function that returns a value that corresponds to `null` data item or absent data item
    * @returns a new decoder that applies the function `f` to decoded value
    */
   tryMap<U, R extends number>(
