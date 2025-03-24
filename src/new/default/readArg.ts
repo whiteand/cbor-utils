@@ -101,12 +101,10 @@ function decodeU64(d: IDecoder): bigint {
 }
 
 function decodeU32(d: IDecoder): number {
-  let res = d.buf[d.ptr++];
-  res = (res << 8) | d.buf[d.ptr++];
-  res = (res << 8) | d.buf[d.ptr++];
-  res =
-    res <= 0x7fffff ? (res << 8) | d.buf[d.ptr++] : res * 256 + d.buf[d.ptr++];
-  return res;
+  return (
+    ((((d.buf[d.ptr++] << 8) | d.buf[d.ptr++]) << 8) | d.buf[d.ptr++]) * 256 +
+    d.buf[d.ptr++]
+  );
 }
 
 function decodeU16(d: IDecoder): number {
