@@ -12,6 +12,8 @@ describe("u64", () => {
   const tests = [
     { v: 0n, b: "00" },
     { v: 1n, b: "01" },
+    { v: 0x7fffffffn, b: "1a7fffffff" },
+    { v: 0x80000000n, b: "1a80000000" },
     { v: 2n ** 64n - 1n, b: "1bffffffffffffffff" },
     { v: 2n ** 64n, ee: new OverflowError(2n ** 64n - 1n, 2n ** 64n) },
     { b: "f97e00", de: new TypeMismatchError("uint", "f16") },
