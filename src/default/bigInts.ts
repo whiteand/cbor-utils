@@ -38,7 +38,6 @@ function createBigInt(
         start: number
       ): Result<bigint, TypeMismatchError> => {
         const value = BigInt(arg);
-        console.log({ value });
 
         if (value <= getMaxValue(size) && value >= 0n) {
           return ok(value);
