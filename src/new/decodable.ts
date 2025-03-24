@@ -89,7 +89,7 @@ export abstract class Decodable<T, Results>
         return this.original.minDataItems();
       }
       decode(input: InputByteStream): Results | R {
-        let res = this.original.decode(input);
+        const res = this.original.decode(input);
         if (res !== 0) return res;
         const value = this.original.getValue();
         return this.f(value, this);

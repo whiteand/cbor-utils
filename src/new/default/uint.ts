@@ -66,7 +66,7 @@ class UintDecoder extends SingleDataItemDecodable<
     if (getType(marker) !== NUMBER_TYPE) {
       return TYPE_MISMATCH_ERROR_CODE;
     }
-    let err = readArg(d, this.receiver);
+    const err = readArg(d, this.receiver);
     if (err !== 0) return err;
     if (this.receiver.isNull()) return INVALID_CBOR_ERROR_CODE;
     return 0;
