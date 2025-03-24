@@ -17,13 +17,7 @@ import { IDecoder, IEncoder } from "../types";
 
 /**
  * A type that encodes and decodes negative integers
- * in range -(2 ^ 128) (inclusively) to -1 (inclusively)
- *
- * Note: It allows encoding of integers that have 128 bits.
- * Which is not strictly specified as a part of specification.
- * But it was added to allow encoding of large numbers. The
- * specification however envisions future extension of number
- * type to 128 bits.
+ * in range -(2 ^ 64) (inclusively) to -1 (inclusively)
  */
 export const nint: CborType<
   number | bigint,

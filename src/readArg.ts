@@ -71,12 +71,11 @@ function decodeU64(d: IDecoder): bigint {
 }
 
 function decodeU32(d: IDecoder): number {
-  return (
-    (d.buf[d.ptr++] << 24) |
-    (d.buf[d.ptr++] << 16) |
-    (d.buf[d.ptr++] << 8) |
-    d.buf[d.ptr++]
-  );
+  let res = d.buf[d.ptr++];
+  res = (res << 8) | d.buf[d.ptr++];
+  res = (res << 8) | d.buf[d.ptr++];
+  res = res * 256 + d.buf[d.ptr++];
+  return res;
 }
 
 function decodeU16(d: IDecoder): number {
