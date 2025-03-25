@@ -96,6 +96,11 @@ export interface IDecodable<T, Results>
    */
   nullValue(): T;
   /**
+   * Returns true if the data can be null.
+   * If it returns true, `nullValue` should return valid value.
+   */
+  hasNullValue(): boolean;
+  /**
    * Skips the encoded structure item in decoder
    */
   skip(input: InputByteStream): Results;

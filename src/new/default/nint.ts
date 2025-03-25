@@ -1,20 +1,3 @@
-// import { ok, Result } from "resultra";
-// import { DecodingError } from "../DecodingError";
-// import { InvalidCborError } from "../InvalidCborError";
-// import { OverflowError } from "../OverflowError";
-// import { TypeMismatchError } from "../TypeMismatchError";
-// import { CborType } from "../base";
-// import { NEGATIVE_INT_TYPE } from "../constants";
-// import { getTypeString } from "../getTypeString";
-// import { getType } from "../marker";
-// import { readArg } from "../readArg";
-// import { writeTypeAndArg } from "../writeTypeAndArg";
-// import { MAX_U128 } from "../limits";
-// import { UnderflowError } from "../UnderflowError";
-// import { getEoiResult } from "../EndOfInputError";
-// import { done } from "../utils/done";
-// import { IDecoder, IEncoder } from "../types";
-
 import { NEGATIVE_INT_TYPE } from "../../constants";
 import { MAX_U64 } from "../../limits";
 import { getType } from "../../marker";
@@ -31,42 +14,6 @@ import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
 import { ArgReceiver, readArg } from "./readArg";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
 import { writeTypeAndArg } from "./writeTypeAndArg";
-
-// /**
-//  * A type that encodes and decodes negative integers
-//  * in range -(2 ^ 64) (inclusively) to -1 (inclusively)
-//  */
-// export const nint: CborType<
-//   number | bigint,
-//   number | bigint,
-//   OverflowError | TypeMismatchError,
-//   DecodingError,
-//   [],
-//   []
-// > = CborType.builder()
-//   .encode((v: number | bigint, e: IEncoder) => {
-
-//   })
-//   .decode((d: IDecoder): Result<number | bigint, DecodingError> => {
-//     if (done(d)) return getEoiResult();
-//     const marker = d.buf[d.ptr];
-//     if (getType(marker) !== NEGATIVE_INT_TYPE) {
-//       return new TypeMismatchError("negative-int", getTypeString(marker)).err();
-//     }
-//     const argRes = readArg(d);
-//     if (!argRes.ok()) {
-//       return argRes;
-//     }
-//     const v = argRes.value;
-//     if (v == null) {
-//       return new InvalidCborError(marker, d.ptr).err();
-//     }
-//     if (typeof v === "bigint") {
-//       return ok(-1n - v);
-//     }
-//     return ok(-1 - v);
-//   })
-//   .build();
 
 export type NegativeIntEncoderResults =
   | SuccessResult
@@ -138,24 +85,20 @@ class NegativeIntDecoder extends SingleDataItemDecodable<
     if (this.receiver.isNumber()) {
       const value = this.receiver.getNumber();
       this.receiver.setNum(-1 - value);
-      return 0;
     } else {
       const value = this.receiver.getBigInt();
       this.receiver.setBigInt(-1n - value);
-      return 0;
     }
-  }
-  isNumber(): boolean {
-    return this.receiver.isNumber();
-  }
-  getArgumentReceiver(): ArgReceiver {
-    return this.receiver;
+    return 0;
   }
   getValue(): number | bigint {
     return this.receiver.get()!;
   }
   nullValue(): number | bigint {
     return -1;
+  }
+  hasNullValue(): boolean {
+    return false;
   }
   skip(decoder: InputByteStream): NegativeIntDecoderResults {
     return this.decode(decoder);

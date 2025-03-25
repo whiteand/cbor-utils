@@ -27,6 +27,7 @@ export abstract class SingleDataItemDecodable<T, Results> extends Decodable<
   abstract decode(input: InputByteStream): Results;
   abstract getValue(): T;
   abstract nullValue(): T;
+  abstract hasNullValue(): boolean;
   abstract skip(input: InputByteStream): Results;
   dataItems(): number {
     return 1;

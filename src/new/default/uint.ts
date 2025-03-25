@@ -83,6 +83,9 @@ class UintDecoder extends SingleDataItemDecodable<
   nullValue(): Uint {
     return 0;
   }
+  hasNullValue(): boolean {
+    return false;
+  }
   skip(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
     return this.decode(decoder);
   }

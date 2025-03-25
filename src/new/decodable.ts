@@ -6,6 +6,7 @@ export abstract class Decodable<T, Results>
   implements IDecodable<T, Results>
 {
   abstract nullValue(): T;
+  abstract hasNullValue(): boolean;
   abstract skip(input: InputByteStream): Results;
   abstract dataItems(input: InputByteStream): void;
   abstract minDataItems(): number;
