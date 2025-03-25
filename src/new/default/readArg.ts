@@ -28,6 +28,12 @@ export class ArgReceiver {
   setNull() {
     this.variant = 3;
   }
+  getNumber() {
+    return this.numArg;
+  }
+  getBigInt() {
+    return this.bigIntArg;
+  }
   get() {
     switch (this.variant) {
       case 1:
