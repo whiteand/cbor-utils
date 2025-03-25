@@ -50,7 +50,7 @@ class NegativeIntEncoder extends SingleDataItemEncodable<
       typeof value === "bigint" ? -1n - value : -1 - value
     );
   }
-  isNull(value: number | bigint): boolean {
+  isNull(): boolean {
     return false;
   }
 }

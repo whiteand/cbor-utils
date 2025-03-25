@@ -6,9 +6,9 @@ import { CborType } from "./cbor-type";
 import { stringifyErrorCode } from "./stringifyErrorCode";
 import { IDecodable, IEncodable } from "./types";
 
-export function testCborType<N, R extends number>(
+export function testCborType<N, ER extends number, DR extends number>(
   name: string,
-  type: CborType<IEncodable<N, R>, IDecodable<N, R>>,
+  type: CborType<IEncodable<N, ER>, IDecodable<N, DR>>,
   POSITIVE_TESTS: Array<{
     hex: string;
     decoded: N;
@@ -17,12 +17,12 @@ export function testCborType<N, R extends number>(
     | {
         type: "encode";
         value: N;
-        error: number;
+        error: ER;
       }
     | {
         type: "decode";
         hex: string;
-        error: number;
+        error: DR;
       }
   >
 ): void {
