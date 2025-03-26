@@ -18,7 +18,17 @@ testCborType(
   ],
   [
     { type: "decode", hex: "", error: EOI_ERROR_CODE },
-    { type: "decode", hex: "01", error: TYPE_MISMATCH_ERROR_CODE },
-    { type: "decode", hex: "9bffffffffffffff", error: EOI_ERROR_CODE },
+    {
+      type: "decode",
+
+      hex: "01",
+      error: TYPE_MISMATCH_ERROR_CODE,
+    },
+    {
+      type: "decode",
+
+      hex: "9bffffffffffffff",
+      error: EOI_ERROR_CODE,
+    },
   ]
 );

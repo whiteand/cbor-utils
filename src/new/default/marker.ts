@@ -1,5 +1,5 @@
 import { getType } from "../../marker";
-import { done } from "../../utils/done";
+import { done } from "../done";
 import {
   EOI_ERROR_CODE,
   INVALID_CBOR_ERROR_CODE,
@@ -17,34 +17,36 @@ import {
 import { ArgReceiver, readArg } from "./readArg";
 import { writeTypeAndArg } from "./writeTypeAndArg";
 
-type TLen = number | bigint | null;
-type LenEncoderResults =
+type MarkerInfo = number | bigint | null;
+export type MarkerEncoderResults =
   | SuccessResult
   | typeof UNDERFLOW_ERROR_CODE
   | typeof OVERFLOW_ERROR_CODE;
 
-export class LenEncoder implements WithEncodeMethod<TLen, LenEncoderResults> {
-  __inferT: TLen;
-  __inferResults: LenEncoderResults;
+export class MarkerEncoder
+  implements WithEncodeMethod<MarkerInfo, MarkerEncoderResults>
+{
+  __inferT: MarkerInfo;
+  __inferResults: MarkerEncoderResults;
   constructor(private readonly major: MajorType) {}
-  encode(len: TLen, e: OutputByteStream) {
-    return writeTypeAndArg(e, this.major, len);
+  encode(markerInfo: MarkerInfo, e: OutputByteStream) {
+    return writeTypeAndArg(e, this.major, markerInfo);
   }
 }
 
-type LenDecoderResults =
+type MarkerDecoderResults =
   | SuccessResult
   | typeof INVALID_CBOR_ERROR_CODE
   | typeof TYPE_MISMATCH_ERROR_CODE
   | typeof EOI_ERROR_CODE;
 
-export class LenDecoder extends ArgReceiver {
-  __inferT: TLen;
-  __inferResults: LenDecoderResults;
+export class MarkerDecoder extends ArgReceiver {
+  __inferT: MarkerInfo;
+  __inferResults: MarkerDecoderResults;
   constructor(private readonly major: MajorType) {
     super();
   }
-  decode(d: InputByteStream): LenDecoderResults {
+  decode(d: InputByteStream): MarkerDecoderResults {
     if (done(d)) return EOI_ERROR_CODE;
     const marker = d.buf[d.ptr];
     const t = getType(marker);
@@ -53,10 +55,10 @@ export class LenDecoder extends ArgReceiver {
     }
     return readArg(d, this);
   }
-  skip(d: InputByteStream): LenDecoderResults {
+  skip(d: InputByteStream): MarkerDecoderResults {
     return this.decode(d);
   }
-  getValue(): TLen {
+  getValue(): MarkerInfo {
     switch (this.variant) {
       case 1:
         return this.numArg;

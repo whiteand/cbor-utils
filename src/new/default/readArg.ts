@@ -1,8 +1,8 @@
 import { getInfo } from "../../marker";
 import { IDecoder } from "../../types";
-import { done } from "../../utils/done";
+import { done } from "../done";
 import { EOI_ERROR_CODE, INVALID_CBOR_ERROR_CODE } from "../error-codes";
-import { SuccessResult } from "../types";
+import { InputByteStream, SuccessResult } from "../types";
 
 export type ReadArgErrors =
   | typeof EOI_ERROR_CODE
@@ -50,7 +50,7 @@ export class ArgReceiver {
 export const argReceiver: ArgReceiver = new ArgReceiver();
 
 export function readArg(
-  d: IDecoder,
+  d: InputByteStream,
   out: ArgReceiver
 ): ReadArgErrors | SuccessResult {
   const marker = d.buf[d.ptr++];
@@ -61,7 +61,7 @@ export function readArg(
   }
   switch (info) {
     case 24: {
-      return done(d) ? EOI_ERROR_CODE : (out.setNum(d.buf[d.ptr++]), 0);
+      return out.setNum(d.buf[d.ptr++]), 0;
     }
     case 25: {
       return d.ptr + 1 < d.buf.length

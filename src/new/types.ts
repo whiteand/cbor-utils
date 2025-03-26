@@ -109,7 +109,7 @@ export interface IDecodable<T, Results>
    * The number of data items that will be read from decoder
    * @param input decoder from which the data items will be read
    */
-  dataItems(input: InputByteStream): void;
+  dataItems(input: InputByteStream, receiver: { value: number }): Results;
   /**
    * How many data items will be read from decoder
    */

@@ -5,8 +5,6 @@ import { fromHex, hex } from "../utils/hex";
 import { CborType } from "./cbor-type";
 import { stringifyErrorCode } from "./stringifyErrorCode";
 import {
-  IDecodable,
-  IEncodable,
   InputByteStream,
   WithDecodeAndGetValue,
   WithEncodeMethod,

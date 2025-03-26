@@ -1,4 +1,5 @@
 import { BREAK_BYTE } from "../../constants";
+import { done } from "../done";
 import {
   EOI_ERROR_CODE,
   INVALID_CBOR_ERROR_CODE,
@@ -8,7 +9,7 @@ import {
 } from "../error-codes";
 import { MajorType } from "../major";
 import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
-import { LenDecoder, LenEncoder } from "./len";
+import { MarkerDecoder, MarkerEncoder } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
 
 export type SliceEncoderResults =
@@ -20,17 +21,17 @@ export class SliceEncoder extends SingleDataItemEncodable<
   Uint8Array,
   SliceEncoderResults
 > {
-  lenEncoder: LenEncoder;
+  markerEncoder: MarkerEncoder;
   constructor(public readonly major: MajorType) {
     super();
-    this.lenEncoder = new LenEncoder(major);
+    this.markerEncoder = new MarkerEncoder(major);
   }
 
   encode(
     value: Uint8Array<ArrayBufferLike>,
     encoder: OutputByteStream
   ): SliceEncoderResults {
-    const res = this.lenEncoder.encode(value.length, encoder);
+    const res = this.markerEncoder.encode(value.length, encoder);
 
     if (res !== 0) return res;
 
@@ -53,24 +54,24 @@ export class SliceDecoder extends SingleDataItemDecodable<
 > {
   private result: Uint8Array;
   private chunks: Uint8Array[];
-  private lenDecoder: LenDecoder;
-  constructor(private readonly major: MajorType) {
+  private markerDecoder: MarkerDecoder;
+  constructor(major: MajorType) {
     super();
     this.chunks = [];
-    this.lenDecoder = new LenDecoder(major);
+    this.markerDecoder = new MarkerDecoder(major);
   }
   decode(d: InputByteStream): SliceDecoderResults {
-    const res = this.lenDecoder.decode(d);
+    const res = this.markerDecoder.decode(d);
 
     return res !== 0
       ? res
-      : this.lenDecoder.isNull()
+      : this.markerDecoder.isNull()
       ? this.decodeIndefiniteSlice(d)
       : this.readDefiniteSlice(
           d,
-          this.lenDecoder.isNumber()
-            ? this.lenDecoder.getNumber()
-            : Number(this.lenDecoder.getBigInt())
+          this.markerDecoder.isNumber()
+            ? this.markerDecoder.getNumber()
+            : Number(this.markerDecoder.getBigInt())
         );
   }
   readDefiniteSlice(d: InputByteStream, length: number): SliceDecoderResults {
@@ -86,7 +87,7 @@ export class SliceDecoder extends SingleDataItemDecodable<
     const initialLength = this.chunks.length;
     let total = 0;
     while (true) {
-      if (d.ptr >= d.buf.length) {
+      if (done(d)) {
         return EOI_ERROR_CODE;
       }
       const m = d.buf[d.ptr];
@@ -144,17 +145,17 @@ export class SliceDecoder extends SingleDataItemDecodable<
     return false;
   }
   skip(d: InputByteStream): SliceDecoderResults {
-    const res = this.lenDecoder.decode(d);
+    const res = this.markerDecoder.decode(d);
 
     return res !== 0
       ? res
-      : this.lenDecoder.isNull()
+      : this.markerDecoder.isNull()
       ? this.skipIndefiniteSlice(d)
       : this.skipDefiniteSlice(
           d,
-          this.lenDecoder.isNumber()
-            ? this.lenDecoder.getNumber()
-            : Number(this.lenDecoder.getBigInt())
+          this.markerDecoder.isNumber()
+            ? this.markerDecoder.getNumber()
+            : Number(this.markerDecoder.getBigInt())
         );
   }
 }

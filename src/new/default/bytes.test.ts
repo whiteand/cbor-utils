@@ -9,10 +9,12 @@ describe("indefinite bytes", (it) => {
   const testcases = [
     {
       hex: "5f4301020341015f4101ffff",
+
       decoded: new Uint8Array([1, 2, 3, 1, 1]),
     },
     {
       hex: "5f41014202035f420405ffff",
+
       decoded: new Uint8Array([1, 2, 3, 4, 5]),
     },
   ];
@@ -34,7 +36,10 @@ testCborType(
       hex: "40",
       decoded: new Uint8Array(),
     },
-    { hex: "4401020304", decoded: new Uint8Array(fromHex("01020304")) },
+    {
+      hex: "4401020304",
+      decoded: new Uint8Array(fromHex("01020304")),
+    },
     {
       decoded: new Uint8Array([1, 2, 3]),
       hex: "43010203",

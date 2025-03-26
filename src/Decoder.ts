@@ -1,5 +1,6 @@
 import { Result } from "resultra";
 import { AnyContextArgs, IDecodable, IDecoder, Z } from "./types";
+import { InputByteStream } from "./new/types";
 
 /**
  * Basic class which defines buffer and pointer into the buffer.
@@ -27,7 +28,7 @@ class BaseDecoder {
  *
  * Cbor Types mutate this instance during encoding and decoding.
  */
-export class Decoder extends BaseDecoder {
+export class Decoder extends BaseDecoder implements InputByteStream {
   /**
    * @param bytes Bytes that contain CBOR
    * @param ptr A pointer to the current position in the bytes

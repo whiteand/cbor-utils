@@ -1,7 +1,5 @@
 import { NEGATIVE_INT_TYPE } from "../../constants";
 import { MAX_U64 } from "../../limits";
-import { getType } from "../../marker";
-import { done } from "../../utils/done";
 import { CborType } from "../cbor-type";
 import {
   EOI_ERROR_CODE,
@@ -11,7 +9,7 @@ import {
   UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
 import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
-import { ArgReceiver, readArg } from "./readArg";
+import { MarkerDecoder } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
 import { writeTypeAndArg } from "./writeTypeAndArg";
 
@@ -67,34 +65,29 @@ class NegativeIntDecoder extends SingleDataItemDecodable<
   number | bigint,
   NegativeIntDecoderResults
 > {
-  private receiver: ArgReceiver;
+  private markerDecoder: MarkerDecoder;
 
   constructor() {
     super();
-    this.receiver = new ArgReceiver();
+    this.markerDecoder = new MarkerDecoder(NEGATIVE_INT_TYPE);
   }
   decode(d: InputByteStream): NegativeIntDecoderResults {
-    if (done(d)) return EOI_ERROR_CODE;
-    const marker = d.buf[d.ptr];
-    if (getType(marker) !== NEGATIVE_INT_TYPE) {
-      return TYPE_MISMATCH_ERROR_CODE;
-    }
-    const argRes = readArg(d, this.receiver);
+    const argRes = this.markerDecoder.decode(d);
     if (argRes !== 0) return argRes;
-    if (this.receiver.isNull()) return INVALID_CBOR_ERROR_CODE;
-    if (this.receiver.isNumber()) {
-      const value = this.receiver.getNumber();
-      this.receiver.setNum(-1 - value);
+    if (this.markerDecoder.isNull()) return INVALID_CBOR_ERROR_CODE;
+    if (this.markerDecoder.isNumber()) {
+      const value = this.markerDecoder.getNumber();
+      this.markerDecoder.setNum(-1 - value);
     } else {
-      const value = this.receiver.getBigInt();
-      this.receiver.setBigInt(-1n - value);
+      const value = this.markerDecoder.getBigInt();
+      this.markerDecoder.setBigInt(-1n - value);
     }
     return 0;
   }
   getValue(): number | bigint {
-    return this.receiver.isNumber()
-      ? this.receiver.getNumber()
-      : this.receiver.getBigInt();
+    return this.markerDecoder.isNumber()
+      ? this.markerDecoder.getNumber()
+      : this.markerDecoder.getBigInt();
   }
   nullValue(): number | bigint {
     return -1;

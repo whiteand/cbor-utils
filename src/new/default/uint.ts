@@ -16,7 +16,7 @@ import {
   SuccessResult,
   WithEncodeMethod,
 } from "../types";
-import { ArgReceiver, readArg } from "./readArg";
+import { MarkerDecoder } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
 import { writeTypeAndArg } from "./writeTypeAndArg";
 
@@ -55,32 +55,28 @@ class UintDecoder extends SingleDataItemDecodable<
   Uint,
   SuccessResult | UintDecoderErrors
 > {
-  private receiver: ArgReceiver;
+  private lenDecoder: MarkerDecoder;
   constructor() {
     super();
-    this.receiver = new ArgReceiver();
+    this.lenDecoder = new MarkerDecoder(NUMBER_TYPE);
   }
   decode(d: InputByteStream): SuccessResult | UintDecoderErrors {
-    if (done(d)) return EOI_ERROR_CODE;
-    const marker = d.buf[d.ptr];
-    if (getType(marker) !== NUMBER_TYPE) {
-      return TYPE_MISMATCH_ERROR_CODE;
-    }
-    const err = readArg(d, this.receiver);
-    if (err !== 0) return err;
-    if (this.receiver.isNull()) return INVALID_CBOR_ERROR_CODE;
+    const res = this.lenDecoder.decode(d);
+
+    if (res !== 0) return res;
+    if (this.lenDecoder.isNull()) return INVALID_CBOR_ERROR_CODE;
     return 0;
   }
   isNumber(): boolean {
-    return this.receiver.isNumber();
+    return this.lenDecoder.isNumber();
   }
-  getArgumentReceiver(): ArgReceiver {
-    return this.receiver;
+  getLenDecoder(): MarkerDecoder {
+    return this.lenDecoder;
   }
   getValue(): Uint {
-    return this.receiver.isNumber()
-      ? this.receiver.getNumber()
-      : this.receiver.getBigInt();
+    return this.lenDecoder.isNumber()
+      ? this.lenDecoder.getNumber()
+      : this.lenDecoder.getBigInt();
   }
   nullValue(): Uint {
     return 0;
