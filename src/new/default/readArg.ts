@@ -9,9 +9,9 @@ export type ReadArgErrors =
   | typeof INVALID_CBOR_ERROR_CODE;
 
 export class ArgReceiver {
-  numArg: number;
-  bigIntArg: bigint;
-  variant: 1 | 2 | 3;
+  protected numArg: number;
+  protected bigIntArg: bigint;
+  protected variant: 1 | 2 | 3;
   constructor() {
     this.numArg = 0;
     this.bigIntArg = 0n;

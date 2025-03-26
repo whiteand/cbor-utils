@@ -17,7 +17,6 @@ import {
   TAG_TYPE,
 } from "../constants";
 import { getTypeString } from "../getTypeString";
-import { MAX_U128 } from "../limits";
 import { getInfo, getType } from "../marker";
 import { array } from "../operators/array";
 import { mapErrors } from "../operators/mapErrors";
@@ -40,6 +39,7 @@ import { simple } from "./simple";
 import { str } from "./str";
 import { uint } from "./uint";
 import { undefinedType } from "./undefined";
+import { MAX_U64 } from "../limits";
 
 export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
   const p = d.ptr;
@@ -127,13 +127,13 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
 }
 
 function encodeBigInt(b: bigint, e: IEncoder): Result<void, OverflowError> {
-  if (b > MAX_U128 || b < -(MAX_U128 + 1n)) {
-    return bignum.encode(b, e);
-  }
-  if (b >= 0n) {
-    return uint.encode(b, e);
-  }
-  return nint.encode(b, e);
+  return b > MAX_U64
+    ? bignum.encode(b, e)
+    : b < -(MAX_U64 + 1n)
+    ? bignum.encode(b, e)
+    : b >= 0n
+    ? uint.encode(b, e)
+    : nint.encode(b, e);
 }
 function encodeAny(
   value: Readonly<DataItem>,

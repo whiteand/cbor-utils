@@ -1,22 +1,21 @@
+import { getType } from "../../marker";
+import { done } from "../../utils/done";
+import {
+  EOI_ERROR_CODE,
+  INVALID_CBOR_ERROR_CODE,
+  OVERFLOW_ERROR_CODE,
+  TYPE_MISMATCH_ERROR_CODE,
+  UNDERFLOW_ERROR_CODE,
+} from "../error-codes";
 import { MajorType } from "../major";
 import {
   InputByteStream,
   OutputByteStream,
   SuccessResult,
-  WithDecodeAndGetValue,
   WithEncodeMethod,
 } from "../types";
-import {
-  UNDERFLOW_ERROR_CODE,
-  OVERFLOW_ERROR_CODE,
-  INVALID_CBOR_ERROR_CODE,
-  EOI_ERROR_CODE,
-  TYPE_MISMATCH_ERROR_CODE,
-} from "../error-codes";
+import { ArgReceiver, readArg } from "./readArg";
 import { writeTypeAndArg } from "./writeTypeAndArg";
-import { readArg, ArgReceiver } from "./readArg";
-import { done } from "../../utils/done";
-import { getType } from "../../marker";
 
 type TLen = number | bigint | null;
 type LenEncoderResults =
@@ -25,6 +24,8 @@ type LenEncoderResults =
   | typeof OVERFLOW_ERROR_CODE;
 
 export class LenEncoder implements WithEncodeMethod<TLen, LenEncoderResults> {
+  __inferT: TLen;
+  __inferResults: LenEncoderResults;
   constructor(private readonly major: MajorType) {}
   encode(len: TLen, e: OutputByteStream) {
     return writeTypeAndArg(e, this.major, len);
@@ -38,6 +39,8 @@ type LenDecoderResults =
   | typeof EOI_ERROR_CODE;
 
 export class LenDecoder extends ArgReceiver {
+  __inferT: TLen;
+  __inferResults: LenDecoderResults;
   constructor(private readonly major: MajorType) {
     super();
   }
@@ -49,5 +52,18 @@ export class LenDecoder extends ArgReceiver {
       return TYPE_MISMATCH_ERROR_CODE;
     }
     return readArg(d, this);
+  }
+  skip(d: InputByteStream): LenDecoderResults {
+    return this.decode(d);
+  }
+  getValue(): TLen {
+    switch (this.variant) {
+      case 1:
+        return this.numArg;
+      case 2:
+        return this.bigIntArg;
+      case 3:
+        return null;
+    }
   }
 }

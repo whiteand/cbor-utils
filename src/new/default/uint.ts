@@ -168,6 +168,9 @@ function createDecoder(size: 8 | 16 | 32) {
     skip(decoder: InputByteStream): SuccessResult | SmallIntDecoderErrors {
       return this.decode(decoder);
     }
+    hasNullValue(): boolean {
+      return false;
+    }
   }
   return new SmallIntDecoder(uint.decoder());
 }

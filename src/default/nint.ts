@@ -1,19 +1,19 @@
 import { ok, Result } from "resultra";
-import { DecodingError } from "../DecodingError";
-import { InvalidCborError } from "../InvalidCborError";
-import { OverflowError } from "../OverflowError";
-import { TypeMismatchError } from "../TypeMismatchError";
 import { CborType } from "../base";
 import { NEGATIVE_INT_TYPE } from "../constants";
-import { getTypeString } from "../getTypeString";
-import { getType } from "../marker";
-import { readArg } from "../readArg";
-import { writeTypeAndArg } from "../writeTypeAndArg";
-import { MAX_U128, MAX_U64 } from "../limits";
-import { UnderflowError } from "../UnderflowError";
+import { DecodingError } from "../DecodingError";
 import { getEoiResult } from "../EndOfInputError";
-import { done } from "../utils/done";
+import { getTypeString } from "../getTypeString";
+import { InvalidCborError } from "../InvalidCborError";
+import { MAX_U64 } from "../limits";
+import { getType } from "../marker";
+import { OverflowError } from "../OverflowError";
+import { readArg } from "../readArg";
+import { TypeMismatchError } from "../TypeMismatchError";
 import { IDecoder, IEncoder } from "../types";
+import { UnderflowError } from "../UnderflowError";
+import { done } from "../utils/done";
+import { writeTypeAndArg } from "../writeTypeAndArg";
 
 /**
  * A type that encodes and decodes negative integers

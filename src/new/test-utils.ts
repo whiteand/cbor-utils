@@ -4,11 +4,20 @@ import { Encoder } from "../Encoder";
 import { fromHex, hex } from "../utils/hex";
 import { CborType } from "./cbor-type";
 import { stringifyErrorCode } from "./stringifyErrorCode";
-import { IDecodable, IEncodable } from "./types";
+import {
+  IDecodable,
+  IEncodable,
+  InputByteStream,
+  WithDecodeAndGetValue,
+  WithEncodeMethod,
+} from "./types";
 
 export function testCborType<N, ER extends number, DR extends number>(
   name: string,
-  type: CborType<IEncodable<N, ER>, IDecodable<N, DR>>,
+  type: CborType<
+    WithEncodeMethod<N, ER>,
+    WithDecodeAndGetValue<N, DR> & { skip(d: InputByteStream): DR }
+  >,
   POSITIVE_TESTS: Array<{
     hex: string;
     decoded: N;
