@@ -16,9 +16,8 @@ import {
   SuccessResult,
   WithEncodeMethod,
 } from "../types";
-import { MarkerDecoder } from "./marker";
+import { MarkerDecoder, MarkerEncoder } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
-import { writeTypeAndArg } from "./writeTypeAndArg";
 
 type Uint = number | bigint;
 
@@ -35,12 +34,19 @@ class UintEncoder extends SingleDataItemEncodable<
   Uint,
   SuccessResult | UintEncoderErrors
 > {
+  private markerEncoder: MarkerEncoder;
+  constructor() {
+    super();
+    this.markerEncoder = new MarkerEncoder(NUMBER_TYPE);
+  }
+
   encode(
     value: Uint,
     encoder: OutputByteStream
   ): SuccessResult | UintEncoderErrors {
-    return writeTypeAndArg(encoder, NUMBER_TYPE, value);
+    return this.markerEncoder.encode(value, encoder);
   }
+
   isNull(): boolean {
     return false;
   }

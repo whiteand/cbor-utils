@@ -9,9 +9,8 @@ import {
   UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
 import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
-import { MarkerDecoder } from "./marker";
+import { MarkerDecoder, MarkerEncoder } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
-import { writeTypeAndArg } from "./writeTypeAndArg";
 
 export type NegativeIntEncoderResults =
   | SuccessResult
@@ -22,6 +21,11 @@ class NegativeIntEncoder extends SingleDataItemEncodable<
   number | bigint,
   NegativeIntEncoderResults
 > {
+  private markerEncoder: MarkerEncoder;
+  constructor() {
+    super();
+    this.markerEncoder = new MarkerEncoder(NEGATIVE_INT_TYPE);
+  }
   encode(
     value: number | bigint,
     encoder: OutputByteStream
@@ -42,10 +46,9 @@ class NegativeIntEncoder extends SingleDataItemEncodable<
         return UNDERFLOW_ERROR_CODE;
       }
     }
-    return writeTypeAndArg(
-      encoder,
-      NEGATIVE_INT_TYPE,
-      typeof value === "bigint" ? -1n - value : -1 - value
+    return this.markerEncoder.encode(
+      typeof value === "bigint" ? -1n - value : -1 - value,
+      encoder
     );
   }
   isNull(): boolean {
