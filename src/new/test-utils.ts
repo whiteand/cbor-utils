@@ -9,6 +9,9 @@ import {
   WithDecodeAndGetValue,
   WithEncodeMethod,
 } from "./types";
+import { free, provide, takeContext, useContext } from "./Context";
+import { RemainingDataItemsContext } from "./remainingDataItems";
+import { afterEach } from "node:test";
 
 export function testCborType<N, ER extends number, DR extends number>(
   name: string,
@@ -19,6 +22,7 @@ export function testCborType<N, ER extends number, DR extends number>(
   POSITIVE_TESTS: Array<{
     hex: string;
     decoded: N;
+    expectedRemaining?: number;
   }>,
   NEGATIVE_TESTS: Array<
     | {
@@ -34,6 +38,9 @@ export function testCborType<N, ER extends number, DR extends number>(
   >
 ): void {
   describe(name, () => {
+    afterEach(() => {
+      free(RemainingDataItemsContext);
+    });
     test.each(POSITIVE_TESTS)("decodes $hex => $decoded", (t) => {
       const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
       expect(stringifyErrorCode(type.decoder().decode(d))).toBe("success");
@@ -41,6 +48,19 @@ export function testCborType<N, ER extends number, DR extends number>(
       expect(value).toEqual(t.decoded);
       expect(d.ptr).toBe(d.buf.length);
     });
+    test.each(POSITIVE_TESTS)(
+      "decodes $hex => $decoded with remaining data items",
+      (t) => {
+        provide(RemainingDataItemsContext, 1);
+        const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
+        expect(stringifyErrorCode(type.decoder().decode(d))).toBe("success");
+        const remainingDataItems = takeContext(RemainingDataItemsContext);
+        const value = type.decoder().getValue();
+        expect(value).toEqual(t.decoded);
+        expect(d.ptr).toBe(d.buf.length);
+        expect(remainingDataItems).toBe(t.expectedRemaining ?? 0);
+      }
+    );
     test.each(POSITIVE_TESTS)("decodes skips $hex", (t) => {
       const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
       expect(stringifyErrorCode(type.decoder().skip(d))).toBe("success");

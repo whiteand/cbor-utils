@@ -1,4 +1,5 @@
 import { BREAK_BYTE } from "../../constants";
+import { free, isProvided, provide, useContext } from "../Context";
 import { done } from "../done";
 import {
   EOI_ERROR_CODE,
@@ -8,6 +9,7 @@ import {
   UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
 import { MajorType } from "../major";
+import { RemainingDataItemsContext } from "../remainingDataItems";
 import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
 import { MarkerDecoder, MarkerEncoder } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
@@ -61,20 +63,41 @@ export class SliceDecoder extends SingleDataItemDecodable<
     this.markerDecoder = new MarkerDecoder(major);
   }
   decode(d: InputByteStream): SliceDecoderResults {
-    const res = this.markerDecoder.decode(d);
+    let res = this.markerDecoder.decode(d);
+    if (res !== 0) return res;
+    if (this.markerDecoder.isNull()) {
+      if (isProvided(RemainingDataItemsContext)) {
+        const oldValue = useContext(RemainingDataItemsContext);
+        free(RemainingDataItemsContext);
+        res = this.decodeIndefiniteSlice(d);
+        if (res !== 0) {
+          return res;
+        }
+        provide(RemainingDataItemsContext, oldValue - 1);
+        return 0;
+      } else {
+        return this.decodeIndefiniteSlice(d);
+      }
+    }
+    const len = this.markerDecoder.isNumber()
+      ? this.markerDecoder.getNumber()
+      : Number(this.markerDecoder.getBigInt());
 
-    return res !== 0
-      ? res
-      : this.markerDecoder.isNull()
-      ? this.decodeIndefiniteSlice(d)
-      : this.readDefiniteSlice(
-          d,
-          this.markerDecoder.isNumber()
-            ? this.markerDecoder.getNumber()
-            : Number(this.markerDecoder.getBigInt())
-        );
+    if (isProvided(RemainingDataItemsContext)) {
+      const oldValue = useContext(RemainingDataItemsContext);
+      provide(RemainingDataItemsContext, len);
+      res = this.decodeDefiniteSlice(d, len);
+      if (res !== 0) {
+        provide(RemainingDataItemsContext, oldValue);
+        return res;
+      }
+      provide(RemainingDataItemsContext, oldValue - 1);
+      return res;
+    } else {
+      return this.decodeDefiniteSlice(d, len);
+    }
   }
-  readDefiniteSlice(d: InputByteStream, length: number): SliceDecoderResults {
+  decodeDefiniteSlice(d: InputByteStream, length: number): SliceDecoderResults {
     if (d.ptr + length > d.buf.length) {
       return EOI_ERROR_CODE;
     }

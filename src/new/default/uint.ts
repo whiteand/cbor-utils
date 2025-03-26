@@ -2,6 +2,7 @@ import { NUMBER_TYPE } from "../../constants";
 import { getType } from "../../marker";
 import { done } from "../../utils/done";
 import { CborType } from "../cbor-type";
+import { isProvided } from "../Context";
 import {
   EOI_ERROR_CODE,
   INVALID_CBOR_ERROR_CODE,
@@ -9,6 +10,7 @@ import {
   TYPE_MISMATCH_ERROR_CODE,
   UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
+import { decRemaining, RemainingDataItemsContext } from "../remainingDataItems";
 import {
   InferDecoder,
   InputByteStream,
@@ -71,6 +73,7 @@ class UintDecoder extends SingleDataItemDecodable<
 
     if (res !== 0) return res;
     if (this.lenDecoder.isNull()) return INVALID_CBOR_ERROR_CODE;
+    decRemaining();
     return 0;
   }
   isNumber(): boolean {

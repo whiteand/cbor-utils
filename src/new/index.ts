@@ -1,20 +1,22 @@
-export * from "./error-codes";
 export { CborType } from "./cbor-type";
+export * from "./Context";
+export * from "./error-codes";
+export { RemainingDataItemsContext } from "./remainingDataItems";
 export {
-  OutputByteStream,
-  InputByteStream,
-  SuccessResult,
-  Inferable,
-  InferType,
-  InferResults,
-  AnyEncodable,
-  IEncodable,
   AnyDecodable,
-  IDecodable,
+  AnyEncodable,
   AnyType,
-  InferDecoder,
-  InferEncoder,
-  InferEncodedType,
+  IDecodable,
+  IEncodable,
+  Inferable,
   InferDecodedType,
+  InferDecoder,
+  InferEncodedType,
+  InferEncoder,
+  InferResults,
+  InferType,
+  InputByteStream,
   IType,
+  OutputByteStream,
+  SuccessResult,
 } from "./types";

@@ -32,12 +32,18 @@ export function useContext<T>(ctx: IContext<T>): T {
   return (ctx as Z as Context<T>).value;
 }
 
+export function takeContext<T>(ctx: IContext<T>): T {
+  (ctx as Z as Context<T>).provided = false;
+  return (ctx as Z as Context<T>).value;
+}
+
 export function isProvided<T>(ctx: IContext<T>): boolean {
   return (ctx as Z as Context<T>).provided;
 }
 
 export function provide<T, Ctx extends IContext<T>>(ctx: Ctx, value: T): Ctx {
   (ctx as Z as Context<T>).value = value;
+  (ctx as Z as Context<T>).provided = true;
   return ctx;
 }
 

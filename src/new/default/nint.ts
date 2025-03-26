@@ -1,6 +1,7 @@
 import { NEGATIVE_INT_TYPE } from "../../constants";
 import { MAX_U64 } from "../../limits";
 import { CborType } from "../cbor-type";
+import { isProvided, provide, useContext } from "../Context";
 import {
   EOI_ERROR_CODE,
   INVALID_CBOR_ERROR_CODE,
@@ -8,6 +9,7 @@ import {
   TYPE_MISMATCH_ERROR_CODE,
   UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
+import { decRemaining, RemainingDataItemsContext } from "../remainingDataItems";
 import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
 import { MarkerDecoder, MarkerEncoder } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
@@ -85,6 +87,7 @@ class NegativeIntDecoder extends SingleDataItemDecodable<
       const value = this.markerDecoder.getBigInt();
       this.markerDecoder.setBigInt(-1n - value);
     }
+    decRemaining();
     return 0;
   }
   getValue(): number | bigint {
