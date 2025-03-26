@@ -127,9 +127,7 @@ export function decodeAny(d: IDecoder): Result<DataItem, EndOfInputError> {
 }
 
 function encodeBigInt(b: bigint, e: IEncoder): Result<void, OverflowError> {
-  return b > MAX_U64
-    ? bignum.encode(b, e)
-    : b < -(MAX_U64 + 1n)
+  return b > MAX_U64 || b < -(MAX_U64 + 1n)
     ? bignum.encode(b, e)
     : b >= 0n
     ? uint.encode(b, e)
