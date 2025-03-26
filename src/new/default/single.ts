@@ -1,13 +1,11 @@
-import { Pipeable } from "../../pipe";
 import { Decodable } from "../decodable";
-import { IEncodable, InputByteStream, OutputByteStream } from "../types";
+import { Encodable } from "../encodable";
+import { InputByteStream, OutputByteStream } from "../types";
 
-export abstract class SingleDataItemEncodable<T, Results>
-  extends Pipeable
-  implements IEncodable<T, Results>
-{
-  __inferT!: T;
-  __inferResults!: Results;
+export abstract class SingleDataItemEncodable<T, Results> extends Encodable<
+  T,
+  Results
+> {
   dataItems(): number {
     return 1;
   }

@@ -17,6 +17,18 @@ testCborType(
       decoded: -1,
     },
     {
+      hex: "29",
+      decoded: -10,
+    },
+    {
+      hex: "3863",
+      decoded: -100,
+    },
+    {
+      hex: "3903e7",
+      decoded: -1000,
+    },
+    {
       hex: "3bffffffffffffffff",
       decoded: -(2n ** 64n),
     },

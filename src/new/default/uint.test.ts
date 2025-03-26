@@ -46,6 +46,10 @@ testCborType(
       hex: "1a000f4240",
       decoded: 1000000,
     },
+    {
+      hex: "1b000000e8d4a51000",
+      decoded: 1000000000000n,
+    },
     { decoded: 2n ** 64n - 1n, hex: "1bffffffffffffffff" },
   ],
   [

@@ -51,6 +51,9 @@ export abstract class Decodable<T, Results>
       maxDataItems(): number {
         return this.original.maxDataItems();
       }
+      hasNullValue(): boolean {
+        return this.original.hasNullValue();
+      }
     })(this, f);
   }
 
@@ -97,6 +100,9 @@ export abstract class Decodable<T, Results>
       }
       getValue() {
         return this.value;
+      }
+      hasNullValue(): boolean {
+        return this.original.hasNullValue();
       }
     })(this, f, nullValue);
   }

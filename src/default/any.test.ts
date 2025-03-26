@@ -369,8 +369,8 @@ export const TESTS: Array<{
   },
   {
     cbor: "RAECAwQ=",
-    hex: "4401020304",
     roundtrip: true,
+    hex: "4401020304",
     decoded: new Uint8Array(fromHex("01020304")),
     diagnostic: "h'01020304'",
   },
