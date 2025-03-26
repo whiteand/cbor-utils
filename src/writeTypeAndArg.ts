@@ -1,6 +1,6 @@
 import { Result } from "resultra";
 import { OverflowError } from "./OverflowError";
-import { MAX_U128, MAX_U16, MAX_U32, MAX_U64, MAX_U8 } from "./limits";
+import { MAX_U16, MAX_U32, MAX_U64, MAX_U8 } from "./limits";
 import { IEncoder } from "./types";
 import { getVoidOk } from "./getVoidOk";
 
@@ -37,11 +37,8 @@ function encodeBigInt(e: IEncoder, tyMask: number, value: number | bigint) {
     encodeU64(e, tyMask, bigInt);
     return getVoidOk();
   }
-  if (bigInt <= MAX_U128) {
-    encodeU128(e, tyMask, bigInt);
-    return getVoidOk();
-  }
-  return new OverflowError(MAX_U128, bigInt).err();
+
+  return new OverflowError(MAX_U64, bigInt).err();
 }
 
 function encodeSmallInt(e: IEncoder, tyMask: number, smallInt: number) {

@@ -78,7 +78,9 @@ class UintDecoder extends SingleDataItemDecodable<
     return this.receiver;
   }
   getValue(): Uint {
-    return this.receiver.get()!;
+    return this.receiver.isNumber()
+      ? this.receiver.getNumber()
+      : this.receiver.getBigInt();
   }
   nullValue(): Uint {
     return 0;

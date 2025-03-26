@@ -9,7 +9,7 @@ import { getTypeString } from "../getTypeString";
 import { getType } from "../marker";
 import { readArg } from "../readArg";
 import { writeTypeAndArg } from "../writeTypeAndArg";
-import { MAX_U128 } from "../limits";
+import { MAX_U128, MAX_U64 } from "../limits";
 import { UnderflowError } from "../UnderflowError";
 import { getEoiResult } from "../EndOfInputError";
 import { done } from "../utils/done";
@@ -35,13 +35,13 @@ export const nint: CborType<
       if (v >= 0) {
         return new OverflowError(-1, v).err();
       }
-      if (BigInt(v) < -1n - MAX_U128) {
-        return new UnderflowError(-1n - MAX_U128, v).err();
+      if (BigInt(v) < -1n - MAX_U64) {
+        return new UnderflowError(-1n - MAX_U64, v).err();
       }
     } else if (typeof v === "bigint") {
       if (v >= 0n) return new OverflowError(-1n, v).err();
-      if (v < -1n - MAX_U128) {
-        return new UnderflowError(-1n - MAX_U128, v).err();
+      if (v < -1n - MAX_U64) {
+        return new UnderflowError(-1n - MAX_U64, v).err();
       }
     } else {
       return new TypeMismatchError("number | bigint", typeof v).err();

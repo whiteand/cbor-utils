@@ -34,19 +34,11 @@ export class ArgReceiver {
   getBigInt() {
     return this.bigIntArg;
   }
-  get() {
-    switch (this.variant) {
-      case 1:
-        return this.numArg;
-      case 2:
-        return this.bigIntArg;
-      case 3:
-        return null;
-    }
-  }
+
   isNull() {
     return this.variant === 3;
   }
+
   /**
    * @returns Returns true if the decoded value has type "number"
    */

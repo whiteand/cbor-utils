@@ -16,12 +16,12 @@ describe("nint", () => {
     { v: 1, ee: new OverflowError(-1, 1) },
     { v: 1n, ee: new OverflowError(-1n, 1n) },
     {
-      v: -(2n ** 128n),
-      b: "3cffffffffffffffffffffffffffffffff",
+      v: -(2n ** 64n),
+      b: "3bffffffffffffffff",
     },
     {
-      v: -(2n ** 128n) - 1n,
-      ee: new UnderflowError(-(2n ** 128n), -(2n ** 128n) - 1n),
+      v: -(2n ** 64n) - 1n,
+      ee: new UnderflowError(-(2n ** 64n), -(2n ** 64n) - 1n),
     },
     { v: "1", ee: new TypeMismatchError("number | bigint", "string") },
     { v: Infinity, ee: new TypeMismatchError("negative-int", "f64") },

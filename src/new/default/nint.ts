@@ -92,7 +92,9 @@ class NegativeIntDecoder extends SingleDataItemDecodable<
     return 0;
   }
   getValue(): number | bigint {
-    return this.receiver.get()!;
+    return this.receiver.isNumber()
+      ? this.receiver.getNumber()
+      : this.receiver.getBigInt();
   }
   nullValue(): number | bigint {
     return -1;
