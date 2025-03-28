@@ -1,5 +1,4 @@
 import { BREAK_BYTE } from "../../constants";
-import { free, isProvided, provide, useContext } from "../Context";
 import { done } from "../done";
 import {
   EOI_ERROR_CODE,
@@ -9,7 +8,6 @@ import {
   UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
 import { MajorType } from "../major";
-import { RemainingDataItemsContext } from "../remainingDataItems";
 import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
 import { MarkerDecoder, MarkerEncoder } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
@@ -62,42 +60,22 @@ export class SliceDecoder extends SingleDataItemDecodable<
     this.chunks = [];
     this.markerDecoder = new MarkerDecoder(major);
   }
-  decode(d: InputByteStream): SliceDecoderResults {
+  protected decodeItem(d: InputByteStream): SliceDecoderResults {
     let res = this.markerDecoder.decode(d);
     if (res !== 0) return res;
     if (this.markerDecoder.isNull()) {
-      if (isProvided(RemainingDataItemsContext)) {
-        const oldValue = useContext(RemainingDataItemsContext);
-        free(RemainingDataItemsContext);
-        res = this.decodeIndefiniteSlice(d);
-        if (res !== 0) {
-          return res;
-        }
-        provide(RemainingDataItemsContext, oldValue - 1);
-        return 0;
-      } else {
-        return this.decodeIndefiniteSlice(d);
-      }
+      return this.decodeIndefiniteSlice(d);
     }
     const len = this.markerDecoder.isNumber()
       ? this.markerDecoder.getNumber()
       : Number(this.markerDecoder.getBigInt());
 
-    if (isProvided(RemainingDataItemsContext)) {
-      const oldValue = useContext(RemainingDataItemsContext);
-      provide(RemainingDataItemsContext, len);
-      res = this.decodeDefiniteSlice(d, len);
-      if (res !== 0) {
-        provide(RemainingDataItemsContext, oldValue);
-        return res;
-      }
-      provide(RemainingDataItemsContext, oldValue - 1);
-      return res;
-    } else {
-      return this.decodeDefiniteSlice(d, len);
-    }
+    return this.decodeDefiniteSlice(d, len);
   }
-  decodeDefiniteSlice(d: InputByteStream, length: number): SliceDecoderResults {
+  private decodeDefiniteSlice(
+    d: InputByteStream,
+    length: number
+  ): SliceDecoderResults {
     if (d.ptr + length > d.buf.length) {
       return EOI_ERROR_CODE;
     }
@@ -105,7 +83,7 @@ export class SliceDecoder extends SingleDataItemDecodable<
     d.ptr += length;
     return 0;
   }
-  decodeIndefiniteSlice(d: InputByteStream): SliceDecoderResults {
+  private decodeIndefiniteSlice(d: InputByteStream): SliceDecoderResults {
     const chunks = this.chunks;
     const initialLength = this.chunks.length;
     let total = 0;
@@ -118,7 +96,7 @@ export class SliceDecoder extends SingleDataItemDecodable<
         d.ptr++;
         break;
       }
-      const res = this.decode(d);
+      const res = this.decodeItem(d);
       if (res !== 0) {
         this.chunks.length = initialLength;
         return res;
@@ -137,21 +115,24 @@ export class SliceDecoder extends SingleDataItemDecodable<
     this.chunks.length = initialLength;
     return 0;
   }
-  skipDefiniteSlice(d: InputByteStream, length: number): SliceDecoderResults {
+  private skipDefiniteSlice(
+    d: InputByteStream,
+    length: number
+  ): SliceDecoderResults {
     if (d.ptr + length > d.buf.length) {
       return EOI_ERROR_CODE;
     }
     d.ptr += length;
     return 0;
   }
-  skipIndefiniteSlice(d: InputByteStream): SliceDecoderResults {
+  private skipIndefiniteSlice(d: InputByteStream): SliceDecoderResults {
     while (d.ptr < d.buf.length) {
       const m = d.buf[d.ptr];
       if (m === BREAK_BYTE) {
         d.ptr++;
         break;
       }
-      const res = this.skip(d);
+      const res = this.skipItem(d);
       if (res !== 0) {
         return res;
       }
@@ -167,7 +148,7 @@ export class SliceDecoder extends SingleDataItemDecodable<
   hasNullValue(): boolean {
     return false;
   }
-  skip(d: InputByteStream): SliceDecoderResults {
+  protected skipItem(d: InputByteStream): SliceDecoderResults {
     const res = this.markerDecoder.decode(d);
 
     return res !== 0

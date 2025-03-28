@@ -5,10 +5,13 @@ export abstract class Decodable<T, Results>
   extends Pipeable
   implements IDecodable<T, Results>
 {
+  abstract dataItems(
+    input: InputByteStream,
+    receiver: { value: number }
+  ): Results;
   abstract nullValue(): T;
   abstract hasNullValue(): boolean;
   abstract skip(input: InputByteStream): Results;
-  abstract dataItems(input: InputByteStream): void;
   abstract minDataItems(): number;
   abstract maxDataItems(): number;
   __inferT: T;
@@ -42,8 +45,13 @@ export abstract class Decodable<T, Results>
       skip(input: InputByteStream): Results {
         return this.original.skip(input);
       }
-      dataItems(input: InputByteStream): void {
-        return this.original.dataItems(input);
+      dataItems(
+        input: InputByteStream,
+        receiver: {
+          value: number;
+        }
+      ): Results {
+        return this.original.dataItems(input, receiver);
       }
       minDataItems(): number {
         return this.original.minDataItems();
@@ -83,8 +91,8 @@ export abstract class Decodable<T, Results>
       skip(input: InputByteStream): Results | R {
         return this.original.skip(input);
       }
-      dataItems(input: InputByteStream): void {
-        return this.original.dataItems(input);
+      dataItems(input: InputByteStream, r: { value: number }): Results {
+        return this.original.dataItems(input, r);
       }
       minDataItems(): number {
         return this.original.minDataItems();

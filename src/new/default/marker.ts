@@ -1,5 +1,5 @@
 import { getType } from "../../marker";
-import { isProvided, useContext } from "../Context";
+import { useContext } from "../Context";
 import { done } from "../done";
 import {
   EOI_ERROR_CODE,
@@ -49,11 +49,6 @@ export class MarkerDecoder extends ArgReceiver {
     super();
   }
   decode(d: InputByteStream): MarkerDecoderResults {
-    if (isProvided(RemainingDataItemsContext)) {
-      if (useContext(RemainingDataItemsContext) <= 0) {
-        return EOI_ERROR_CODE;
-      }
-    }
     if (done(d)) return EOI_ERROR_CODE;
     const marker = d.buf[d.ptr];
     const t = getType(marker);

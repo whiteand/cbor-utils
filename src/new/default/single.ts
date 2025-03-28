@@ -1,6 +1,9 @@
+import { isProvided, provide, takeContext } from "../Context";
 import { Decodable } from "../decodable";
 import { Encodable } from "../encodable";
-import { InputByteStream, OutputByteStream } from "../types";
+import { EOI_ERROR_CODE } from "../error-codes";
+import { RemainingDataItemsContext } from "../remainingDataItems";
+import { InputByteStream, OutputByteStream, SuccessResult } from "../types";
 
 export abstract class SingleDataItemEncodable<T, Results> extends Encodable<
   T,
@@ -18,15 +21,47 @@ export abstract class SingleDataItemEncodable<T, Results> extends Encodable<
   abstract encode(value: T, encoder: OutputByteStream): Results;
   abstract isNull(value: T): boolean;
 }
+
+export type MinimalResutls = SuccessResult | typeof EOI_ERROR_CODE;
+
 export abstract class SingleDataItemDecodable<T, Results> extends Decodable<
   T,
-  Results
+  Results | MinimalResutls
 > {
-  abstract decode(input: InputByteStream): Results;
   abstract getValue(): T;
   abstract nullValue(): T;
   abstract hasNullValue(): boolean;
-  abstract skip(input: InputByteStream): Results;
+  protected abstract decodeItem(input: InputByteStream): Results;
+  protected abstract skipItem(input: InputByteStream): Results;
+  decode(input: InputByteStream): Results | MinimalResutls {
+    if (isProvided(RemainingDataItemsContext)) {
+      const old = takeContext(RemainingDataItemsContext);
+      if (old <= 0) {
+        return EOI_ERROR_CODE;
+      }
+      const res = this.decodeItem(input);
+      if (res !== 0) return res;
+      provide(RemainingDataItemsContext, old - 1);
+      return 0;
+    } else {
+      return this.decodeItem(input);
+    }
+  }
+  skip(input: InputByteStream): Results | MinimalResutls {
+    if (isProvided(RemainingDataItemsContext)) {
+      const old = takeContext(RemainingDataItemsContext);
+      if (old <= 0) {
+        return EOI_ERROR_CODE;
+      }
+      const res = this.skipItem(input);
+      if (res !== 0) return res;
+      provide(RemainingDataItemsContext, old - 1);
+      return 0;
+    } else {
+      return this.skipItem(input);
+    }
+  }
+
   dataItems(): number {
     return 1;
   }

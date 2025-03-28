@@ -1,8 +1,5 @@
 import { NUMBER_TYPE } from "../../constants";
-import { getType } from "../../marker";
-import { done } from "../../utils/done";
 import { CborType } from "../cbor-type";
-import { isProvided } from "../Context";
 import {
   EOI_ERROR_CODE,
   INVALID_CBOR_ERROR_CODE,
@@ -10,7 +7,6 @@ import {
   TYPE_MISMATCH_ERROR_CODE,
   UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
-import { decRemaining, RemainingDataItemsContext } from "../remainingDataItems";
 import {
   InferDecoder,
   InputByteStream,
@@ -68,12 +64,11 @@ class UintDecoder extends SingleDataItemDecodable<
     super();
     this.lenDecoder = new MarkerDecoder(NUMBER_TYPE);
   }
-  decode(d: InputByteStream): SuccessResult | UintDecoderErrors {
+  protected decodeItem(d: InputByteStream): SuccessResult | UintDecoderErrors {
     const res = this.lenDecoder.decode(d);
 
     if (res !== 0) return res;
     if (this.lenDecoder.isNull()) return INVALID_CBOR_ERROR_CODE;
-    decRemaining();
     return 0;
   }
   isNumber(): boolean {
@@ -93,7 +88,9 @@ class UintDecoder extends SingleDataItemDecodable<
   hasNullValue(): boolean {
     return false;
   }
-  skip(decoder: InputByteStream): SuccessResult | UintDecoderErrors {
+  protected skipItem(
+    decoder: InputByteStream
+  ): SuccessResult | UintDecoderErrors {
     return this.decode(decoder);
   }
 }
@@ -156,7 +153,9 @@ function createDecoder(size: 8 | 16 | 32) {
     constructor(private readonly uintDecoder: InferDecoder<typeof uint>) {
       super();
     }
-    decode(decoder: InputByteStream): SuccessResult | SmallIntDecoderErrors {
+    protected decodeItem(
+      decoder: InputByteStream
+    ): SuccessResult | SmallIntDecoderErrors {
       const res = this.uintDecoder.decode(decoder);
       if (res !== 0) return res;
       if (!this.uintDecoder.isNumber()) return TYPE_MISMATCH_ERROR_CODE;
@@ -170,8 +169,10 @@ function createDecoder(size: 8 | 16 | 32) {
     nullValue(): number {
       return 0;
     }
-    skip(decoder: InputByteStream): SuccessResult | SmallIntDecoderErrors {
-      return this.decode(decoder);
+    protected skipItem(
+      decoder: InputByteStream
+    ): SuccessResult | SmallIntDecoderErrors {
+      return this.decodeItem(decoder);
     }
     hasNullValue(): boolean {
       return false;
