@@ -79,3 +79,5 @@ export type {
 } from "./types";
 export { UnderflowError } from "./UnderflowError";
 export { UnexpectedValueError } from "./UnexpectedValueError";
+
+export * from "./new";

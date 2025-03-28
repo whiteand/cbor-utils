@@ -1,3 +1,4 @@
-import { createContext } from "./Context";
+import { createContext, IContext } from "./Context";
 
-export const RemainingDataItemsContext = createContext<number>();
+export const RemainingDataItemsContext: IContext<number> =
+  createContext<number>();

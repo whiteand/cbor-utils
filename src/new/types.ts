@@ -24,7 +24,7 @@ export type InferType<T> = T extends T
 
 export type InferResults<T> = T extends T
   ? T extends { __inferResults: Z }
-    ? InferResultsInner<T["__inferResults"]>
+    ? InferResultsInner<T>
     : never
   : never;
 
@@ -105,11 +105,6 @@ export interface IDecodable<T, Results>
    */
   skip(input: InputByteStream): Results;
 
-  /**
-   * The number of data items that will be read from decoder
-   * @param input decoder from which the data items will be read
-   */
-  dataItems(input: InputByteStream, receiver: { value: number }): Results;
   /**
    * How many data items will be read from decoder
    */

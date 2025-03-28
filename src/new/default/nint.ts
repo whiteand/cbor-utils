@@ -104,4 +104,5 @@ class NegativeIntDecoder extends SingleDataItemDecodable<
 }
 const nintDecoder = new NegativeIntDecoder();
 
-export const nint = new CborType(nintEncoder, nintDecoder);
+export const nint: CborType<NegativeIntEncoder, NegativeIntDecoder> =
+  new CborType(nintEncoder, nintDecoder);

@@ -28,23 +28,23 @@ export type MarkerEncoderResults =
 export class MarkerEncoder
   implements WithEncodeMethod<MarkerInfo, MarkerEncoderResults>
 {
-  __inferT: MarkerInfo;
-  __inferResults: MarkerEncoderResults;
+  __inferT!: MarkerInfo;
+  __inferResults!: MarkerEncoderResults;
   constructor(private readonly major: MajorType) {}
-  encode(markerInfo: MarkerInfo, e: OutputByteStream) {
+  encode(markerInfo: MarkerInfo, e: OutputByteStream): MarkerEncoderResults {
     return writeTypeAndArg(e, this.major, markerInfo);
   }
 }
 
-type MarkerDecoderResults =
+export type MarkerDecoderResults =
   | SuccessResult
   | typeof INVALID_CBOR_ERROR_CODE
   | typeof TYPE_MISMATCH_ERROR_CODE
   | typeof EOI_ERROR_CODE;
 
 export class MarkerDecoder extends ArgReceiver {
-  __inferT: MarkerInfo;
-  __inferResults: MarkerDecoderResults;
+  __inferT!: MarkerInfo;
+  __inferResults!: MarkerDecoderResults;
   constructor(private readonly major: MajorType) {
     super();
   }

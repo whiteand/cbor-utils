@@ -8,6 +8,8 @@ import {
   UNDERFLOW_ERROR_CODE,
 } from "../error-codes";
 import {
+  IDecodable,
+  IEncodable,
   InferDecoder,
   InputByteStream,
   OutputByteStream,
@@ -97,14 +99,19 @@ class UintDecoder extends SingleDataItemDecodable<
 
 const uintDecoder = new UintDecoder();
 
-export const uint = new CborType(uintEncoder, uintDecoder);
+export const uint: CborType<UintEncoder, UintDecoder> = new CborType(
+  uintEncoder,
+  uintDecoder
+);
 
 const MAX_SIZE = {
   8: 0xff,
   16: 0xffff,
   32: 0xffffffff,
 };
-function createEncoder(size: 8 | 16 | 32) {
+function createEncoder(
+  size: 8 | 16 | 32
+): IEncodable<number, SuccessResult | UintEncoderErrors> {
   class SmallIntEncoder extends SingleDataItemEncodable<
     number,
     SuccessResult | UintEncoderErrors
@@ -142,7 +149,9 @@ export type SmallIntDecoderErrors =
   | UintDecoderErrors
   | typeof OVERFLOW_ERROR_CODE;
 
-function createDecoder(size: 8 | 16 | 32) {
+function createDecoder(
+  size: 8 | 16 | 32
+): IDecodable<number, SuccessResult | SmallIntDecoderErrors> {
   class SmallIntDecoder extends SingleDataItemDecodable<
     number,
     SuccessResult | SmallIntDecoderErrors
@@ -181,7 +190,20 @@ function createDecoder(size: 8 | 16 | 32) {
   return new SmallIntDecoder(uint.decoder());
 }
 
-export const u8 = new CborType(createEncoder(8), createDecoder(8));
-export const u16 = new CborType(createEncoder(16), createDecoder(16));
-export const u32 = new CborType(createEncoder(32), createDecoder(32));
-export const u64 = new CborType(uint.encoder(), uint.decoder().map(BigInt));
+export const u8: CborType<
+  IEncodable<number, SuccessResult | UintEncoderErrors>,
+  IDecodable<number, SuccessResult | SmallIntDecoderErrors>
+> = new CborType(createEncoder(8), createDecoder(8));
+export const u16: CborType<
+  IEncodable<number, SuccessResult | UintEncoderErrors>,
+  IDecodable<number, SuccessResult | SmallIntDecoderErrors>
+> = new CborType(createEncoder(16), createDecoder(16));
+export const u32: CborType<
+  IEncodable<number, SuccessResult | UintEncoderErrors>,
+  IDecodable<number, SuccessResult | SmallIntDecoderErrors>
+> = new CborType(createEncoder(32), createDecoder(32));
+
+export const u64: CborType<
+  UintEncoder,
+  IDecodable<bigint, UintDecoderErrors | SuccessResult>
+> = new CborType(uint.encoder(), uint.decoder().map(BigInt));

@@ -62,9 +62,6 @@ export abstract class SingleDataItemDecodable<T, Results> extends Decodable<
     }
   }
 
-  dataItems(): number {
-    return 1;
-  }
   minDataItems(): number {
     return 1;
   }

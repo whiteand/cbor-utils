@@ -5,8 +5,8 @@ export abstract class Encodable<T, Results>
   extends Pipeable
   implements IEncodable<T, Results>
 {
-  __inferT: T;
-  __inferResults: Results;
+  __inferT!: T;
+  __inferResults!: Results;
 
   abstract isNull(value: T): boolean;
   abstract dataItems(value: T): number;

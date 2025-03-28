@@ -57,8 +57,9 @@ export class SliceDecoder extends SingleDataItemDecodable<
   private markerDecoder: MarkerDecoder;
   constructor(major: MajorType) {
     super();
-    this.chunks = [];
     this.markerDecoder = new MarkerDecoder(major);
+    this.result = new Uint8Array();
+    this.chunks = [];
   }
   protected decodeItem(d: InputByteStream): SliceDecoderResults {
     let res = this.markerDecoder.decode(d);

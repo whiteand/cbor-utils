@@ -17,32 +17,32 @@ export class ArgReceiver {
     this.bigIntArg = 0n;
     this.variant = 3;
   }
-  setNum(value: number) {
+  setNum(value: number): void {
     this.variant = 1;
     this.numArg = value;
   }
-  setBigInt(value: bigint) {
+  setBigInt(value: bigint): void {
     this.variant = 2;
     this.bigIntArg = value;
   }
-  setNull() {
+  setNull(): void {
     this.variant = 3;
   }
-  getNumber() {
+  getNumber(): number {
     return this.numArg;
   }
-  getBigInt() {
+  getBigInt(): bigint {
     return this.bigIntArg;
   }
 
-  isNull() {
+  isNull(): boolean {
     return this.variant === 3;
   }
 
   /**
    * @returns Returns true if the decoded value has type "number"
    */
-  isNumber() {
+  isNumber(): boolean {
     return this.variant === 1;
   }
 }

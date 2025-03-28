@@ -1,9 +1,11 @@
 import { Z } from "../types";
 
 class Context<T> {
-  public value: T;
+  public value!: T;
   public provided: boolean;
-  constructor() {}
+  constructor() {
+    this.provided = false;
+  }
   provide(value: T): void {
     this.value = value;
     this.provided = true;
@@ -16,7 +18,7 @@ class Context<T> {
   }
 }
 
-interface IContext<T> {
+export interface IContext<T> {
   __inferCtx: T;
 }
 
