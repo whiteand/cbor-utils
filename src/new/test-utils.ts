@@ -67,6 +67,7 @@ export function testCborType<N, ER extends number, DR extends number>(
       const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
       expect(stringifyErrorCode(type.decoder().skip(d))).toBe("success");
       expect(d.ptr).toBe(d.buf.length);
+      expect(type.decoder().values).toHaveLength(0);
     });
     test.each(POSITIVE_TESTS)("encodes $decoded => $hex", (t) => {
       const e = new Encoder();

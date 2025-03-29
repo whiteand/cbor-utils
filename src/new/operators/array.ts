@@ -21,6 +21,8 @@ import {
   SuccessResult,
   WithEncodeMethod,
 } from "../types";
+import { takeSuffix } from "../suffix";
+import { BREAK_BYTE } from "../../constants";
 
 class ArrayEncoder<T, R> extends SingleDataItemEncodable<
   readonly T[],
@@ -66,54 +68,54 @@ class ArrayDecoder<T, R> extends SingleDataItemDecodable<
     return false;
   }
   protected decodeItem(input: InputByteStream): R | MarkerDecoderResults {
-    const res: R | MarkerDecoderResults = this.m.decode(input);
+    let res: R | MarkerDecoderResults = this.m.decode(input);
     if (res !== 0) return res;
-    if (this.m.isNull()) {
-      return this.decodeIndefiniteArray(input);
-    }
-    const len = this.m.isNumber()
-      ? this.m.getNumber()
-      : Number(this.m.getBigInt());
-    return this.decodeDefiniteArray(input, len);
-  }
-  private decodeDefiniteArray(
-    input: InputByteStream,
-    len: number
-  ): R | SuccessResult {
     const initialLength = this.it.values.length;
-    for (let i = 0; i < len; i++) {
-      const res = this.it.decode(input);
-      if (res !== 0) return res;
+    if (this.m.isNull()) {
+      res = this.decodeIndefiniteArray(input);
+    } else {
+      const len = this.m.isNumber()
+        ? this.m.getNumber()
+        : Number(this.m.getBigInt());
+      res = this.decodeDefiniteArray(input, len);
+    }
+    if (res !== 0) {
+      takeSuffix(initialLength, this.it.values);
+      return res;
     }
     const result = this.it.values.splice(
       initialLength,
       this.it.values.length - initialLength
     );
     this.values.push(result);
+    return res;
+  }
+  private decodeDefiniteArray(
+    input: InputByteStream,
+    len: number
+  ): R | SuccessResult {
+    for (let i = 0; i < len; i++) {
+      const res = this.it.decode(input);
+      if (res !== 0) return res;
+    }
     return 0;
   }
   private decodeIndefiniteArray(
     input: InputByteStream
   ): R | typeof EOI_ERROR_CODE | SuccessResult {
     let res: R;
-    const initialLength = this.it.values.length;
     while (true) {
       if (done(input)) {
         return EOI_ERROR_CODE;
       }
       const m = input.buf[input.ptr];
-      if (m === 0xff) {
+      if (m === BREAK_BYTE) {
         input.ptr++;
         break;
       }
       res = this.it.decode(input);
       if (res !== 0) return res;
     }
-    const result = this.it.values.splice(
-      initialLength,
-      this.it.values.length - initialLength
-    );
-    this.values.push(result);
     return 0;
   }
   private skipDefiniteArray(
