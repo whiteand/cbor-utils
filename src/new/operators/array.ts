@@ -52,7 +52,6 @@ class ArrayDecoder<T, R> extends SingleDataItemDecodable<
   T[],
   R | MarkerDecoderResults
 > {
-  result: T[] = [];
   constructor(
     private readonly it: IDecodable<T, R>,
     private readonly m: MarkerDecoder
@@ -60,9 +59,6 @@ class ArrayDecoder<T, R> extends SingleDataItemDecodable<
     super();
   }
 
-  getValue(): T[] {
-    return this.result;
-  }
   nullValue(): T[] {
     return [];
   }
@@ -84,20 +80,23 @@ class ArrayDecoder<T, R> extends SingleDataItemDecodable<
     input: InputByteStream,
     len: number
   ): R | SuccessResult {
-    const result: T[] = [];
+    const initialLength = this.it.values.length;
     for (let i = 0; i < len; i++) {
       const res = this.it.decode(input);
       if (res !== 0) return res;
-      result.push(this.it.getValue());
     }
-    this.result = result;
+    const result = this.it.values.splice(
+      initialLength,
+      this.it.values.length - initialLength
+    );
+    this.values.push(result);
     return 0;
   }
   private decodeIndefiniteArray(
     input: InputByteStream
   ): R | typeof EOI_ERROR_CODE | SuccessResult {
-    const result: T[] = [];
     let res: R;
+    const initialLength = this.it.values.length;
     while (true) {
       if (done(input)) {
         return EOI_ERROR_CODE;
@@ -109,28 +108,28 @@ class ArrayDecoder<T, R> extends SingleDataItemDecodable<
       }
       res = this.it.decode(input);
       if (res !== 0) return res;
-      result.push(this.it.getValue());
     }
-    this.result = result;
+    const result = this.it.values.splice(
+      initialLength,
+      this.it.values.length - initialLength
+    );
+    this.values.push(result);
     return 0;
   }
   private skipDefiniteArray(
     input: InputByteStream,
     len: number
   ): R | SuccessResult {
-    const result: T[] = [];
     for (let i = 0; i < len; i++) {
       const res = this.it.skip(input);
       if (res !== 0) return res;
-      result.push(this.it.getValue());
     }
-    this.result = result;
+
     return 0;
   }
   private skipIndefiniteArray(
     input: InputByteStream
   ): R | typeof EOI_ERROR_CODE | SuccessResult {
-    const result: T[] = [];
     let res: R;
     while (true) {
       if (done(input)) {
@@ -143,9 +142,7 @@ class ArrayDecoder<T, R> extends SingleDataItemDecodable<
       }
       res = this.it.skip(input);
       if (res !== 0) return res;
-      result.push(this.it.getValue());
     }
-    this.result = result;
     return 0;
   }
 

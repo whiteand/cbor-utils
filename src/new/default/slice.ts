@@ -52,13 +52,11 @@ export class SliceDecoder extends SingleDataItemDecodable<
   Uint8Array,
   SliceDecoderResults
 > {
-  private result: Uint8Array;
   private chunks: Uint8Array[];
   private markerDecoder: MarkerDecoder;
   constructor(major: MajorType) {
     super();
     this.markerDecoder = new MarkerDecoder(major);
-    this.result = new Uint8Array();
     this.chunks = [];
   }
   protected decodeItem(d: InputByteStream): SliceDecoderResults {
@@ -80,8 +78,9 @@ export class SliceDecoder extends SingleDataItemDecodable<
     if (d.ptr + length > d.buf.length) {
       return EOI_ERROR_CODE;
     }
-    this.result = d.buf.slice(d.ptr, d.ptr + length);
+    const result = d.buf.slice(d.ptr, d.ptr + length);
     d.ptr += length;
+    this.values.push(result);
     return 0;
   }
   private decodeIndefiniteSlice(d: InputByteStream): SliceDecoderResults {
@@ -102,7 +101,7 @@ export class SliceDecoder extends SingleDataItemDecodable<
         this.chunks.length = initialLength;
         return res;
       }
-      const bs = this.getValue();
+      const bs = this.values.pop()!;
       total += bs.length;
       chunks.push(bs);
     }
@@ -112,7 +111,7 @@ export class SliceDecoder extends SingleDataItemDecodable<
       result.set(chunks[i], offset);
       offset += chunks[i].length;
     }
-    this.result = result;
+    this.values.push(result);
     this.chunks.length = initialLength;
     return 0;
   }
@@ -140,9 +139,7 @@ export class SliceDecoder extends SingleDataItemDecodable<
     }
     return 0;
   }
-  getValue(): Uint8Array<ArrayBufferLike> {
-    return this.result;
-  }
+
   nullValue(): Uint8Array<ArrayBufferLike> {
     return new Uint8Array();
   }

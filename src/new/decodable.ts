@@ -7,13 +7,13 @@ export abstract class Decodable<T, Results>
 {
   __inferT!: T;
   __inferResults!: Results;
+  values: T[] = [];
   abstract nullValue(): T;
   abstract hasNullValue(): boolean;
   abstract skip(input: InputByteStream): Results;
   abstract minDataItems(): number;
   abstract maxDataItems(): number;
   abstract decode(input: InputByteStream): Results;
-  abstract getValue(): T;
 
   /**
    * Maps decoded value using passed function.
@@ -30,10 +30,12 @@ export abstract class Decodable<T, Results>
         super();
       }
       decode(input: InputByteStream): Results {
-        return this.original.decode(input);
-      }
-      getValue(): U {
-        return this.f(this.original.getValue());
+        const res = this.original.decode(input);
+        if (res !== 0) return res;
+        const value = this.original.values.pop()!;
+        const mapped = this.f(value);
+        this.values.push(mapped);
+        return res;
       }
       nullValue(): U {
         return this.f(this.original.nullValue());
@@ -87,12 +89,15 @@ export abstract class Decodable<T, Results>
         return this.original.minDataItems();
       }
       decode(input: InputByteStream): Results | R {
-        const res = this.original.decode(input);
+        let res: Results | R = this.original.decode(input);
         if (res !== 0) return res;
-        const value = this.original.getValue();
-        return this.f(value, this);
+        const value = this.original.values.pop()!;
+        res = this.f(value, this);
+        if (res !== 0) return res;
+        this.values.push(this.value);
+        return res;
       }
-      getValue() {
+      popValue() {
         return this.value;
       }
       hasNullValue(): boolean {

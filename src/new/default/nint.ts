@@ -80,18 +80,15 @@ class NegativeIntDecoder extends SingleDataItemDecodable<
     if (this.markerDecoder.isNull()) return INVALID_CBOR_ERROR_CODE;
     if (this.markerDecoder.isNumber()) {
       const value = this.markerDecoder.getNumber();
-      this.markerDecoder.setNum(-1 - value);
+
+      this.values.push(-1 - value);
     } else {
       const value = this.markerDecoder.getBigInt();
-      this.markerDecoder.setBigInt(-1n - value);
+      this.values.push(-1n - value);
     }
     return 0;
   }
-  getValue(): number | bigint {
-    return this.markerDecoder.isNumber()
-      ? this.markerDecoder.getNumber()
-      : this.markerDecoder.getBigInt();
-  }
+
   nullValue(): number | bigint {
     return -1;
   }
@@ -99,7 +96,10 @@ class NegativeIntDecoder extends SingleDataItemDecodable<
     return false;
   }
   protected skipItem(decoder: InputByteStream): NegativeIntDecoderResults {
-    return this.decodeItem(decoder);
+    const argRes = this.markerDecoder.decode(decoder);
+    if (argRes !== 0) return argRes;
+    if (this.markerDecoder.isNull()) return INVALID_CBOR_ERROR_CODE;
+    return argRes;
   }
 }
 const nintDecoder = new NegativeIntDecoder();

@@ -23,7 +23,7 @@ describe("indefinite bytes", (it) => {
     const d = new Decoder(new Uint8Array(input), 0);
     const res = bytes.decode(d);
     expect(res).toBe(0);
-    const value = bytes.decoder().getValue();
+    const value = bytes.decoder().values.pop()!;
     expect(value).toEqual(t.decoded);
   });
 });

@@ -28,7 +28,6 @@ export abstract class SingleDataItemDecodable<T, Results> extends Decodable<
   T,
   Results | MinimalResutls
 > {
-  abstract getValue(): T;
   abstract nullValue(): T;
   abstract hasNullValue(): boolean;
   protected abstract decodeItem(input: InputByteStream): Results;

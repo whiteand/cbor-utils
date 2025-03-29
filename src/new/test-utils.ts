@@ -44,7 +44,8 @@ export function testCborType<N, ER extends number, DR extends number>(
     test.each(POSITIVE_TESTS)("decodes $hex => $decoded", (t) => {
       const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
       expect(stringifyErrorCode(type.decoder().decode(d))).toBe("success");
-      const value = type.decoder().getValue();
+
+      const value = type.decoder().values.pop()!;
       expect(value).toEqual(t.decoded);
       expect(d.ptr).toBe(d.buf.length);
     });
@@ -55,8 +56,9 @@ export function testCborType<N, ER extends number, DR extends number>(
         const d = new Decoder(new Uint8Array(fromHex(t.hex)), 0);
         expect(stringifyErrorCode(type.decoder().decode(d))).toBe("success");
         const remainingDataItems = takeContext(RemainingDataItemsContext);
-        const value = type.decoder().getValue();
+        const value = type.decoder().values.pop()!;
         expect(value).toEqual(t.decoded);
+        expect(type.decoder().values).toHaveLength(0);
         expect(d.ptr).toBe(d.buf.length);
         expect(remainingDataItems).toBe(t.expectedRemaining ?? 0);
       }

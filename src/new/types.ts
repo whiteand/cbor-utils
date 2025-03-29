@@ -75,16 +75,17 @@ export interface WithDecodeAndGetValue<T, Results> {
    * Returns 0 if the value was successfully decoded.
    * Otherwise returns error code.
    * You can get the error message from the documentation of the concrete decoder.
-   * If value successfully decoded (returned value is 0), you can receive decoded value from getValue method.
+   * If value successfully decoded (returned value is 0) it is pushed
+   * into values list
    *
    * @param input decoder from which the value will be decoded
    */
   decode(input: InputByteStream): Results;
   /**
-   * Returns decoded value, if the data item was successfully decoded.
-   * Unsafe: ensure that decode operation returned 0.
+   * Returns number of decoded values
+   * The user is the owner of the values array.
    */
-  getValue(): T;
+  values: T[];
 }
 
 export interface IDecodable<T, Results>

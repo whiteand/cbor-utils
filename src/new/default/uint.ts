@@ -71,6 +71,13 @@ class UintDecoder extends SingleDataItemDecodable<
 
     if (res !== 0) return res;
     if (this.lenDecoder.isNull()) return INVALID_CBOR_ERROR_CODE;
+
+    this.values.push(
+      this.lenDecoder.isNumber()
+        ? this.lenDecoder.getNumber()
+        : this.lenDecoder.getBigInt()
+    );
+
     return 0;
   }
   isNumber(): boolean {
@@ -78,11 +85,6 @@ class UintDecoder extends SingleDataItemDecodable<
   }
   getLenDecoder(): MarkerDecoder {
     return this.lenDecoder;
-  }
-  getValue(): Uint {
-    return this.lenDecoder.isNumber()
-      ? this.lenDecoder.getNumber()
-      : this.lenDecoder.getBigInt();
   }
   nullValue(): Uint {
     return 0;
@@ -93,7 +95,7 @@ class UintDecoder extends SingleDataItemDecodable<
   protected skipItem(
     decoder: InputByteStream
   ): SuccessResult | UintDecoderErrors {
-    return this.decode(decoder);
+    return this.decodeItem(decoder);
   }
 }
 
@@ -168,13 +170,12 @@ function createDecoder(
       const res = this.uintDecoder.decode(decoder);
       if (res !== 0) return res;
       if (!this.uintDecoder.isNumber()) return TYPE_MISMATCH_ERROR_CODE;
-      const value = this.uintDecoder.getValue();
+      const value = this.uintDecoder.values.pop()!;
       if (value > SmallIntDecoder.MAX_VALUE) return OVERFLOW_ERROR_CODE;
+      this.values.push(Number(value));
       return 0;
     }
-    getValue(): number {
-      return this.uintDecoder.getValue() as number;
-    }
+
     nullValue(): number {
       return 0;
     }

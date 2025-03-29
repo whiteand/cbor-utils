@@ -45,6 +45,7 @@ export type MarkerDecoderResults =
 export class MarkerDecoder extends ArgReceiver {
   __inferT!: MarkerInfo;
   __inferResults!: MarkerDecoderResults;
+  values: MarkerInfo[] = [];
   constructor(private readonly major: MajorType) {
     super();
   }
@@ -55,7 +56,10 @@ export class MarkerDecoder extends ArgReceiver {
     if (t !== this.major) {
       return TYPE_MISMATCH_ERROR_CODE;
     }
-    return readArg(d, this);
+    const res = readArg(d, this);
+    if (res !== 0) return res;
+    this.values.push(this.getValue());
+    return res;
   }
   skip(d: InputByteStream): MarkerDecoderResults {
     return this.decode(d);
