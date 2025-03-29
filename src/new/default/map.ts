@@ -2,6 +2,10 @@ import { BREAK_BYTE } from "../../constants";
 import { done } from "../done";
 import { EOI_ERROR_CODE } from "../error-codes";
 import {
+  IDecodable,
+  IEncodable,
+  InferResults,
+  InferType,
   InputByteStream,
   OutputByteStream,
   WithDecodeAndGetValue,
@@ -15,6 +19,9 @@ import {
 } from "./marker";
 import { SingleDataItemDecodable, SingleDataItemEncodable } from "./single";
 import { takeSuffix } from "../suffix";
+import { CborType } from "../cbor-type";
+import { mapLen } from "./mapLen";
+import { Z } from "../../types";
 
 interface IReadonlyMap<K, V> {
   entries(): Iterable<[K, V]>;
@@ -146,8 +153,17 @@ class MapDecoder<K, KR, V, VR, C> extends SingleDataItemDecodable<
       return res;
     }
 
-    for (let i = 0; i < keys.length; i++) {
-      this.b.set(keys[i], values[i]);
+    this.b = this.builder();
+
+    if ((this.k.values as any[]) === (this.v.values as any[])) {
+      // Key and value type are the same
+      for (let i = 0; i < keys.length; i += 2) {
+        this.b.set(keys[i], keys[i + 1] as Z as V);
+      }
+    } else {
+      for (let i = 0; i < keys.length; i++) {
+        this.b.set(keys[i], values[i]);
+      }
     }
 
     this.values.push(this.b.build());
@@ -243,4 +259,37 @@ class MapDecoder<K, KR, V, VR, C> extends SingleDataItemDecodable<
   ): MapDecoder<K, KR, V, VR, Record<K, V>> {
     return new MapDecoder(k, v, marker, () => new ObjectBuilder<K, V>());
   }
+}
+
+export function mapAsMap<KE, KD, VE, VD>(
+  key: CborType<KE, KD>,
+  value: CborType<VE, VD>
+): CborType<
+  MapEncoder<
+    InferType<KE>,
+    InferResults<KE>,
+    InferType<VE>,
+    InferResults<VE>,
+    IReadonlyMap<InferType<KE>, InferType<VE>>
+  >,
+  MapDecoder<
+    InferType<KD>,
+    InferResults<KD>,
+    InferType<VD>,
+    InferResults<VD>,
+    Map<InferType<KD>, InferType<VD>>
+  >
+> {
+  return new CborType(
+    new MapEncoder(
+      key.encoder() as IEncodable<InferType<KE>, InferResults<KE>>,
+      value.encoder() as IEncodable<InferType<VE>, InferResults<VE>>,
+      mapLen.encoder()
+    ),
+    MapDecoder.toMap(
+      key.decoder() as IDecodable<InferType<KD>, InferResults<VD>>,
+      value.decoder() as IDecodable<InferType<VD>, InferResults<VE>>,
+      mapLen.decoder()
+    )
+  );
 }
