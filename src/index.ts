@@ -80,4 +80,4 @@ export type {
 export { UnderflowError } from "./UnderflowError";
 export { UnexpectedValueError } from "./UnexpectedValueError";
 
-export * from "./new";
+export * as v2 from "./new";
