@@ -55,6 +55,6 @@
     "vitest": "^3.0.9"
   },
   "dependencies": {
-    "resultra": "^0.1.4"
+    "resultra": "^0.2.0"
   }
 }
