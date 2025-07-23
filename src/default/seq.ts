@@ -114,5 +114,21 @@ export function seq<const TypesList extends readonly AnyCborTypeCodec[]>(
         return ok(tuple as InferEncodedSeqType<TypesList>);
       }
     )
+    .nullable(types.every((t) => t.nullable))
+    .isNull(
+      types.every((t) => t.nullable)
+        ? (values) => values.every((v, i) => types[i].isNull(v))
+        : () => false
+    )
+    .decodeNull(
+      types.every((t) => t.nullable)
+        ? (...ctx) =>
+            types.map((ty) =>
+              ty.decodeNull(...ctx)
+            ) as InferDecodedSeqType<TypesList>
+        : () => {
+            throw new Error(`Sequence contains non-null values`);
+          }
+    )
     .build() as Z;
 }

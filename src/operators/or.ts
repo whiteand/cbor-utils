@@ -74,6 +74,7 @@ export function or<const Types extends readonly ICborType<Z, Z, Z, Z, Z, Z>[]>(
     types: Types;
   }
 
+  const isNullableType = types.some((t) => t.nullable);
   const proto = CborType.builder()
     .encode(function encode(this: IOr, v: Z, e: IEncoder, ctx: Z) {
       const p = e.save();
@@ -105,7 +106,39 @@ export function or<const Types extends readonly ICborType<Z, Z, Z, Z, Z, Z>[]>(
       }
       return err(new OrError(errors));
     })
-    .nullable(types.some((t) => t.nullable))
+    .nullable(isNullableType)
+    .isNull(
+      isNullableType
+        ? (v, ...ctx) => {
+            for (const t of types) {
+              if (t.nullable && t.isNull(v, ...ctx)) {
+                return true;
+              }
+            }
+            return false;
+          }
+        : () => false
+    )
+    .decodeNull(
+      isNullableType
+        ? (...ctx) => {
+            for (const t of types) {
+              if (!t.nullable) continue;
+              try {
+                const nullValue = t.decodeNull(...ctx);
+                return nullValue;
+              } catch {
+                continue;
+              }
+            }
+            throw new Error(`Failed to find decodeNull value for or type`);
+          }
+        : () => {
+            throw new Error(
+              `There is no null value for non-nullable types in "or" type`
+            );
+          }
+    )
     .build();
 
   const orType = {

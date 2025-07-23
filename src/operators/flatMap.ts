@@ -29,8 +29,7 @@ import {
  *                   Called after sourceTy successfully decodes a value.
  *
  * @param nullable - Controls whether targetTy allows null values.
- *                  When true, null values are accepted during encoding/decoding.
- *                  When not provided, inherits nullability from sourceTy.
+ *                  When object is passed, null values are accepted during encoding/decoding.
  *
  * @returns A function that takes sourceTy and returns targetTy with the
  *          specified transformations applied.
@@ -65,7 +64,10 @@ export function flatMap<
     value: OldDecodedType,
     decoder: IDecoder
   ) => Result<NewDecodedType, NDE>,
-  nullable?: boolean
+  nullable?: {
+    isNull(value: NewEncodedType): boolean;
+    decodeNull(): NewDecodedType;
+  }
 ): <
   EE extends Error,
   DE extends Error,
@@ -99,7 +101,10 @@ export function flatMap<
     ctx: unknown,
     startPosition: number
   ) => Result<NewDecodedType, NDE>,
-  nullable?: boolean
+  nullable?: {
+    isNull(value: NewEncodedType): boolean;
+    decodeNull(): NewDecodedType;
+  }
 ): <
   EE extends Error,
   DE extends Error,
@@ -134,7 +139,10 @@ export function flatMap<
     decoder: IDecoder,
     ...ctx: [...NDCArgs, number]
   ) => Result<NewDecodedType, NDE>,
-  nullable?: boolean
+  nullable?: {
+    isNull(value: NewEncodedType, ...ctx: NECArgs): boolean;
+    decodeNull(...ctx: NDCArgs): NewDecodedType;
+  }
 ): <
   EE extends Error,
   DE extends Error,
@@ -165,7 +173,10 @@ export function flatMap<
     ctx: unknown,
     startPosition: number
   ) => Result<NewDecodedType, NDE>,
-  nullable?: boolean
+  nullable?: {
+    isNull(value: NewEncodedType): boolean;
+    decodeNull(): NewDecodedType;
+  }
 ): <
   EE extends Error,
   DE extends Error,
@@ -191,7 +202,10 @@ export function flatMap<
 >(
   newEncode: Z,
   newDecode: Z,
-  nullable?: boolean
+  nullable?: {
+    isNull(value: NewEncodedType, ...ctx: Z[]): boolean;
+    decodeNull(...ctx: Z[]): NewDecodedType;
+  }
 ): <EE extends Error, DE extends Error>(
   ty: ICborType<OldEncodedType, OldDecodedType, EE, DE, Z, Z>
 ) => CborType<NewEncodedType, NewDecodedType, NEE | EE, NDE | DE, Z, Z> {
@@ -205,12 +219,7 @@ export function flatMap<
     }
 
     const proto = CborType.builder()
-      .encode(function encode(
-        this: IObj,
-        value: unknown,
-        e: IEncoder,
-        ctx: unknown
-      ) {
+      .encode(function encode(this: IObj, value: Z, e: IEncoder, ctx: Z) {
         const innerValueRes = this.newEncode(value, ctx);
         if (!innerValueRes.ok()) {
           return innerValueRes;
@@ -220,14 +229,22 @@ export function flatMap<
 
         return this.sourceType.encode(innerValue, e, ctx);
       })
-      .decode(function decode(this: IObj, d: IDecoder, ctx: unknown) {
+      .decode(function decode(this: IObj, d: IDecoder, ctx: Z) {
         const startPosition = d.ptr;
         const inner = this.sourceType.decode(d, ctx);
         return inner.ok()
           ? this.newDecode(inner.value, d, ctx, startPosition)
           : inner;
       })
-      .nullable(nullable ?? ty.nullable)
+      .nullable(nullable != null)
+      .isNull(nullable ? nullable.isNull : () => false)
+      .decodeNull(
+        nullable
+          ? nullable.decodeNull
+          : () => {
+              throw new Error(`Failed to decode non-nullable flatMap`);
+            }
+      )
       .build();
 
     const obj = {

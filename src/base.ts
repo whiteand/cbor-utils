@@ -14,6 +14,10 @@ import {
 
 const getDefaultEncode = () => () => err(new NotImplementedError("encode"));
 const getDefaultDecode = () => () => err(new NotImplementedError("decode"));
+const getDefaultIsNull = () => () => false;
+const getDefaultDecodeNull = () => () => {
+  throw new Error(`Cannot decode null of non-nullable type`);
+};
 
 export class CborBuilder<
   ET,
@@ -31,6 +35,8 @@ export class CborBuilder<
 
   private _decode: (d: IDecoder, ...args: DCArgs) => Result<DT, DE>;
   private _nullable: boolean;
+  private _isNull: (value: ET, ...args: ECArgs) => boolean;
+  private _decodeNull: (...args: DCArgs) => DT;
 
   constructor() {
     this._encode = getDefaultEncode() as unknown as (
@@ -43,6 +49,8 @@ export class CborBuilder<
       ...args: DCArgs
     ) => Result<DT, DE>;
     this._nullable = false;
+    this._isNull = getDefaultIsNull();
+    this._decodeNull = getDefaultDecodeNull();
   }
   encode<NET, NEE extends Error>(
     fn: (v: NET, e: IEncoder) => Result<void, NEE>
@@ -79,8 +87,20 @@ export class CborBuilder<
     this._nullable = value;
     return this;
   }
+  isNull(cb: (value: ET, ...ctx: ECArgs) => boolean): this {
+    return (this._isNull = cb), this;
+  }
+  decodeNull(cb: (...ctx: DCArgs) => DT): this {
+    return (this._decodeNull = cb), this;
+  }
   build(): CborType<ET, DT, EE, DE, ECArgs, DCArgs> {
-    return new CborType(this._encode, this._decode, this._nullable);
+    return new CborType(
+      this._encode,
+      this._decode,
+      this._nullable,
+      this._isNull,
+      this._decodeNull
+    );
   }
 }
 
@@ -147,18 +167,25 @@ export class CborType<
    * @returns Result of decoding
    */
   decode: (d: IDecoder, ...args: DCArgs) => Result<DT, DE>;
-  public nullable: boolean;
+  nullable: boolean;
+  isNull: (value: ET, ...args: ECArgs) => boolean;
+  decodeNull: (...args: DCArgs) => DT;
 
   constructor(
     encode: (value: ET, e: IEncoder, ...ctx: ECArgs) => Result<void, EE>,
     decode: (d: IDecoder, ...ctx: DCArgs) => Result<DT, DE>,
-    nullable: boolean
+    nullable: boolean,
+    isNull: (value: ET, ...args: ECArgs) => boolean,
+    decodeNull: (...args: DCArgs) => DT
   ) {
     super();
     this.encode = encode;
     this.decode = decode;
     this.nullable = nullable;
+    this.isNull = isNull;
+    this.decodeNull = decodeNull;
   }
+
   static builder(): CborBuilder<
     never,
     never,
@@ -191,6 +218,8 @@ export class CborType<
               (ty.decode as Z)(d, c)) as Z as TDecodeFunction<DT, DE, DCArgs>
           )
           .nullable(ty.nullable)
+          .isNull(ty.isNull)
+          .decodeNull(ty.decodeNull)
           .build();
   }
   /**

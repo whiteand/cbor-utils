@@ -49,5 +49,8 @@ export function mapErrors<
         const r = (ty.decode as Z)(d, c);
         return r.ok() ? r : err(de(r.error, m, p));
       }) as Z as TDecodeFunction<DT, NDE, DCArgs>)
+      .nullable(ty.nullable)
+      .decodeNull(ty.decodeNull)
+      .isNull(ty.isNull)
       .build();
 }

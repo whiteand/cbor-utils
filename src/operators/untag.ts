@@ -60,6 +60,13 @@ export function untag(
         }
         return ok(t.value);
       },
-      ty.nullable
+      ty.nullable,
+      (value, ...ctx) => {
+        return ty.isNull(new TaggedDataItem(tag, value), ...ctx);
+      },
+      (...ctx) => {
+        const value = ty.decodeNull(...ctx);
+        return value.value;
+      }
     );
 }

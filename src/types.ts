@@ -198,6 +198,8 @@ export interface ICborType<
     IDecodable<DT, DE, DCArgs> {
   /** if true the underlying cbor can consist of a single Null data item. */
   nullable: boolean;
+  isNull: (value: ET, ...args: ECArgs) => boolean;
+  decodeNull: (...args: DCArgs) => DT;
 }
 /** All CBOR types are assignable to a variable for type `AnyCborTypeCodec` */
 export type AnyCborTypeCodec = ICborType<Z, Z, Error, Error, Z, Z>;

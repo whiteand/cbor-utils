@@ -15,6 +15,9 @@ import { AnyContextArgs, ICborType, IDecoder, IEncoder, Z } from "../types";
  * @param expectedValue Value of the source type
  * @param isEqual Function tahat compares the expected value with the actual one
  * @returns a operator that transforms a type into a constant value type
+ *
+ * NOTE: A returning type is nullable if source type is nullable.
+ * But in this case decodeNull is redefined to return expectedValue.
  */
 export function constant<In, const V extends In>(
   expectedValue: V,
@@ -52,20 +55,20 @@ export function constant<In, const V extends In>(
         this: IConstant,
         value: V,
         e: IEncoder,
-        ctx: Z
+        ...ctx: ECArgs
       ): Result<void, EE | UnexpectedValueError<In, V>> {
         const { expectedValue } = this;
         if (!this.isEqual(value, expectedValue)) {
           return new UnexpectedValueError(expectedValue, value).err();
         }
-        return (ty.encode as Z)(value, e, ctx);
+        return (ty.encode as Z)(value, e, ...ctx);
       })
       .decode(function decode(
         this: IConstant,
         d: IDecoder,
-        ctx: DCArgs
+        ...ctx: DCArgs
       ): Result<V, DE | UnexpectedValueError<In, V>> {
-        const v = (ty.decode as Z)(d, ctx);
+        const v = (ty.decode as Z)(d, ...ctx);
         if (!v.ok()) {
           return v;
         }
@@ -75,6 +78,11 @@ export function constant<In, const V extends In>(
         }
         return ok(v.value as V);
       })
+      .nullable(ty.nullable)
+      .isNull(function isNull(this: IConstant, value, ...ctx) {
+        return ty.isNull(value, ...ctx);
+      })
+      .decodeNull(() => expectedValue)
       .build();
 
     const constantType = Object.create(proto);

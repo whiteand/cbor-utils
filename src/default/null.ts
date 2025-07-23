@@ -36,4 +36,6 @@ export const nullType: CborType<
     return new TypeMismatchError("null", getTypeString(d.buf[d.ptr])).err();
   })
   .nullable(true)
+  .isNull((value) => value == null)
+  .decodeNull(() => null)
   .build();

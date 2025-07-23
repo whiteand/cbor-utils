@@ -63,5 +63,7 @@ export function nullable(): <
         return (ty.decode as Z)(d, ctx);
       }) as Z as TDecodeFunction<DT | null, DE, DCArgs>)
       .nullable(true)
+      .isNull((value, ...ctx) => value == null || ty.isNull(value, ...ctx))
+      .decodeNull(() => null)
       .build();
 }

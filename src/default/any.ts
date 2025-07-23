@@ -213,7 +213,13 @@ export const any: CborType<
   DecodingError,
   [],
   []
-> = CborType.builder().encode(encodeAny).decode(decodeAny).nullable().build();
+> = CborType.builder()
+  .encode(encodeAny)
+  .decode(decodeAny)
+  .nullable()
+  .isNull((value) => value == null)
+  .decodeNull(() => null)
+  .build();
 
 export const anyArray: CborType<
   readonly Readonly<DataItem>[],
