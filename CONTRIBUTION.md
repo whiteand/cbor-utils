@@ -1,6 +1,8 @@
 # How to publish
 
-Make a tag and create a release with specified tag.
+Run `npm version patch` or `npm version minor` or `npm version major`
+Push created tag
+Create a release with the specified tag
 
 # How to check quality of the code: 
 
