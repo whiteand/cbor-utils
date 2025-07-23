@@ -264,6 +264,10 @@ export class CborType<
       decode: (decoder: IDecoder, ctx: ContextFromArgs<DCArgs>) => {
         return (this.decode as Z)(decoder, ctx).map(toNewDecodedValue);
       },
+      decodeNull: (ctx: ContextFromArgs<DCArgs>) =>
+        toNewDecodedValue((this.decodeNull as Z)(ctx)),
+      isNull: (value: T, ctx: ContextFromArgs<ECArgs>) =>
+        (this.isNull as Z)(toOldEncodedValue(value), ctx),
     };
 
     Reflect.setPrototypeOf(obj, this);
